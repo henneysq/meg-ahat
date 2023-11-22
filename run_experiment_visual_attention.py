@@ -18,4 +18,4 @@ experiment_manager.make_and_save_experiment_data(
 )
 experiment_manager.load_experiment_data()
 
-experiment_manager.execute_current_trial("left", True, "isf")
+experiment_manager.run_experiment()
