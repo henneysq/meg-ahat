@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from itertools import product
 
 import pandas as pd
 from numpy import random
@@ -75,9 +74,6 @@ class ExperimentManagerBase:
 
     def make_and_save_experiment_data(
         self,
-        blocks: int,
-        stimuli: any,
-        tasks: any,
         # repetitions: int = 1,
         # target_congruence: any = (1, 0),
         root: str | Path | None = None,
@@ -140,7 +136,7 @@ class ExperimentManagerBase:
         # private method is a dead-end for the `ExperimentManagerBase` class
         # and is intended to be overwritten by experiment-specific child classes.
         experiment_data = self._make_and_save_experiment_data(
-            blocks, stimuli, tasks, **kwargs
+            **kwargs
         )
 
         # Save the experiment data, making sure not to
@@ -338,95 +334,3 @@ class ExperimentManagerBase:
     def __len__(self) -> int:
         return self.experiment_data.__len__()
 
-class VisualAttentionExperimentManager(ExperimentManagerBase):
-    def _make_and_save_experiment_data(
-        _, blocks, stimuli, tasks, repetitions, target_congruence
-    ) -> pd.DataFrame:
-        # Experiment-specific subroutine that overwrites the
-        # ExperimentManagerBase._make_and_save_experiment_data method    
-        
-        # Create all unique combinations of stimuli, tasks, and target_congruence.
-        # NOTE: combinations are contained in a tuple, making this a list of
-        # tuples each with length 3.
-        combinations = list(product(stimuli, tasks, target_congruence))
-        
-        # Count the number of unique combinations
-        n_combinations = len(combinations)
-        
-        # Create a variable to index unique combinations a number of
-        # time specified by the number of within-block `repetitions`.
-        within_block_combination_indices = list(range(n_combinations)) * repetitions
-        
-        # Count number of trials in a block, given unique
-        # combinations and repetitions within block
-        trials_in_block = n_combinations * repetitions
-        
-        # Count total number of trials in experiment
-        total_trials = blocks * trials_in_block
-        
-        # Make list of trials
-        # NOTE: These are 0-indexed
-        trial_numbers = list(range(total_trials))
-        
-        # Prepare a list to contain conditions of each trial
-        conditions_ = [None] * total_trials
-
-        # Prepare a list of block number for each trial
-        block_numbers = []
-        
-        # Iterate over blocks
-        for b in range(blocks):
-            # Add block number to the number of trials within block
-            block_numbers += [b] * trials_in_block
-
-            # Randomly select the order of trial combinations
-            indices_ = random.choice(
-                within_block_combination_indices, trials_in_block, replace=False
-            )
-            
-            # Use the randomised indeces to set the randomised condtions
-            # for the given block
-            conditions_[b * trials_in_block : (b + 1) * trials_in_block] = [
-                combinations[i] for i in indices_
-            ]
-
-        # Unpack the combination contents into stimuli, tasks, and congruence
-        stimulus_conditions = [c[0] for c in conditions_]
-        tasks = [c[1] for c in conditions_]
-        task_congruences = [c[2] for c in conditions_]
-
-        # Prepare empty list of responses
-        responses = [None] * total_trials
-        
-        # Prepare empty list of reaction times
-        reaction_times = [None] * total_trials
-
-        # Prepare empty list of `completed` flags
-        completed = [0] * total_trials
-        
-        # Create the experiment data table as DataFrame
-        experiment_data = pd.DataFrame.from_dict(
-            {
-                "trial_number": trial_numbers,
-                "block_number": block_numbers,
-                "stimulus_condition": stimulus_conditions,
-                "task": tasks,
-                "task_congruence": task_congruences,
-                "response": responses,
-                "reaction_time": reaction_times,
-                "completed": completed,
-            }
-        )
-        return experiment_data
-
-    def _set_trial_response(self, trial_number: int, response, reaction_time) -> None:
-        """Set the response of a given trial
-        
-        Args:
-            trial_number (int): Trial number to set response for.
-            response (_type_): Reponse value.
-            reaction_time (_type_): Reaction time.
-        """
-        
-        self.experiment_data.at[trial_number, "response"] = response
-        self.experiment_data.at[trial_number, "reaction_time"] = reaction_time
