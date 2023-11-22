@@ -1,0 +1,13 @@
+trial_number,block_number,stimulus_condition,task,task_congruence,response,reaction_time,completed
+0,0,isf,left,1,,,0
+1,0,isf,right,0,,,0
+2,0,isf,right,1,,,0
+3,0,con,left,1,,,0
+4,0,strobe,right,1,,,0
+5,0,strobe,left,1,,,0
+6,0,strobe,left,0,,,0
+7,0,con,right,1,,,0
+8,0,isf,left,0,,,0
+9,0,con,right,0,,,0
+10,0,strobe,right,0,,,0
+11,0,con,left,0,,,0
