@@ -3,38 +3,29 @@ from pathlib import Path
 
 import pandas as pd
 
-from experiment_manager import ExperimentManagerBase
+from experiment_manager_base import ExperimentManagerBase
 
 SUB = 42
 SES = 42
 RUN = 42
 
-BLOCKS = 1
-STIMULI = ("con", "isf", "strobe")
-TASKS = ("left", "right")
+ROOT = Path(__file__).parent / "test_data"
 
 
 class TestExperimentBase(unittest.TestCase):
-    def test_make_and_save_experiment_data(self) -> None:
-        data_path = Path(__file__).parent / "test_data"
-
-        experiment_manager = ExperimentManagerBase(
-            sub=SUB, ses=SES, run=RUN, root=data_path
-        )
+    def test_1_make_and_save_experiment_data(self) -> None:
+        experiment_manager = ExperimentManagerBase(sub=SUB, ses=SES, run=RUN, root=ROOT)
 
         with self.assertRaises(NotImplementedError):
             experiment_manager.make_and_save_experiment_data(
-                root=data_path,
-                blocks=BLOCKS,
-                stimuli=STIMULI,
-                tasks=TASKS,
+                root=ROOT,
                 overwrite=False,
             )
 
     def test_trial_progress(self) -> None:
         data = self._make_exp_dat()
         experiment_manager = ExperimentManagerBase(
-            sub=SUB, ses=SES, run=RUN, experiment_data=data
+            sub=SUB, ses=SES, run=RUN, root=ROOT, experiment_data=data
         )
 
         self.assertFalse(experiment_manager.end_of_experiment_flag)
