@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from experiment_manager_base import ExperimentManagerBase
+from experiment_management.experiment_manager_base import ExperimentManagerBase
 
 SUB = 42
 SES = 42

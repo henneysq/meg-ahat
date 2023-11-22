@@ -3,7 +3,7 @@ import unittest
 
 from numpy import random
 
-from experiment_manager_va import VisualAttentionExperimentManager
+from experiment_management.experiment_manager_va import VisualAttentionExperimentManager
 
 SUB = 42
 SES = 42

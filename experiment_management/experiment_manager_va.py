@@ -5,8 +5,8 @@ import time
 from numpy import random
 import pandas as pd
 
-from experiment_manager_base import ExperimentManagerBase
-import experiment_va_settings as evas
+from .experiment_manager_base import ExperimentManagerBase
+from . import experiment_va_settings as evas
 
 from psychopy import core
 

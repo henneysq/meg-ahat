@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from experiment_manager_va import VisualAttentionExperimentManager
+from experiment_management.experiment_manager_va import VisualAttentionExperimentManager
 
 # Experiment variables
 SUB = 42
