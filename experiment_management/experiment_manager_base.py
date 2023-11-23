@@ -356,15 +356,18 @@ class ExperimentManagerBase:
                 `timeout`, (-1, `timeout`) is returned.
         """
         t_start = time.time()
+        keyboard.clock.reset()
         while 1:
-            rt = time.time() - t_start
-            if rt > timeout:
+            #rt = time.time() - t_start
+            if time.time() - t_start > timeout:
                 return -1, timeout
 
             keys = keyboard.getKeys()
             if len(keys) > 0:
                 for key_ in keys:
-                    k = key_
+                    k = key_.value
+                    rt = key_.rt
+
                     if k == target_key:
                         return 1, rt
                     elif k == "q":
