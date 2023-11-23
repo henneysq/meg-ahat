@@ -1,4 +1,4 @@
 git+https://optogit.optoceutics.com/optoceutics/software/libledcontroller.git@master#egg=libLEDController
 pandas==2.1.3
-psychopy==2023.2.3
 numpy
+git+https://github.com/henneysq/psychopy.git@dev#egg=psychopy
