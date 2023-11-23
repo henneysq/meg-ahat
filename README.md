@@ -31,7 +31,7 @@ Control of the two experiments, trial condition randomisation, and progress moni
 
 Two scripts are provided in the root directory to prepare, run, and save outputs for the experiments. Update the `SUB`, `SES`, and `RUN` constants appropriately before executing the script.
 
-## Advanded Options
+## Advanced Options
 
 Several handy features are implemented to handle the experiments.
 
