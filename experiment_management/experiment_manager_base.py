@@ -72,6 +72,10 @@ class ExperimentManagerBase:
     def bids_kv_pair_str(self):
         return self.__bids_kv_pair_str
 
+    @property
+    def root(self):
+        return self.__root
+
     def make_and_save_experiment_data(
         self,
         # repetitions: int = 1,
@@ -148,7 +152,7 @@ class ExperimentManagerBase:
         experiment_data.to_csv(file_path, index=False)
 
         # Update the instance root if none was specified previously.
-        if self.__root is None:
+        if self.root is None:
             self.__root = root
 
         # Return the experiment data only if specified
@@ -179,7 +183,7 @@ class ExperimentManagerBase:
         file_path = Path(root / f"{self.bids_kv_pair_str}_experimentdata.csv")
         self.experiment_data = pd.read_csv(file_path)
 
-        if self.__root is None:
+        if self.root is None:
             self.__root = root
 
     def save_experiment_data(self, root: str | Path | None = None) -> None:
@@ -324,11 +328,11 @@ class ExperimentManagerBase:
 
     def _check_root(self, root: str | Path) -> str | Path:
         if root is None:
-            if self.__root is None:
+            if self.root is None:
                 raise ValueError(
                     f"If not `root` was specified at instantiation, root can not be `None`."
                 )
-            root = self.__root
+            root = self.root
         return root
 
     def __len__(self) -> int:
