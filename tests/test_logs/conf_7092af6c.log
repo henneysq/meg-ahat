@@ -1,0 +1,10 @@
+INFO:root:Visual Attention Experiment Configs:
+INFO:root:Expected single trial duration: 9.0 s.
+INFO:root:Number op trials: 12.
+INFO:root:Total duration: 1 min, 48 sec.
+
+INFO:root:Working Memory Experiment Configs:
+INFO:root:Expected single trial duration: 10.5 s.
+INFO:root:Number op trials: 12.
+INFO:root:Total duration: 2 min, 6 sec.
+
