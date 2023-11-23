@@ -16,26 +16,17 @@ REPETITIONS = 1
 
 WINDOW = Window(fullscr=True, units="pix")
 KEYBOARD = keyboard.Keyboard()
-INSTRUCTION_DURATION = 1
+PRE_FIXATION_DURATION = 1
+INSTRUCTION_DURATION = 6
 FIXATION_DURATION_RANGE = (1, 2)
 FIXATION_MARK = text_stim(WINDOW, text=f"+")
-# DETECTION_GRATING = grating.GratingStim(
-#     WINDOW, tex="sin", mask="gauss", units="pix", contrast=0.25, sf=0.05, size=100
-# )
-# GRATING_POS_LEFT = (-400, -300)
-# GRATING_POS_RIGHT = (400, -300)
-# GRATION_ORIENTATIONS = (45, -45)
-# GRATING_POSITION_MAP = {"left": GRATING_POS_LEFT, "right": GRATING_POS_RIGHT}
-# GRATING_ORIENTATION_MAP = {
-#     "left": GRATION_ORIENTATIONS[0],
-#     "right": GRATION_ORIENTATIONS[1],
-# }
-# SIDES = ("left", "right")
+
 RESPONSE_KEYS = ("down", "up")  # first is wrong, second is right
-RESPONSE_TIMEOUT = 1
+RESPONSE_TIMEOUT = 2
 
 expected_max_single_trial_duration = (
-    INSTRUCTION_DURATION
+    PRE_FIXATION_DURATION
+    + INSTRUCTION_DURATION
     + (FIXATION_DURATION_RANGE[0] + FIXATION_DURATION_RANGE[1]) / 2
     + RESPONSE_TIMEOUT
 )
