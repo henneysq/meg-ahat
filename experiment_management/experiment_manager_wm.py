@@ -112,11 +112,15 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
     def execute_current_trial(
         self,
         stimulus: str,
+        task_difficulty: str,
         presented_sum_correctness: bool,
+        pre_fixation_duration: float | None = None,
         instruction_duration: float | None = None,
         fixation_duration_range: tuple[float, float] | None = None,
         response_timeout: float | None = None,
     ):
+        if pre_fixation_duration is None:
+            pre_fixation_duration = ewms.PRE_FIXATION_DURATION
         if instruction_duration is None:
             instruction_duration = ewms.INSTRUCTION_DURATION
         if fixation_duration_range is None:
@@ -124,13 +128,19 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         if response_timeout is None:
             response_timeout = ewms.RESPONSE_TIMEOUT
 
-        values = random.randint(low=1, high=9, size=2)
-        true_sum = values[0] + values[1]
-        if presented_sum_correctness:
+        if task_difficulty == "low":
+            values = random.randint(low=1, high=9, size=2)
             offset = random.randint(low=1, high=2)
-            presented_sum = true_sum + offset * random.choice((-1, 1))
-        else:
+        elif task_difficulty == "high":
+            values = random.randint(low=100, high=900, size=2)
+            offset = random.randint(low=10, high=20)
+        
+        true_sum = values[0] + values[1]
+        
+        if presented_sum_correctness:
             presented_sum = true_sum
+        else:
+            presented_sum = true_sum + offset * random.choice((-1, 1))
 
         # Fixation point
         ewms.FIXATION_MARK.draw()
@@ -165,6 +175,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
 
     def run_experiment(
         self,
+        pre_fixation_duration: float | None = None,
         instruction_duration: float | None = None,
         fixation_duration_range: tuple[float, float] | None = None,
         response_timeout: float | None = None,
@@ -173,6 +184,8 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
             error_msg = f"Please set `experiment_data` before running experiment"
             raise RuntimeError(error_msg)
 
+        if pre_fixation_duration is None:
+            pre_fixation_duration = ewms.PRE_FIXATION_DURATION
         if instruction_duration is None:
             instruction_duration = ewms.INSTRUCTION_DURATION
         if fixation_duration_range is None:
@@ -183,10 +196,12 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         for _ in range(len(self) - self.trial_progress):
             current_trial = self.get_current_trial_data()
             stimulus = current_trial.stimulus_condition
+            task_difficulty = current_trial.task_difficulty
             presented_sum_correctness = current_trial.presented_sum_correctness
             response, reaction_time = self.execute_current_trial(
                 presented_sum_correctness=presented_sum_correctness,
                 stimulus=stimulus,
+                task_difficulty=task_difficulty,
                 instruction_duration=instruction_duration,
                 fixation_duration_range=fixation_duration_range,
                 response_timeout=response_timeout,

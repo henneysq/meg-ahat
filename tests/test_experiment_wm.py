@@ -65,10 +65,12 @@ class TestWorkingMemory(unittest.TestCase):
 
         current_trial = experiment_manager.get_current_trial_data()
         stimulus = current_trial.stimulus_condition
+        task_difficulty = current_trial.task_difficulty
         presented_sum_correctness = current_trial.presented_sum_correctness
         _ = experiment_manager.execute_current_trial(
             presented_sum_correctness=presented_sum_correctness,
             stimulus=stimulus,
+            task_difficulty=task_difficulty
         )
 
     # def test_6_run_experiment_externally(self):
@@ -107,6 +109,7 @@ class TestWorkingMemory(unittest.TestCase):
         experiment_manager.load_experiment_data()
 
         experiment_manager.run_experiment(
+            pre_fixation_duration=0.001,
             instruction_duration=0.001,
             fixation_duration_range=(0.0005, 0.001),
             response_timeout=0.001,
