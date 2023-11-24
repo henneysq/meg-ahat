@@ -115,14 +115,14 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         task_difficulty: str,
         presented_sum_correctness: bool,
         pre_fixation_duration: float | None = None,
-        instruction_duration: float | None = None,
+        wm_task_duration: float | None = None,
         fixation_duration_range: tuple[float, float] | None = None,
         response_timeout: float | None = None,
     ):
         if pre_fixation_duration is None:
             pre_fixation_duration = ewms.PRE_FIXATION_DURATION
-        if instruction_duration is None:
-            instruction_duration = ewms.INSTRUCTION_DURATION
+        if wm_task_duration is None:
+            wm_task_duration = ewms.WM_TASK_DURATION
         if fixation_duration_range is None:
             fixation_duration_range = ewms.FIXATION_DURATION_RANGE
         if response_timeout is None:
@@ -145,7 +145,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         # Fixation point
         ewms.FIXATION_MARK.draw()
         ewms.WINDOW.flip()
-        core.wait(instruction_duration)
+        core.wait(wm_task_duration)
 
         # Stimulus
         # ledc_left.set_stimuli(stimulus)
@@ -154,7 +154,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         msg = ewms.text_stim(ewms.WINDOW, text=f" {values[0]}\n+{values[1]}")
         msg.draw()
         ewms.WINDOW.flip()
-        core.wait(instruction_duration)
+        core.wait(wm_task_duration)
 
         # Fixation point
         ewms.FIXATION_MARK.draw()
@@ -176,7 +176,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
     def run_experiment(
         self,
         pre_fixation_duration: float | None = None,
-        instruction_duration: float | None = None,
+        wm_task_duration: float | None = None,
         fixation_duration_range: tuple[float, float] | None = None,
         response_timeout: float | None = None,
     ):
@@ -186,8 +186,8 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
 
         if pre_fixation_duration is None:
             pre_fixation_duration = ewms.PRE_FIXATION_DURATION
-        if instruction_duration is None:
-            instruction_duration = ewms.INSTRUCTION_DURATION
+        if wm_task_duration is None:
+            wm_task_duration = ewms.WM_TASK_DURATION
         if fixation_duration_range is None:
             fixation_duration_range = ewms.FIXATION_DURATION_RANGE
         if response_timeout is None:
@@ -202,7 +202,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
                 presented_sum_correctness=presented_sum_correctness,
                 stimulus=stimulus,
                 task_difficulty=task_difficulty,
-                instruction_duration=instruction_duration,
+                wm_task_duration=wm_task_duration,
                 fixation_duration_range=fixation_duration_range,
                 response_timeout=response_timeout,
             )

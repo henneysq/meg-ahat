@@ -110,7 +110,7 @@ class TestWorkingMemory(unittest.TestCase):
 
         experiment_manager.run_experiment(
             pre_fixation_duration=0.001,
-            instruction_duration=0.001,
+            wm_task_duration=0.001,
             fixation_duration_range=(0.0005, 0.001),
             response_timeout=0.001,
         )
