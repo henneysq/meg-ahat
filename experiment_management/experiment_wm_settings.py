@@ -30,11 +30,11 @@ FIXATION_MARK = text_stim(WINDOW, text=f"+")
 
 ## Trial design parameters
 # Duration of fixation prior to task
-PRE_FIXATION_DURATION = 1 # seconds
+PRE_FIXATION_DURATION = 2 # seconds
 # Duration for which the WM task is presented
-WM_TASK_DURATION = 6 # seconds
+WM_TASK_DURATION = 5 # seconds
 # Duration range between task and response
-FIXATION_DURATION_RANGE = (1,  2)  # seconds
+FIXATION_DURATION_RANGE = (2,)  # seconds
 
 # Target response keys
 # NOTE: Map these to button box
