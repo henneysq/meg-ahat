@@ -34,7 +34,7 @@ PRE_FIXATION_DURATION = 2 # seconds
 # Duration for which the WM task is presented
 WM_TASK_DURATION = 5 # seconds
 # Duration range between task and response
-FIXATION_DURATION_RANGE = (2,)  # seconds
+FIXATION_DURATION_RANGE = (2, 2)  # seconds
 
 # Target response keys
 # NOTE: Map these to button box
