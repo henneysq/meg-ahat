@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.1",
     author="OptoCeutics",
     author_email="mark@henney.dk",
-    description="Interaction with lamp firmware",
+    description="Donders OC colab project",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/henneysq/meg-ahat",
