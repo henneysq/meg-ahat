@@ -2,6 +2,9 @@ import logging
 import unittest
 from pathlib import Path
 
+from util import set_git_executable_path
+set_git_executable_path()
+
 import git
 
 from experiment_management import experiment_va_settings as evas
