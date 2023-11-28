@@ -14,7 +14,9 @@ class ExperimentTrigger(serial.Serial):
     def __init__(self, port: str | None = "COM1", baudrate: int = 115200, bytesize: int = serial.EIGHTBITS, parity: str = serial.PARITY_NONE, stopbits: float = serial.STOPBITS_ONE, timeout: float | None = 1, write_timeout: float | None = 2) -> None:
         super().__init__(port, baudrate, bytesize, parity, stopbits, timeout, write_timeout)
         
-    def prepare_trigger(self) -> None:
+        self._prepare_trigger()
+        
+    def _prepare_trigger(self) -> None:
         if not self.is_open:
             msg = "Could not open serial port."
             raise ConnectionAbortedError(msg)
