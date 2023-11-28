@@ -15,7 +15,7 @@ class ExperimentTrigger(serial.Serial):
         super().__init__(port, baudrate, bytesize, parity, stopbits, timeout, write_timeout)
         
     def prepare_trigger(self) -> None:
-        if not self.is_open():
+        if not self.is_open:
             msg = "Could not open serial port."
             raise ConnectionAbortedError(msg)
         
