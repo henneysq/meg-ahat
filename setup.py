@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="megahat",
-    version="0.1.3",
+    version="0.2.0",
     author="OptoCeutics",
     author_email="mark@henney.dk",
     description="Donders OC colab project",
