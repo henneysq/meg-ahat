@@ -34,14 +34,16 @@ Git is not installed on the DCCN MEG presentation PC, which is why the path to a
 Two scripts are provided in the root directory to prepare, run, and save outputs for the experiments. Update the `SUB`, `SES`, and `RUN` constants appropriately before executing the script.
 ## Structure
 
+### Experiment Managers
+
 Control of the two experiments, trial condition randomisation, and progress monitoring is implemented with the two classes 
 `experiment_management.experiment_manager_va.ExperimentManagerVA` and `experiment_management.experiment_manager_wm.ExperimentManagerWM` for the VA- and WM-experiments, respectively. Internally, they are built on a common parent class `experiment_management.experiment_manager_base.ExperimentManagerBase` which handles most of the shared data- and experiment flow management.
 
 Experimental settings such as durations, blocks, repetitions etc. are configured manually in `experiment_management.experiment_va_settings.py` and `experiment_management.experiment_wm_settings.py` for the VA and WM experiments, repectively. These are loaded by the manager classes.
 
-## Experiment Triggers
+### Experiment Triggers
 
-Serial interface with the BITSI trigger system is controlled by the `experiment_management.experiment_trigger.ExperimentTrigger`. The experiment managers use this to send distinct `uint8` trigger codes for each event in a trial. NOTE: TODO
+Serial interface with the BITSI trigger system is controlled by the `experiment_management.experiment_trigger.ExperimentTrigger`. The experiment managers use this to send distinct `uint8` trigger codes for each event in a trial. NOTE: TODO.
 
 ## Advanced Options
 
