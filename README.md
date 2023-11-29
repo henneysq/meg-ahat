@@ -22,14 +22,26 @@ The experiments require visual presentations and participant feedback is impleme
 pip install -r requirements.txt
 ```
 
+Note that the proprietary `libLEDController` package is not publicly available.
+
+### Portable-Git for DCCN MEG presentation PC
+
+Git is not installed on the DCCN MEG presentation PC, which is why the path to a (portable) Git executable can be set with `util.set_git_executable_path`. Some additional GitPython wrappers are also contained in `util`.
+
+
+## Quick-Start Guide
+
+Two scripts are provided in the root directory to prepare, run, and save outputs for the experiments. Update the `SUB`, `SES`, and `RUN` constants appropriately before executing the script.
 ## Structure
 
 Control of the two experiments, trial condition randomisation, and progress monitoring is implemented with the two classes 
 `experiment_management.experiment_manager_va.ExperimentManagerVA` and `experiment_management.experiment_manager_wm.ExperimentManagerWM` for the VA- and WM-experiments, respectively. Internally, they are built on a common parent class `experiment_management.experiment_manager_base.ExperimentManagerBase` which handles most of the shared data- and experiment flow management.
 
-## Quick-Start Guide
+Experimental settings such as durations, blocks, repetitions etc. are configured manually in `experiment_management.experiment_va_settings.py` and `experiment_management.experiment_wm_settings.py` for the VA and WM experiments, repectively. These are loaded by the manager classes.
 
-Two scripts are provided in the root directory to prepare, run, and save outputs for the experiments. Update the `SUB`, `SES`, and `RUN` constants appropriately before executing the script.
+## Experiment Triggers
+
+Serial interface with the BITSI trigger system is controlled by the `experiment_management.experiment_trigger.ExperimentTrigger`. The experiment managers use this to send distinct `uint8` trigger codes for each event in a trial. NOTE: TODO
 
 ## Advanced Options
 
