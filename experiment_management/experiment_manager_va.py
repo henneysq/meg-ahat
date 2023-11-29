@@ -10,6 +10,10 @@ from . import experiment_va_settings as evas
 
 from psychopy import core
 
+ATT_SIDE_INSTRUCTION_MAP = {
+    "left": "<- <- <-",
+    "right": "-> -> ->"
+}
 
 class VisualAttentionExperimentManager(ExperimentManagerBase):
     def _make_and_save_experiment_data(self) -> pd.DataFrame:
@@ -123,7 +127,7 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         if response_timeout is None:
             response_timeout = evas.RESPONSE_TIMEOUT
 
-        msg = evas.text_stim(evas.WINDOW, text=f"Attend to the {grating_side} light")
+        msg = evas.text_stim(evas.WINDOW, text=ATT_SIDE_INSTRUCTION_MAP[grating_side])
         msg.draw()
         evas.WINDOW.flip()
         core.wait(instruction_duration)

@@ -15,7 +15,7 @@ TASK_CONGRUENCE = (1, 0)
 
 WINDOW = Window(fullscr=True, units="pix")
 KEYBOARD = keyboard.Keyboard()
-INSTRUCTION_DURATION = 1
+INSTRUCTION_DURATION = 2
 FIXATION_DURATION_RANGE = (6, 8)
 FIXATION_GRATING = grating.GratingStim(
     WINDOW, tex="sin", mask="gauss", units="pix", contrast=1, sf=0.05, size=100
@@ -31,7 +31,7 @@ GRATING_ORIENTATION_MAP = {
     "left": GRATION_ORIENTATIONS[0],
     "right": GRATION_ORIENTATIONS[1],
 }
-SIDES = ("left", "right")
+
 RESPONSE_KEYS = ("down", "up")  # first is incongruent, second is congruent
 RESPONSE_TIMEOUT = 1
 
