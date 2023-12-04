@@ -47,13 +47,14 @@ class ExperimentTrigger(serial.Serial):
         self.reset_input_buffer()
         self.reset_output_buffer()
 
-        self.write(self.trigger_mode)
+        self.write(self.trigger_mode) # 0 2 0
         self.reset_output_buffer()
         #self.flush()
 
+        sleep(.5)
         self.write(self.pulse_mode)
-        my_byte = self.pulse_dur.to_bytes(length=1, byteorder="little")
-        self.write(my_byte)
+        my_byte = self.pulse_dur.to_bytes(length=1, byteorder="little") # 0 1
+        self.write(my_byte) # variable ms length
         self.reset_output_buffer()
         
         sleep(.5)
@@ -79,5 +80,5 @@ class ExperimentTrigger(serial.Serial):
         if code < 1 or code > 255:
             raise ValueError(f"Trigger must be a positive uint8; got value of {code}")
 
-        my_byte = code
-        self.write(my_byte).to_bytes(length=1, byteorder="little")
+        my_byte = code.to_bytes(length=1, byteorder="little")
+        self.write(my_byte)
