@@ -1,4 +1,4 @@
-# MEG-AHAT
+# MEG-AHAT: Propagation of spectral flicker during visual- and non-visual cognitive tasks
 
 Author: Mark Alexander Henney
 
