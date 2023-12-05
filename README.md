@@ -9,7 +9,15 @@ Collaborators: Gustavo Feijoo, Henrik Hansen, Marcus Carstensen, Kristoffer Mads
 # Table of contents
 
 1. [About the Project](#about)
-1. [Dependencies](#dependencies)
+2. [Dependencies](#dependencies)
+3. [Quick-Start Guide](#quickstart)
+4. [Structure](#structure)
+    1. [Experiment tanagers](#managers)
+    2. [Experiment triggers](#triggers)
+5. [Advanced Option](#advanced)
+    1. [Setting custom root](#root)
+    2. [Setting experiment progress](#root)
+    3. [Using a custom random seed](#root)
 
 ## About the Project <a name="about"></a>
 
@@ -19,7 +27,7 @@ It investigates the effects of 40 Hz visible and *invisible spectral flicker* (s
 See also the 
 [`/protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx`](https://github.com/henneysq/meg-ahat/blob/main/protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx) for the DCCN project proposal slides.
 
-## Dependencies <a name="dependenciesspec"></a>
+## Dependencies <a name="dependencies"></a>
 
 The experiments require visual presentations and participant feedback is implemented in Python with `psychopy`, and light stimulation with custom and proprietary equipment and drivers are provided by OC. The required software can be installed by:
 
@@ -79,9 +87,9 @@ experiment_manager = VisualAttentionExperimentManager(
 
 Note that the `root` argument is required the first time calling `make_and_save_experiment_data` and `load_experiment_data` if it was not given at instantiation. In these cases, the root is subsequently stored in `experiment_manager.root` property.
 
-### Setting trial progresss <a name="progress"></a>
+### Setting experiment progresss <a name="progress"></a>
 
-In case of a crash during the experiment, the experiment can be restarted at a customly selected trial. The experiment data
+In case of a crash during the experiment, it can be restarted at a customly selected trial. The experiment data
 is saved to the `>ROOT</data/` directory, and completed trials are indicates in the "completed" column.
 
 To start an experiment after the already completed trials, first set the trial progress, then run the experiment:
