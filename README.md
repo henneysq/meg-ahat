@@ -6,7 +6,12 @@ Principle Investigator: Robert Oostenveld
 
 Collaborators: Gustavo Feijoo, Henrik Hansen, Marcus Carstensen, Kristoffer Madsen, Eelke Spaak
 
-## About the Project
+# Table of contents
+
+1. [About the Project](#about)
+1. [Dependencies](#dependencies)
+
+## About the Project <a name="about"></a>
 
 MEG-AHAT is run at the Donders Center for Cognitive Neuroimaing (DCCN) in collaboration with the Technical University of Denmark and OptoCeutics ApS (OC).
 It investigates the effects of 40 Hz visible and *invisible spectral flicker* (see [Carstensen et. al. 2020](https://doi.org/10.1117/12.2544338)) on the brain during a visual attention (VA) task and a non-visual working memory (WM) task with simultaneous megnetoencephalography (MEG).
@@ -14,7 +19,7 @@ It investigates the effects of 40 Hz visible and *invisible spectral flicker* (s
 See also the 
 [`/protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx`](https://github.com/henneysq/meg-ahat/blob/main/protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx) for the DCCN project proposal slides.
 
-## Dependencies
+## Dependencies <a name="dependenciesspec"></a>
 
 The experiments require visual presentations and participant feedback is implemented in Python with `psychopy`, and light stimulation with custom and proprietary equipment and drivers are provided by OC. The required software can be installed by:
 
@@ -29,27 +34,28 @@ Note that the proprietary `libLEDController` package is not publicly available.
 Git is not installed on the DCCN MEG presentation PC, which is why the path to a (portable) Git executable can be set with `util.set_git_executable_path`. Some additional GitPython wrappers are also contained in `util`.
 
 
-## Quick-Start Guide
+## Quick-Start Guide <a name="quickstart"></a>
 
 Two scripts are provided in the root directory to prepare, run, and save outputs for the experiments. Update the `SUB`, `SES`, and `RUN` constants appropriately before executing the script.
-## Structure
 
-### Experiment Managers
+## Structure <a name="structure"></a>
+
+### Experiment Managers <a name="managers"></a>
 
 Control of the two experiments, trial condition randomisation, and progress monitoring is implemented with the two classes 
 `experiment_management.experiment_manager_va.ExperimentManagerVA` and `experiment_management.experiment_manager_wm.ExperimentManagerWM` for the VA- and WM-experiments, respectively. Internally, they are built on a common parent class `experiment_management.experiment_manager_base.ExperimentManagerBase` which handles most of the shared data- and experiment flow management.
 
 Experimental settings such as durations, blocks, repetitions etc. are configured manually in `experiment_management.experiment_va_settings.py` and `experiment_management.experiment_wm_settings.py` for the VA and WM experiments, repectively. These are loaded by the manager classes.
 
-### Experiment Triggers
+### Experiment Triggers <a name="triggers"></a>
 
 Serial interface with the BITSI trigger system is controlled by the `experiment_management.experiment_trigger.ExperimentTrigger`. The experiment managers use this to send distinct `uint8` trigger codes for each event in a trial. NOTE: TODO.
 
-## Advanced Options
+## Advanced Options <a name="advanced"></a>
 
 Several handy features are implemented to handle the experiments.
 
-### Setting custom root
+### Setting custom root <a name="root"></a>
 
 A custom root directory can be defined in which experiment data is stored. This can be done either at instantiation of the experiment objects, when making experiment data with `make_and_save_experiment_data`, when loading existing experiment data from a file with `load_experiment_data` - all via the `root` argument.
 
@@ -73,7 +79,7 @@ experiment_manager = VisualAttentionExperimentManager(
 
 Note that the `root` argument is required the first time calling `make_and_save_experiment_data` and `load_experiment_data` if it was not given at instantiation. In these cases, the root is subsequently stored in `experiment_manager.root` property.
 
-### Setting trial progresss
+### Setting trial progresss <a name="progress"></a>
 
 In case of a crash during the experiment, the experiment can be restarted at a customly selected trial. The experiment data
 is saved to the `>ROOT</data/` directory, and completed trials are indicates in the "completed" column.
@@ -88,7 +94,7 @@ experiment_manager.run_experiment()
 
 In this case, the experiment will run from trial 10 (the 11th).
 
-### Using a custom random seed
+### Using a custom random seed <a name="seed"></a>
 
 When creating experiment data, the conditions are randomised uniquely based on the provided `sub`, `ses`, and `run` arguments at instantiation. In `make_and_save_experiment_data`, a custom seed can be provided via the `seed` argument, though this is not necessarly desireble.
 
