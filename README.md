@@ -25,7 +25,7 @@ MEG-AHAT is run at the Donders Center for Cognitive Neuroimaing (DCCN) in collab
 It investigates the effects of 40 Hz visible and *invisible spectral flicker* (see [Carstensen et. al. 2020](https://doi.org/10.1117/12.2544338)) on the brain during a visual attention (VA) task and a non-visual working memory (WM) task with simultaneous megnetoencephalography (MEG).
 
 See also the 
-[`/protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx`](https://github.com/henneysq/meg-ahat/blob/main/protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx) for the DCCN project proposal slides.
+[`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx).
 
 ## Dependencies <a name="dependencies"></a>
 
@@ -51,14 +51,26 @@ Two scripts are provided in the root directory to prepare, run, and save outputs
 ### Experiment Managers <a name="managers"></a>
 
 Control of the two experiments, trial condition randomisation, and progress monitoring is implemented with the two classes 
-[`ExperimentManagerVA`](https://github.com/henneysq/meg-ahat/blob/main/experiment_management/experiment_manager_va.py#L18)
-and [`ExperimentManagerWM`](experiment_management/experiment_manager_wm.py#L14) for the VA- and WM-experiments, respectively. Internally, they are built on a common parent class `experiment_management.experiment_manager_base.ExperimentManagerBase` which handles most of the shared data- and experiment flow management.
+[`ExperimentManagerVA`](experiment_management/experiment_manager_va.py#L18)
+and [`ExperimentManagerWM`](experiment_management/experiment_manager_wm.py#L13) for the VA- and WM-experiments, respectively. Internally, they are built on a common parent class [`ExperimentManagerBase`](experiment_management/experiment_manager_base.py#L9) which handles most of the shared data- and experiment flow management.
 
-Experimental settings such as durations, blocks, repetitions etc. are configured manually in `experiment_management.experiment_va_settings.py` and `experiment_management.experiment_wm_settings.py` for the VA and WM experiments, repectively. These are loaded by the manager classes.
+Experimental settings such as durations, blocks, repetitions etc. are configured manually in [`experiment_va_settings.py`](experiment_management/experiment_va_settings.py) and [`experiment_wm_settings.py`](experiment_management/experiment_wm_settings.py) for the VA and WM experiments, repectively. These are loaded by the manager classes.
 
 ### Experiment Triggers <a name="triggers"></a>
 
-Serial interface with the BITSI trigger system is controlled by the `experiment_management.experiment_trigger.ExperimentTrigger`. The experiment managers use this to send distinct `uint8` trigger codes for each event in a trial. NOTE: TODO.
+Serial interface with the BITSI trigger system is controlled by the [`ExperimentTrigger`](experiment_management/experiment_trigger.py) class. It inherits from the [`Serial`](https://pyserial.readthedocs.io/en/latest/pyserial_api.html) object as a thin wrapper with standard values specified in the [DCCN BITSI documentation](https://intranet.donders.ru.nl/index.php?id=lab-bitsi&no_cache=1&sword_list%5B%5D=bitsi).
+
+At instantiation of the `ExperimentTrigger` object, the BITSI is automatically programmed to trigger mode, and the trigger length set to 30 ms.
+
+It implements a function [`send_trigger`](experiment_management/experiment_trigger.py#L67), which takes a single unsigned 8-bit integer, encodes it as an ASCII character, and writes this to the BITSI. The experiment managers use this to send distinct trigger codes for each event in a trial.
+
+```python
+## Example of using the ExperimentTrigger
+# Import the experiment trigger
+from experiment_management.experiment_trigger import ExperimentTrigger as ET
+et = ET() # At instatiation, the BITSI is reprogrammed by ET._prepare_trigger
+et.send_trigger(65) # 65 is encoded as ASCII to 'A' and written to serial
+```
 
 ## Advanced Options <a name="advanced"></a>
 
