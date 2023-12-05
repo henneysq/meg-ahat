@@ -12,7 +12,7 @@ Collaborators: Gustavo Feijoo, Henrik Hansen, Marcus Carstensen, Kristoffer Mads
 2. [Dependencies](#dependencies)
 3. [Quick-Start Guide](#quickstart)
 4. [Structure](#structure)
-    1. [Experiment tanagers](#managers)
+    1. [Experiment managers](#managers)
     2. [Experiment triggers](#triggers)
 5. [Advanced Option](#advanced)
     1. [Setting custom root](#root)
@@ -51,7 +51,8 @@ Two scripts are provided in the root directory to prepare, run, and save outputs
 ### Experiment Managers <a name="managers"></a>
 
 Control of the two experiments, trial condition randomisation, and progress monitoring is implemented with the two classes 
-`experiment_management.experiment_manager_va.ExperimentManagerVA` and `experiment_management.experiment_manager_wm.ExperimentManagerWM` for the VA- and WM-experiments, respectively. Internally, they are built on a common parent class `experiment_management.experiment_manager_base.ExperimentManagerBase` which handles most of the shared data- and experiment flow management.
+[`ExperimentManagerVA`](https://github.com/henneysq/meg-ahat/blob/main/experiment_management/experiment_manager_va.py#L18)
+and [`ExperimentManagerWM`](experiment_management/experiment_manager_wm.py#L14) for the VA- and WM-experiments, respectively. Internally, they are built on a common parent class `experiment_management.experiment_manager_base.ExperimentManagerBase` which handles most of the shared data- and experiment flow management.
 
 Experimental settings such as durations, blocks, repetitions etc. are configured manually in `experiment_management.experiment_va_settings.py` and `experiment_management.experiment_wm_settings.py` for the VA and WM experiments, repectively. These are loaded by the manager classes.
 
