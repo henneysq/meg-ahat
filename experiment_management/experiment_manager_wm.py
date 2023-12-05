@@ -1,6 +1,5 @@
 from __future__ import annotations
 from itertools import product
-import time
 
 from numpy import random
 import pandas as pd
@@ -151,7 +150,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         # ledc_left.set_stimuli(stimulus)
         # ledc_right.set_stimuli(stimulus)
 
-        msg = ewms.text_stim(ewms.WINDOW, text=f" {values[0]}\n+{values[1]}")
+        msg = ewms.text_stim(ewms.WINDOW, text=f" {values[0]}\n+{values[1]}", languageStyle="RTL", height=100)
         msg.draw()
         ewms.WINDOW.flip()
         core.wait(wm_task_duration)
@@ -162,7 +161,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         core.wait(random.uniform(*fixation_duration_range))
         # core.wait(instruction_duration)
 
-        msg = ewms.text_stim(ewms.WINDOW, text=f"{presented_sum}")
+        msg = ewms.text_stim(ewms.WINDOW, text=f"{presented_sum}", height=100)
         msg.draw()
         ewms.WINDOW.flip()
 
