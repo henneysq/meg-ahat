@@ -118,7 +118,7 @@ class ExperimentTrigger(serial.Serial):
     def send_trigger(self, code: int) -> int:
         """Send trigger code to BITSI
         
-        This method simpy wraps the Serial.write method
+        This method thinly wraps the Serial.write method
         to take an unsigned 8-bit integer instead.
         It checks that the provided integer code is
         positive (to avoid setting the BITSI to programming
