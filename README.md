@@ -62,7 +62,7 @@ Serial interface with the BITSI trigger system is controlled by the [`Experiment
 
 At instantiation of the `ExperimentTrigger` object, the BITSI is automatically programmed to trigger mode, and the trigger length set to 30 ms.
 
-It implements a function [`send_trigger`](experiment_management/experiment_trigger.py#L67), which takes a single unsigned 8-bit integer, encodes it as an ASCII character, and writes this to the BITSI. The experiment managers use this to send distinct trigger codes for each event in a trial.
+It implements a function [`send_trigger`](experiment_management/experiment_trigger.py#L118), which takes a single unsigned 8-bit integer, encodes it as an ASCII character, and writes this to the BITSI. The experiment managers use this to send distinct trigger codes for each event in a trial.
 
 ```python
 ## Example of using the ExperimentTrigger
