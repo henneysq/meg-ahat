@@ -7,10 +7,22 @@ import pandas as pd
 from .experiment_manager_base import ExperimentManagerBase
 from . import experiment_wm_settings as ewms
 
-from psychopy import core
-
-
 class WorkingMemoryExperimentManager(ExperimentManagerBase):
+        
+    def prepare_psychopy(self) -> None:
+        """Prepare the psychopy dependencies
+        
+        Psychopy runs some unwanted code at import
+        which we would like to avoid, so we move the
+        imports to runtime, requiring this function to
+        be run prior to running experiment.
+        """
+        
+        # Import the dependencies shared by experiments
+        self._prepare_psychopy()
+        
+        self.psychopy_ready = True
+        
     def _make_and_save_experiment_data(self) -> pd.DataFrame:
         # Experiment-specific subroutine that overwrites the
         # ExperimentManagerBase._make_and_save_experiment_data method
@@ -118,6 +130,10 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         fixation_duration_range: tuple[float, float] | None = None,
         response_timeout: float | None = None,
     ):
+        if not self.psychopy_ready:
+            raise RuntimeError("Please use `prepare_psychopy` before running " + \
+                "a trial")
+
         if pre_fixation_duration is None:
             pre_fixation_duration = ewms.PRE_FIXATION_DURATION
         if wm_task_duration is None:
@@ -142,34 +158,34 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
             presented_sum = true_sum + offset * random.choice((-1, 1))
 
         # Fixation point
-        ewms.FIXATION_MARK.draw()
-        ewms.WINDOW.flip()
-        core.wait(wm_task_duration)
+        self.fixation_mark.draw()
+        self.window.flip()
+        self.core.wait(wm_task_duration)
 
         # Stimulus
         # ledc_left.set_stimuli(stimulus)
         # ledc_right.set_stimuli(stimulus)
 
-        msg = ewms.text_stim(ewms.WINDOW, text=f" {values[0]}\n+{values[1]}", languageStyle="RTL", height=100)
+        msg = self.text_stim(self.window, text=f" {values[0]}\n+{values[1]}", languageStyle="RTL", height=100)
         msg.draw()
-        ewms.WINDOW.flip()
-        core.wait(wm_task_duration)
+        self.window.flip()
+        self.core.wait(wm_task_duration)
 
         # Fixation point
-        ewms.FIXATION_MARK.draw()
-        ewms.WINDOW.flip()
-        core.wait(random.uniform(*fixation_duration_range))
+        self.fixation_mark.draw()
+        self.window.flip()
+        self.core.wait(random.uniform(*fixation_duration_range))
         # core.wait(instruction_duration)
 
-        msg = ewms.text_stim(ewms.WINDOW, text=f"{presented_sum}", height=100)
+        msg = self.text_stim(self.window, text=f"{presented_sum}", height=100)
         msg.draw()
-        ewms.WINDOW.flip()
+        self.window.flip()
 
         correct_key = ewms.RESPONSE_KEYS[presented_sum_correctness]
 
-        ewms.KEYBOARD.getKeys()
+        self.keyboard.getKeys()
         return self._get_response_and_reaction_time(
-            ewms.KEYBOARD, ewms.WINDOW, correct_key, response_timeout
+            self.keyboard, self.window, correct_key, response_timeout
         )
 
     def run_experiment(
@@ -182,6 +198,8 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         if self.experiment_data is None:
             error_msg = f"Please set `experiment_data` before running experiment"
             raise RuntimeError(error_msg)
+        
+        self.prepare_psychopy()
 
         if pre_fixation_duration is None:
             pre_fixation_duration = ewms.PRE_FIXATION_DURATION

@@ -52,6 +52,8 @@ class ExperimentManagerBase:
         )
 
         self.end_of_experiment_flag = False
+        
+        self.psychopy_ready = False
 
     @property
     def sub(self):
@@ -375,6 +377,36 @@ class ExperimentManagerBase:
                         exit()
                     else:
                         return 0, rt
+                    
+    def _prepare_psychopy(self):
+        """Prepare the psychopy dependencies
+        
+        Psychopy runs some unwanted code at import
+        which we would like to avoid, so we move the
+        imports to runtime, requiring this function to
+        be run prior to running experiment.
+        
+        The child classes add additional needed features
+        to the public function and refers to this
+        function for shared dependencies.
+        """
+        from psychopy.hardware import keyboard
+        from psychopy.visual import Window, TextStim
+        from psychopy import core
+        
+        self.core = core
+        self.text_stim = TextStim
+        self.window = Window(size=(1200, 1200*.75), fullscr=False, units="pix")
+        self.keyboard = keyboard.Keyboard()
+        self.fixation_mark = TextStim(self.window, text=f"+")
+        
+    def prepare_psychopy(self):
+        self._prepare_psychopy()
+        self.psychopy_ready = True
 
     def __len__(self) -> int:
         return self.experiment_data.__len__()
+
+    def __del__(self):
+        if self.psychopy_ready:
+            self.window.close()

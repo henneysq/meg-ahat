@@ -1,9 +1,13 @@
+import logging
 from pathlib import Path
 import unittest
 
 from numpy import random
 
 from experiment_management.experiment_manager_va import VisualAttentionExperimentManager
+from tests.__init__ import log_file
+
+logging.basicConfig(filename=log_file, level=logging.INFO, filemode="w")
 
 SUB = 42
 SES = 42
@@ -64,6 +68,7 @@ class TestVisualAttention(unittest.TestCase):
         )
 
         experiment_manager.load_experiment_data()
+        experiment_manager.prepare_psychopy()
 
         current_trial = experiment_manager.get_current_trial_data()
         attention_side = current_trial.task
@@ -83,6 +88,7 @@ class TestVisualAttention(unittest.TestCase):
         )
 
         experiment_manager.load_experiment_data()
+        experiment_manager.prepare_psychopy()
 
         for _ in range(len(experiment_manager)):
             current_trial = experiment_manager.get_current_trial_data()

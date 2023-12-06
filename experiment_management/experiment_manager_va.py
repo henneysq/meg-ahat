@@ -1,14 +1,11 @@
 from __future__ import annotations
 from itertools import product
-import time
 
 from numpy import random
-import pandas as pd
+from pandas import DataFrame
 
 from .experiment_manager_base import ExperimentManagerBase
 from . import experiment_va_settings as evas
-
-from psychopy import core
 
 ATT_SIDE_INSTRUCTION_MAP = {
     "left": "<- <- <-",
@@ -16,7 +13,30 @@ ATT_SIDE_INSTRUCTION_MAP = {
 }
 
 class VisualAttentionExperimentManager(ExperimentManagerBase):
-    def _make_and_save_experiment_data(self) -> pd.DataFrame:
+    
+    def prepare_psychopy(self) -> None:
+        """Prepare the psychopy dependencies
+        
+        Psychopy runs some unwanted code at import
+        which we would like to avoid, so we move the
+        imports to runtime, requiring this function to
+        be run prior to running experiment.
+        """
+        from psychopy.visual import grating
+        
+        # Import the dependencies shared by experiments
+        self._prepare_psychopy()
+            
+        self.fixation_grating = grating.GratingStim(
+            self.window, tex="sin", mask="gauss", units="pix", contrast=1, sf=0.05, size=300
+        )
+        self.detection_grating = grating.GratingStim(
+            self.window, tex="sin", mask="gauss", units="pix", contrast=1, sf=0.05, size=300
+        )
+        
+        self.psychopy_ready = True
+        
+    def _make_and_save_experiment_data(self) -> DataFrame:
         # Experiment-specific subroutine that overwrites the
         # ExperimentManagerBase._make_and_save_experiment_data method
         stimuli = evas.STIMULI
@@ -85,7 +105,7 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         completed = [0] * total_trials
 
         # Create the experiment data table as DataFrame
-        experiment_data = pd.DataFrame.from_dict(
+        experiment_data = DataFrame.from_dict(
             {
                 "trial_number": trial_numbers,
                 "block_number": block_numbers,
@@ -120,6 +140,10 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         fixation_duration_range: tuple[float, float] | None = None,
         response_timeout: float | None = None,
     ):
+        if not self.psychopy_ready:
+            raise RuntimeError("Please use `prepare_psychopy` before running " + \
+                "a trial")
+            
         if instruction_duration is None:
             instruction_duration = evas.INSTRUCTION_DURATION
         if fixation_duration_range is None:
@@ -127,38 +151,38 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         if response_timeout is None:
             response_timeout = evas.RESPONSE_TIMEOUT
 
-        msg = evas.text_stim(evas.WINDOW, text=ATT_SIDE_INSTRUCTION_MAP[grating_side])
+        msg = self.text_stim(self.window, text=ATT_SIDE_INSTRUCTION_MAP[grating_side])
         msg.draw()
-        evas.WINDOW.flip()
-        core.wait(instruction_duration)
+        self.window.flip()
+        self.core.wait(instruction_duration)
 
         # Fixation point
-        evas.FIXATION_GRATING.ori = evas.GRATING_ORIENTATION_MAP[grating_side]
-        evas.FIXATION_GRATING.draw()
-        evas.WINDOW.flip()
+        self.fixation_grating.ori = evas.GRATING_ORIENTATION_MAP[grating_side]
+        self.fixation_grating.draw()
+        self.window.flip()
 
         # Stimulus
         # ledc_left.set_stimuli(stimulus)
         # ledc_right.set_stimuli(stimulus)
 
-        core.wait(random.uniform(*fixation_duration_range))
+        self.core.wait(random.uniform(*fixation_duration_range))
 
-        evas.FIXATION_GRATING.draw()
-        evas.DETECTION_GRATING.pos = evas.GRATING_POSITION_MAP[grating_side]
+        self.fixation_grating.draw()
+        self.detection_grating.pos = evas.GRATING_POSITION_MAP[grating_side]
         if grating_congruence:
-            detection_grating_orientation = evas.FIXATION_GRATING.ori
+            detection_grating_orientation = self.fixation_grating.ori
         else:
-            detection_grating_orientation = evas.FIXATION_GRATING.ori * -1
+            detection_grating_orientation = self.fixation_grating.ori * -1
 
-        evas.DETECTION_GRATING.ori = detection_grating_orientation
-        evas.DETECTION_GRATING.draw()
-        evas.WINDOW.flip()
+        self.detection_grating.ori = detection_grating_orientation
+        self.detection_grating.draw()
+        self.window.flip()
 
         correct_key = evas.RESPONSE_KEYS[grating_congruence]
 
-        evas.KEYBOARD.getKeys()
+        self.keyboard.getKeys()
         return self._get_response_and_reaction_time(
-            evas.KEYBOARD, evas.WINDOW, correct_key, response_timeout
+            self.keyboard, self.window, correct_key, response_timeout
         )
 
     def run_experiment(
@@ -170,6 +194,8 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         if self.experiment_data is None:
             error_msg = f"Please set `experiment_data` before running experiment"
             raise RuntimeError(error_msg)
+        
+        self.prepare_psychopy()
 
         if instruction_duration is None:
             instruction_duration = evas.INSTRUCTION_DURATION
@@ -196,7 +222,3 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
             )
             self.increment_trial_progress()
             self.save_experiment_data()
-
-        def __del__(self):
-            evas.WINDOW.close()
-            self.super.__del__()

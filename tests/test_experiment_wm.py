@@ -1,7 +1,11 @@
+import logging
 from pathlib import Path
 import unittest
 
 from experiment_management.experiment_manager_wm import WorkingMemoryExperimentManager
+from tests.__init__ import log_file
+
+logging.basicConfig(filename=log_file, level=logging.INFO, filemode="w")
 
 SUB = 42
 SES = 42
@@ -62,6 +66,7 @@ class TestWorkingMemory(unittest.TestCase):
         )
 
         experiment_manager.load_experiment_data()
+        experiment_manager.prepare_psychopy()
 
         current_trial = experiment_manager.get_current_trial_data()
         stimulus = current_trial.stimulus_condition
