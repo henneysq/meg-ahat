@@ -5,3 +5,4 @@
 *log*
 protocol/~$*.pptx
 .DS_Store
+.vscode*
