@@ -5,6 +5,7 @@ import time
 import pandas as pd
 from numpy import random
 
+from .experiment_trigger import ExperimentTrigger
 
 class ExperimentManagerBase:
     """Base class for experiment management
@@ -50,6 +51,8 @@ class ExperimentManagerBase:
         self.__bids_kv_pair_str = (
             f"sub-{self.sub:03}_ses-{self.ses:03}_run-{self.run_:03}"
         )
+        
+        self.trigger = ExperimentTrigger()
 
         self.end_of_experiment_flag = False
         

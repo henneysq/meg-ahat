@@ -3,10 +3,11 @@ from unittest.mock import MagicMock
 
 from experiment_management.experiment_trigger import ExperimentTrigger
 
-#trigger_mock.write = MagicMock()
 
-class TestTrigger(unittest.TestCase):
+# class TestTrigger(unittest.TestCase):
     
-    def test_trigger(self):
-        pass#trigger_mock = ExperimentTrigger(port=f"/dev/ttyp3")
+#     def test_trigger(self):        
+#         trigger_mock = ExperimentTrigger()
+#         trigger_mock.write = MagicMock()
         
+#         trigger_mock.

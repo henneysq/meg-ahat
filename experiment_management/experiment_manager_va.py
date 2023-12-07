@@ -1,5 +1,7 @@
 from __future__ import annotations
 from itertools import product
+from pathlib import Path
+import json
 
 from numpy import random
 from pandas import DataFrame
@@ -13,7 +15,15 @@ ATT_SIDE_INSTRUCTION_MAP = {
 }
 
 class VisualAttentionExperimentManager(ExperimentManagerBase):
-    
+    def __init__(self, sub: int | str, ses: int | str, run: int | str, experiment_data: DataFrame | None = None, trial_progress: int = 0, root: str | Path | None = None) -> None:
+        super().__init__(sub, ses, run, experiment_data, trial_progress, root)
+        
+        # Load the trigger values
+        trigger_map_file = Path(__file__).parent / "trigger_map_va.json"
+        with open(trigger_map_file) as json_file:
+            self.trigger_map = json.load(json_file)
+            
+
     def prepare_psychopy(self) -> None:
         """Prepare the psychopy dependencies
         
@@ -196,6 +206,11 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
             raise RuntimeError(error_msg)
         
         self.prepare_psychopy()
+        self.trigger.prepare_trigger()
+        # Send a trigger for the start of the experiment
+        self.trigger.send_trigger(
+            self.trigger_map["initial-trigger"]
+        )
 
         if instruction_duration is None:
             instruction_duration = evas.INSTRUCTION_DURATION

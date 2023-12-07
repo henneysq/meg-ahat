@@ -24,7 +24,7 @@ import serial
 from time import sleep
 
 
-class ExperimentTrigger(serial.Serial):
+class ExperimentTrigger():
     """Serial wrapper for BITSI triggers
 
     This class inherits from the `Serial` class from pyserial
@@ -72,14 +72,23 @@ class ExperimentTrigger(serial.Serial):
             timeout (float, optional): Read timout in seconds. Defaults to 1.
             write_timeout (float, optional): Write timeout in seconds. Defaults to 2.
         """
-        super().__init__(
-            port, baudrate, bytesize, parity, stopbits, timeout, write_timeout
-        )
-
+        self.pulse_dur = pulse_dur
+        self.port = port
+        self.baudrate = baudrate
+        self.bytesize = bytesize
+        self.parity = parity
+        self.stopbits = stopbits
+        self.timeout = timeout
+        self.write_timeout = write_timeout
+        
+        self.ser = None
+        
         # Re-configure BITSI
-        self._prepare_trigger(pulse_dur)
+        #self.prepare_trigger(pulse_dur)
+        self.trigger_ready = False
+        
 
-    def _prepare_trigger(self, pulse_dur) -> None:
+    def prepare_trigger(self, pulse_dur: int | None = None) -> None:
         """Prepare the serial connection to BITSI
 
         Sets the pulse duration to `self.pulse_dur` ms by
@@ -91,29 +100,39 @@ class ExperimentTrigger(serial.Serial):
             ConnectionAbortedError: Raised if the serial port
                 could not be opened.
         """
-        if not self.is_open:
+        if self.ser is None:
+            self.ser = serial.Serial(
+                self.port, self.baudrate, self.bytesize, self.parity, self.stopbits, self.timeout, self.write_timeout
+            )
+        
+        if not self.ser.is_open:
             msg = "Could not open serial port."
             raise ConnectionAbortedError(msg)
+        
+        if pulse_dur is None:
+            pulse_dur = self.pulse_dur
 
         # Flush the input and output buffers
-        self.reset_input_buffer()
-        self.reset_output_buffer()
+        self.ser.reset_input_buffer()
+        self.ser.reset_output_buffer()
 
         # Set the BITSI to trigger mode
-        self.write(self.trigger_mode)
-        self.reset_output_buffer()
+        self.ser.write(self.trigger_mode)
+        self.ser.reset_output_buffer()
         # Give the BITSI a moment to process..
         sleep(0.5)
 
         # Set the BITSI to pulse mode
-        self.write(self.pulse_mode)
+        self.ser.write(self.pulse_mode)
         # Convert the specified pulse duration to a byte
         my_byte = pulse_dur.to_bytes(length=1, byteorder="little")
         # Write it
-        self.write(my_byte)
-        self.reset_output_buffer()
+        self.ser.write(my_byte)
+        self.ser.reset_output_buffer()
         # Give the BITSI a moment to process..
         sleep(0.5)
+        
+        self.trigger_ready = True
 
     def send_trigger(self, code: int) -> int:
         """Send trigger code to BITSI
@@ -133,6 +152,11 @@ class ExperimentTrigger(serial.Serial):
             ValueError: Raised if code is not >0 and <255.
         """
         
+        # Check if the trigger has been prepared
+        if not self.trigger_ready:
+            error_msg = f"Please run `prepare_trigger` before running experiment"
+            raise RuntimeError(error_msg)
+        
         # Check that the provided trigger code is in
         # the acceptable range
         if not isinstance(code, int):
@@ -144,7 +168,7 @@ class ExperimentTrigger(serial.Serial):
         my_byte = code.to_bytes(length=1, byteorder="little")
         
         # Write it to the serial port and return
-        return self.write(my_byte)
+        return self.ser.write(my_byte)
 
     def read_response(self) -> int:
         """Read ASCII character from the FORP
@@ -171,9 +195,10 @@ class ExperimentTrigger(serial.Serial):
         Returns:
             int: Response triggern decoded from ASCII to int.
         """
-        response = self.read(1)
+        response = self.ser.read(1)
         return int.from_bytes(response, byteorder="little")
 
     def __del__(self) -> None:
-        self.close()
-        return super().__del__()
+        if not self.ser is None:
+            self.ser.close()
+            del self.ser

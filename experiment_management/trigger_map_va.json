@@ -1,0 +1,7 @@
+{
+    "initial-trigger":1,
+    "start-of-trial":2,
+    "lateral-cue":3,
+    "fixation-grating":4,
+    "driscrimination-grating":5
+}

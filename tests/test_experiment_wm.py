@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 import unittest
+from unittest.mock import MagicMock
 
 from experiment_management.experiment_manager_wm import WorkingMemoryExperimentManager
 from tests.__init__ import log_file
@@ -67,6 +68,14 @@ class TestWorkingMemory(unittest.TestCase):
 
         experiment_manager.load_experiment_data()
         experiment_manager.prepare_psychopy()
+        
+        try:
+            experiment_manager.trigger.prepare_trigger()
+        except Exception as e:
+            logging.info("Caught exception while connecting serial port:\n" + str(e))
+            experiment_manager.trigger.ser = MagicMock()
+            experiment_manager.trigger.ser.write = MagicMock()
+            experiment_manager.trigger.ser.read = MagicMock(return_value=42)
 
         current_trial = experiment_manager.get_current_trial_data()
         stimulus = current_trial.stimulus_condition
@@ -112,6 +121,15 @@ class TestWorkingMemory(unittest.TestCase):
         )
 
         experiment_manager.load_experiment_data()
+        experiment_manager.prepare_psychopy()
+        
+        try:
+            experiment_manager.trigger.prepare_trigger()
+        except Exception as e:
+            logging.info("Caught exception while connecting serial port:\n" + str(e))
+            experiment_manager.trigger.ser = MagicMock()
+            experiment_manager.trigger.ser.write = MagicMock()
+            experiment_manager.trigger.ser.read = MagicMock(return_value=42)
 
         experiment_manager.run_experiment(
             pre_fixation_duration=0.001,

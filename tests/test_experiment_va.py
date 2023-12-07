@@ -1,10 +1,12 @@
 import logging
 from pathlib import Path
 import unittest
+from unittest.mock import MagicMock
 
 from numpy import random
 
 from experiment_management.experiment_manager_va import VisualAttentionExperimentManager
+from experiment_management.experiment_trigger import ExperimentTrigger
 from tests.__init__ import log_file
 
 logging.basicConfig(filename=log_file, level=logging.INFO, filemode="w")
@@ -66,6 +68,14 @@ class TestVisualAttention(unittest.TestCase):
         experiment_manager = VisualAttentionExperimentManager(
             sub=SUB, ses=SES, run=RUN, root=ROOT
         )
+        
+        try:
+            experiment_manager.trigger.prepare_trigger()
+        except Exception as e:
+            logging.info("Caught exception while connecting serial port:\n" + str(e))
+            experiment_manager.trigger.ser = MagicMock()
+            experiment_manager.trigger.ser.write = MagicMock()
+            experiment_manager.trigger.ser.read = MagicMock(return_value=42)
 
         experiment_manager.load_experiment_data()
         experiment_manager.prepare_psychopy()
@@ -89,6 +99,15 @@ class TestVisualAttention(unittest.TestCase):
 
         experiment_manager.load_experiment_data()
         experiment_manager.prepare_psychopy()
+            
+        try:
+            experiment_manager.trigger.prepare_trigger()
+        except Exception as e:
+            logging.info("Caught exception while connecting serial port:\n" + str(e))
+            experiment_manager.trigger.ser = MagicMock()
+            experiment_manager.trigger.ser.write = MagicMock()
+            experiment_manager.trigger.ser.read = MagicMock(return_value=42)
+
 
         for _ in range(len(experiment_manager)):
             current_trial = experiment_manager.get_current_trial_data()
@@ -117,6 +136,15 @@ class TestVisualAttention(unittest.TestCase):
         )
 
         experiment_manager.load_experiment_data()
+        experiment_manager.prepare_psychopy()
+
+        try:
+            experiment_manager.trigger.prepare_trigger()
+        except Exception as e:
+            logging.info("Caught exception while connecting serial port:\n" + str(e))
+            experiment_manager.trigger.ser = MagicMock()
+            experiment_manager.trigger.ser.write = MagicMock()
+            experiment_manager.trigger.ser.read = MagicMock(return_value=42)
 
         experiment_manager.run_experiment(
             instruction_duration=0.001,
