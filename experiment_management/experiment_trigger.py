@@ -146,6 +146,34 @@ class ExperimentTrigger(serial.Serial):
         # Write it to the serial port and return
         return self.write(my_byte)
 
+    def read_response(self) -> int:
+        """Read ASCII character from the FORP
+        
+        The fiber optic response pads (FORP) sends
+        triggers to the BITSI which can be read as
+        ASCII characters. The ASCII-encoded response
+        trigger is converted to an integer and returned.
+        
+        See also the FORP documentation:
+        https://intranet.donders.ru.nl/index.php?id=lab-response-fiberoptic&no_cache=1
+        
+        The expected values are define by the button mapping:
+        button color | finger      | buttonbox | press character | release character | ASCII code 
+        blue         | right index | right     | a               | A                 | 97 / 65
+        yellow       | right middle| right     | b               | B                 | 98 / 66
+        green        | right ring  | right     | c               | C                 | 99 / 67
+        red          | right pink  | right     | d               | D                 | 100 / 68
+        blue         | left index  | left      | e               | E                 | 101 / 69
+        yellow       | left middle | left      | f               | F                 | 102 / 70
+        green        | left ring   | left      | g               | G                 | 103 / 71
+        red          | left pink   | left      | h               | H                 | 104 / 72 
+        
+        Returns:
+            int: Response triggern decoded from ASCII to int.
+        """
+        response = self.read(1)
+        return int.from_bytes(response, byteorder="little")
+
     def __del__(self) -> None:
         self.close()
         return super().__del__()
