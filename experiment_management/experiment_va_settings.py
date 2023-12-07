@@ -7,7 +7,9 @@ TASKS = ("left", "right")
 REPETITIONS = 4
 TASK_CONGRUENCE = (1, 0)
 
-INSTRUCTION_DURATION = 3.7 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
+REST_DURATION = 3 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
+FIXATION_PRE_DURATION = .2 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
+INSTRUCTION_DURATION = .5 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
 FIXATION_DURATION_RANGE = (1, 2.5)
 GRATING_POS_LEFT = (-400, -300)
 GRATING_POS_RIGHT = (400, -300)
@@ -22,7 +24,9 @@ RESPONSE_KEYS = ("down", "up")  # first is incongruent, second is congruent
 RESPONSE_TIMEOUT = .75
 
 expected_max_single_trial_duration = (
-    INSTRUCTION_DURATION
+    REST_DURATION
+    + FIXATION_PRE_DURATION
+    + INSTRUCTION_DURATION
     + (FIXATION_DURATION_RANGE[0] + FIXATION_DURATION_RANGE[1]) / 2
     + RESPONSE_TIMEOUT
 )

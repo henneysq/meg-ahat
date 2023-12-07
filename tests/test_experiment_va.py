@@ -76,6 +76,7 @@ class TestVisualAttention(unittest.TestCase):
             experiment_manager.trigger.ser = MagicMock()
             experiment_manager.trigger.ser.write = MagicMock()
             experiment_manager.trigger.ser.read = MagicMock(return_value=42)
+            experiment_manager.trigger.trigger_ready = True
 
         experiment_manager.load_experiment_data()
         experiment_manager.prepare_psychopy()
@@ -88,8 +89,6 @@ class TestVisualAttention(unittest.TestCase):
             grating_side=attention_side,
             grating_congruence=task_congruence,
             stimulus=stimulus,
-            instruction_duration=0.1,
-            fixation_duration_range=(0.05, 0.1),
         )
 
     def test_6_run_experiment_externally(self):
@@ -107,6 +106,7 @@ class TestVisualAttention(unittest.TestCase):
             experiment_manager.trigger.ser = MagicMock()
             experiment_manager.trigger.ser.write = MagicMock()
             experiment_manager.trigger.ser.read = MagicMock(return_value=42)
+            experiment_manager.trigger.trigger_ready = True
 
 
         for _ in range(len(experiment_manager)):
@@ -118,9 +118,11 @@ class TestVisualAttention(unittest.TestCase):
                 grating_side=attention_side,
                 grating_congruence=task_congruence,
                 stimulus=stimulus,
-                instruction_duration=0.001,
-                fixation_duration_range=(0.0005, 0.001),
-                response_timeout=0.001,
+                rest_duration=0.0001,
+                fixation_pre_duration=0.0001,
+                instruction_duration=0.0001,
+                fixation_duration_range=(0.0001, 0.0001),
+                response_timeout=0.0001,
             )
             experiment_manager.set_current_trial_response(
                 response=response, reaction_time=reaction_time
@@ -147,9 +149,25 @@ class TestVisualAttention(unittest.TestCase):
             experiment_manager.trigger.ser.read = MagicMock(return_value=42)
 
         experiment_manager.run_experiment(
+            rest_duration=0.0001,
+            fixation_pre_duration=0.0001,
             instruction_duration=0.001,
             fixation_duration_range=(0.0005, 0.001),
             response_timeout=0.001,
         )
 
         self.assertTrue(experiment_manager.end_of_experiment_flag)
+
+    def test_8_check_unique_triggers(self):
+        experiment_manager = VisualAttentionExperimentManager(
+            sub=SUB, ses=SES, run=RUN, root=ROOT
+        )
+        
+        trigger_names = []
+        trigger_values = []
+        for k, v in experiment_manager.trigger_map.items():
+            trigger_names.append(k)
+            trigger_values.append(v)
+            
+        self.assertEqual(len(trigger_names), len(set(trigger_names)))
+        self.assertEqual(len(trigger_values), len(set(trigger_values)))

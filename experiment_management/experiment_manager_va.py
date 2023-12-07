@@ -146,6 +146,8 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         grating_side: str,
         grating_congruence: bool,
         stimulus: str,
+        rest_duration: float | None = None,
+        fixation_pre_duration: float | None = None,
         instruction_duration: float | None = None,
         fixation_duration_range: tuple[float, float] | None = None,
         response_timeout: float | None = None,
@@ -153,7 +155,11 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         if not self.psychopy_ready:
             raise RuntimeError("Please use `prepare_psychopy` before running " + \
                 "a trial")
-            
+        
+        if rest_duration is None:
+            rest_duration = evas.REST_DURATION
+        if fixation_pre_duration is None:
+            fixation_pre_duration = evas.FIXATION_PRE_DURATION
         if instruction_duration is None:
             instruction_duration = evas.INSTRUCTION_DURATION
         if fixation_duration_range is None:
@@ -161,32 +167,44 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         if response_timeout is None:
             response_timeout = evas.RESPONSE_TIMEOUT
 
+        # Display rest period fixation mark
+        self.fixation_mark.draw()
+        self.window.flip()
+        self.trigger.send_trigger(self.trigger_map["rest"])
+        self.core.wait(rest_duration)
+        
+        # Light Stimulus turns on
+        self.trigger.send_trigger(self.trigger_map["start-of-trial"])
+        # ledc_left.set_stimuli(stimulus)
+        # ledc_right.set_stimuli(stimulus)
+        self.core.wait(fixation_pre_duration)
+        
+        # Give lateral attention cue
         msg = self.text_stim(self.window, text=ATT_SIDE_INSTRUCTION_MAP[grating_side])
         msg.draw()
         self.window.flip()
+        self.trigger.send_trigger(self.trigger_map["lateral-cue"])
         self.core.wait(instruction_duration)
 
-        # Fixation point
+        # Show fixation grating
         self.fixation_grating.ori = evas.GRATING_ORIENTATION_MAP[grating_side]
         self.fixation_grating.draw()
         self.window.flip()
-
-        # Stimulus
-        # ledc_left.set_stimuli(stimulus)
-        # ledc_right.set_stimuli(stimulus)
-
+        self.trigger.send_trigger(self.trigger_map["fixation-grating"])
+        # TODO: IMPLEMENT CATCH TRIALS AND EARLY STOP
         self.core.wait(random.uniform(*fixation_duration_range))
 
-        self.fixation_grating.draw()
+        # Show detection (discrimination) grating along with fixation grating
         self.detection_grating.pos = evas.GRATING_POSITION_MAP[grating_side]
         if grating_congruence:
             detection_grating_orientation = self.fixation_grating.ori
         else:
             detection_grating_orientation = self.fixation_grating.ori * -1
-
         self.detection_grating.ori = detection_grating_orientation
         self.detection_grating.draw()
+        self.fixation_grating.draw()
         self.window.flip()
+        self.trigger.send_trigger(self.trigger_map["driscrimination-grating"])
 
         correct_key = evas.RESPONSE_KEYS[grating_congruence]
 
