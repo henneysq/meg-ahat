@@ -194,6 +194,9 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         # TODO: IMPLEMENT CATCH TRIALS AND EARLY STOP
         self.core.wait(random.uniform(*fixation_duration_range))
 
+        # Flush trigger serial input buffer and keyboard presses
+        self.trigger.ser.reset_input_buffer()
+        self.keyboard.clearEvents()
         # Show detection (discrimination) grating along with fixation grating
         self.detection_grating.pos = evas.GRATING_POSITION_MAP[grating_side]
         if grating_congruence:
@@ -208,13 +211,15 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
 
         correct_key = evas.RESPONSE_KEYS[grating_congruence]
 
-        self.keyboard.getKeys()
+        # self.keyboard.getKeys()
         return self._get_response_and_reaction_time(
             self.keyboard, self.window, correct_key, response_timeout
         )
 
     def run_experiment(
         self,
+        rest_duration: float | None = None,
+        fixation_pre_duration: float | None = None,
         instruction_duration: float | None = None,
         fixation_duration_range: tuple[float, float] | None = None,
         response_timeout: float | None = None,
@@ -246,6 +251,8 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
                 grating_side=attention_side,
                 grating_congruence=task_congruence,
                 stimulus=stimulus,
+                rest_duration=rest_duration,
+                fixation_pre_duration=fixation_pre_duration,
                 instruction_duration=instruction_duration,
                 fixation_duration_range=fixation_duration_range,
                 response_timeout=response_timeout,
@@ -255,3 +262,7 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
             )
             self.increment_trial_progress()
             self.save_experiment_data()
+
+        self.trigger.send_trigger(
+            self.trigger_map["final-trigger"]
+        )

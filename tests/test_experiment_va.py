@@ -75,7 +75,7 @@ class TestVisualAttention(unittest.TestCase):
             logging.info("Caught exception while connecting serial port:\n" + str(e))
             experiment_manager.trigger.ser = MagicMock()
             experiment_manager.trigger.ser.write = MagicMock()
-            experiment_manager.trigger.ser.read = MagicMock(return_value=42)
+            experiment_manager.trigger.ser.read = MagicMock(return_value=bytearray([0]))
             experiment_manager.trigger.trigger_ready = True
 
         experiment_manager.load_experiment_data()
@@ -105,7 +105,7 @@ class TestVisualAttention(unittest.TestCase):
             logging.info("Caught exception while connecting serial port:\n" + str(e))
             experiment_manager.trigger.ser = MagicMock()
             experiment_manager.trigger.ser.write = MagicMock()
-            experiment_manager.trigger.ser.read = MagicMock(return_value=42)
+            experiment_manager.trigger.ser.read = MagicMock(return_value=bytearray([42]))
             experiment_manager.trigger.trigger_ready = True
 
 
@@ -146,7 +146,7 @@ class TestVisualAttention(unittest.TestCase):
             logging.info("Caught exception while connecting serial port:\n" + str(e))
             experiment_manager.trigger.ser = MagicMock()
             experiment_manager.trigger.ser.write = MagicMock()
-            experiment_manager.trigger.ser.read = MagicMock(return_value=42)
+            experiment_manager.trigger.ser.read = MagicMock(return_value=bytearray([42]))
 
         experiment_manager.run_experiment(
             rest_duration=0.0001,

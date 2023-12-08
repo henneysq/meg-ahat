@@ -360,26 +360,40 @@ class ExperimentManagerBase:
                 and reaction time [s] is the delay of response. If no response is given within
                 `timeout`, (-1, `timeout`) is returned.
         """
-        t_start = time.time()
         keyboard.clock.reset()
+        t_start = time.time()
+        key = ""
         while 1:
-            #rt = time.time() - t_start
-            if time.time() - t_start > timeout:
+            t = time.time() - t_start
+            if t > timeout:
                 return -1, timeout
 
-            keys = keyboard.getKeys()
-            if len(keys) > 0:
-                for key_ in keys:
-                    k = key_.value
-                    rt = key_.rt
+            key_response = keyboard.getKeys()
+            forp_response = self.trigger.read_response()
+            if forp_response != 0:
+                rt = t
+                key = forp_response
+                return key, rt
+            elif len(key_response) > 0:
+                key_ = key_response[0]
+                key = key_.value
+                rt = key_.rt
+                if key == "q":
+                    window.close()
+                    exit()
+                return key, rt
+                    
+                # for key_ in key_response:
+                #     k = key_.value
+                #     rt = key_.rt
 
-                    if k == target_key:
-                        return 1, rt
-                    elif k == "q":
-                        window.close()
-                        exit()
-                    else:
-                        return 0, rt
+                #     if k == target_key:
+                #         return 1, rt
+                #     elif k == "q":
+                #         window.close()
+                #         exit()
+                #     else:
+                #         return 0, rt
                     
     def _prepare_psychopy(self):
         """Prepare the psychopy dependencies
