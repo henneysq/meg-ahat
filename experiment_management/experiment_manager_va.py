@@ -218,7 +218,7 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         self.core.wait(fixation_pre_duration)
 
         # Give lateral attention cue
-        msg = self.text_stim(self.window, text=ATT_SIDE_INSTRUCTION_MAP[grating_side])
+        msg = self.text_stim(self.window, text=ATT_SIDE_INSTRUCTION_MAP[grating_side], height=100)
         msg.draw()
         self.window.flip()
         self.trigger.send_trigger(self.trigger_map["lateral-cue"])
@@ -265,8 +265,8 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
             response = -2
             rt = -2
 
-        self.lc_left.turn_off()
-        self.lc_right.turn_off()
+        self.lc_right.display_preset(self.stimulation_map["con"])
+        self.lc_left.display_preset(self.stimulation_map["con"])
         return response, rt
 
     def run_experiment(
@@ -300,6 +300,10 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
 
         self.prepare_psychopy()
         self.trigger.prepare_trigger()
+        
+        # Show a start screen
+        self.show_start_screen()
+        
         # Send a trigger for the start of the experiment
         self.trigger.send_trigger(self.trigger_map["initial-trigger"])
 

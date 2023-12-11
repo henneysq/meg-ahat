@@ -21,9 +21,9 @@ class ExperimentManagerBase:
     SERIAL_DEVICES: Final[tuple[str]] = ("FT32TWG5", "FT51RDMI")
 
     stimulation_map = {
-        "con": 1,
+        "con":3,
         "isf": 2,
-        "strobe": 3
+        "strobe": 1
     }
 
     def __init__(
@@ -301,12 +301,18 @@ class ExperimentManagerBase:
                 + f"of the experiment {self.__len__()}."
             )
 
+        # Check if end of a block is reached
+        if self._check_end_of_block():
+            self.show_pause_screen()
+            self.show_start_screen()
+            
         # Increment trial progress number
         self.__trial_progress += 1
 
         # Check whether the end of the experiment is reached,
         # and return flag for the status
         self._check_end_of_trial()
+        
 
     def get_current_trial_data(self) -> pd.Series:
         """Get the conditions for the current trial
@@ -428,7 +434,7 @@ class ExperimentManagerBase:
         self.text_stim = TextStim
         self.window = Window(size=(1920, 1200), fullscr=True, units="pix")
         self.keyboard = keyboard.Keyboard()
-        self.fixation_mark = TextStim(self.window, text=f"+")
+        self.fixation_mark = TextStim(self.window, text=f"+", height=100)
 
     def prepare_led_controllers(self):
         self.lc_left.connect_and_restore_defaults()
@@ -464,6 +470,45 @@ class ExperimentManagerBase:
         """
         raise RuntimeError(error_msg)
         
+    def _check_end_of_block(self):
+        current_block = self.experiment_data.at[self.trial_progress, "block_number"]
+        next_block = self.experiment_data.at[self.trial_progress + 1, "block_number"]
+        
+        return current_block != next_block
+
+    def show_pause_screen(self):
+        self.window.flip()
+        self.core.wait(2)
+        
+        current_block = self.experiment_data.at[self.trial_progress, "block_number"]
+        total_blocks = self.experiment_data.at[len(self) - 1, 'block_number'] + 1
+        print(current_block)
+        msg = self.text_stim(
+            self.window,
+            text=f"Completed block number: {current_block + 1}" + \
+                f" of {total_blocks}",
+            height=50
+        )
+        msg.draw()
+        self.window.flip()
+        self.core.wait(2)
+        
+    def show_start_screen(self, timeout: int = 60*10):
+        msg = self.text_stim(self.window, text="Press any button to continue", height=50)
+        msg.draw()
+        self.window.flip()
+        
+        response, _ = self._get_response_and_reaction_time(self.keyboard, self.window, timeout)
+        if response == -1:
+            raise TimeoutError("Took too long to respond, exiting.")
+
+        self.window.flip()
+        self.core.wait(1)
+        msg = self.text_stim(self.window, text="Starting", height=50)
+        msg.draw()
+        self.window.flip()
+        self.core.wait(2)
+    
     def __len__(self) -> int:
         return self.experiment_data.__len__()
 

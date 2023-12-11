@@ -12,7 +12,7 @@ PRESENTED_SUM_CORRECTNESS = (0, 1)
 REPETITIONS = 2
 # Number of blocks. All of the above is repeated once
 # in each block (though randomised for each block)
-BLOCKS = 5
+BLOCKS = 6
 
 ## Trial design parameters
 # Duration of fixation prior to task

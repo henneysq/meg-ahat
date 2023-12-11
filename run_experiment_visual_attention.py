@@ -5,7 +5,7 @@ from experiment_management.experiment_manager_va import VisualAttentionExperimen
 # Experiment variables
 SUB = 42
 SES = 42
-RUN = 42
+RUN = 1
 
 ROOT = Path(__file__).parent / "data"
 

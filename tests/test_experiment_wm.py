@@ -163,3 +163,22 @@ class TestWorkingMemory(unittest.TestCase):
             
         self.assertEqual(len(trigger_names), len(set(trigger_names)))
         self.assertEqual(len(trigger_values), len(set(trigger_values)))
+
+    def test_9_realtime_test(self):
+        experiment_manager = WorkingMemoryExperimentManager(
+            sub=SUB, ses=SES, run=RUN, root=ROOT
+        )
+
+        experiment_manager = check_is_trigger_connected(experiment_manager)
+        experiment_manager = check_is_lc_connected(experiment_manager)
+        
+        experiment_manager.load_experiment_data()
+        experiment_manager.prepare_psychopy()
+
+        try:
+            experiment_manager.run_experiment()
+        except SystemExit:
+            return
+        
+        self.assertTrue(experiment_manager.end_of_experiment_flag)
+

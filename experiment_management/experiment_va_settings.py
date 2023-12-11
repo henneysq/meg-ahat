@@ -1,4 +1,4 @@
-BLOCKS = 5
+BLOCKS = 6
 STIMULI = ("con", "isf", "strobe")
 TASKS = ("left", "right")
 # OBS: With representation of both congruent and incongruent tasks for
@@ -7,9 +7,9 @@ TASKS = ("left", "right")
 REPETITIONS = 4
 TASK_CONGRUENCE = (1, 0)
 
-REST_DURATION = 3 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
-FIXATION_PRE_DURATION = .2 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
-INSTRUCTION_DURATION = .5 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
+REST_DURATION = 2.5 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
+FIXATION_PRE_DURATION = .001 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
+INSTRUCTION_DURATION = 1 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
 FIXATION_DURATION_RANGE = (1, 2.5)
 GRATING_POS_LEFT = (-700, -400)
 GRATING_POS_RIGHT = (700, -400)
@@ -21,7 +21,7 @@ GRATING_ORIENTATION_MAP = {
 }
 
 RESPONSE_KEYS = ("down", "up")  # first is incongruent, second is congruent
-RESPONSE_TIMEOUT = .75
+RESPONSE_TIMEOUT = 1
 
 expected_max_single_trial_duration = (
     REST_DURATION

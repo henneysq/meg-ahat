@@ -101,16 +101,6 @@ class TestVisualAttention(unittest.TestCase):
         
         experiment_manager.load_experiment_data()
         experiment_manager.prepare_psychopy()
-            
-        try:
-            experiment_manager.trigger.prepare_trigger()
-        except Exception as e:
-            logging.info("Caught exception while connecting serial port:\n" + str(e))
-            experiment_manager.trigger.ser = MagicMock()
-            experiment_manager.trigger.ser.write = MagicMock()
-            experiment_manager.trigger.ser.read = MagicMock(return_value=bytearray([42]))
-            experiment_manager.trigger.trigger_ready = True
-
 
         for _ in range(len(experiment_manager)):
             current_trial = experiment_manager.get_current_trial_data()
@@ -178,7 +168,6 @@ class TestVisualAttention(unittest.TestCase):
         self.assertEqual(len(trigger_names), len(set(trigger_names)))
         self.assertEqual(len(trigger_values), len(set(trigger_values)))
 
-
     def test_9_realtime_test(self):
         experiment_manager = VisualAttentionExperimentManager(
             sub=SUB, ses=SES, run=RUN, root=ROOT
@@ -189,14 +178,6 @@ class TestVisualAttention(unittest.TestCase):
         
         experiment_manager.load_experiment_data()
         experiment_manager.prepare_psychopy()
-
-        try:
-            experiment_manager.trigger.prepare_trigger()
-        except Exception as e:
-            logging.info("Caught exception while connecting serial port:\n" + str(e))
-            experiment_manager.trigger.ser = MagicMock()
-            experiment_manager.trigger.ser.write = MagicMock()
-            experiment_manager.trigger.ser.read = MagicMock(return_value=bytearray([42]))
 
         try:
             experiment_manager.run_experiment()

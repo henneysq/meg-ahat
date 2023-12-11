@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 
 from experiment_management.experiment_manager_base import ExperimentManagerBase
+from tests.util import check_is_trigger_connected
 
 SUB = 42
 SES = 42
@@ -105,3 +106,24 @@ class TestExperimentBase(unittest.TestCase):
                 "completed": completed,
             }
         )
+
+    def test_start_screen(self):
+        experiment_manager = ExperimentManagerBase(
+            sub=SUB, ses=SES, run=RUN
+        )
+        
+        experiment_manager = check_is_trigger_connected(experiment_manager)
+        experiment_manager.prepare_psychopy()
+        experiment_manager.show_start_screen()
+
+    def test_pause_screen(self):
+        data = self._make_exp_dat()
+        experiment_manager = ExperimentManagerBase(
+            sub=SUB, ses=SES, run=RUN, experiment_data=data
+        )
+        
+        experiment_manager = check_is_trigger_connected(experiment_manager)
+        experiment_manager.prepare_psychopy()
+        
+        experiment_manager.increment_trial_progress()
+        experiment_manager.show_pause_screen()
