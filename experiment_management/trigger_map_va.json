@@ -5,5 +5,8 @@
     "lateral-cue":4,
     "fixation-grating":5,
     "driscrimination-grating":6,
-    "final-trigger":7
+    "response":7,
+    "final-trigger":8,
+    "quick-trial":9,
+    "catch-trial":10
 }

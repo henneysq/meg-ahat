@@ -1,0 +1,10 @@
+{
+    "initial-trigger":1,
+    "rest":2,
+    "start-of-trial":3,
+    "sum":4,
+    "fixation-wait":5,
+    "result":6,
+    "response":7,
+    "final-trigger":8
+}

@@ -16,7 +16,8 @@ BLOCKS = 5
 
 ## Trial design parameters
 # Duration of fixation prior to task
-PRE_FIXATION_DURATION = 3.5 # seconds
+REST_DURATION = 3
+PRE_FIXATION_DURATION = .5 # seconds
 # Duration for which the WM task is presented
 WM_TASK_DURATION = 5 # seconds
 # Duration range between task and response

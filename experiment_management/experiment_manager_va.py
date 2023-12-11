@@ -9,43 +9,60 @@ from pandas import DataFrame
 from .experiment_manager_base import ExperimentManagerBase
 from . import experiment_va_settings as evas
 
-ATT_SIDE_INSTRUCTION_MAP = {
-    "left": "<- <- <-",
-    "right": "-> -> ->"
-}
+ATT_SIDE_INSTRUCTION_MAP = {"left": "<- <- <-", "right": "-> -> ->"}
+
 
 class VisualAttentionExperimentManager(ExperimentManagerBase):
-    def __init__(self, sub: int | str, ses: int | str, run: int | str, experiment_data: DataFrame | None = None, trial_progress: int = 0, root: str | Path | None = None) -> None:
+    def __init__(
+        self,
+        sub: int | str,
+        ses: int | str,
+        run: int | str,
+        experiment_data: DataFrame | None = None,
+        trial_progress: int = 0,
+        root: str | Path | None = None,
+    ) -> None:
         super().__init__(sub, ses, run, experiment_data, trial_progress, root)
-        
+
         # Load the trigger values
         trigger_map_file = Path(__file__).parent / "trigger_map_va.json"
         with open(trigger_map_file) as json_file:
             self.trigger_map = json.load(json_file)
-            
 
     def prepare_psychopy(self) -> None:
         """Prepare the psychopy dependencies
-        
+
         Psychopy runs some unwanted code at import
         which we would like to avoid, so we move the
         imports to runtime, requiring this function to
         be run prior to running experiment.
         """
         from psychopy.visual import grating
-        
+
         # Import the dependencies shared by experiments
         self._prepare_psychopy()
-            
+
         self.fixation_grating = grating.GratingStim(
-            self.window, tex="sin", mask="gauss", units="pix", contrast=1, sf=0.05, size=300
+            self.window,
+            tex="sin",
+            mask="gauss",
+            units="pix",
+            contrast=1,
+            sf=0.02,
+            size=300,
         )
         self.detection_grating = grating.GratingStim(
-            self.window, tex="sin", mask="gauss", units="pix", contrast=1, sf=0.05, size=300
+            self.window,
+            tex="sin",
+            mask="gauss",
+            units="pix",
+            contrast=1,
+            sf=0.02,
+            size=300,
         )
-        
+
         self.psychopy_ready = True
-        
+
     def _make_and_save_experiment_data(self) -> DataFrame:
         # Experiment-specific subroutine that overwrites the
         # ExperimentManagerBase._make_and_save_experiment_data method
@@ -152,33 +169,54 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         fixation_duration_range: tuple[float, float] | None = None,
         response_timeout: float | None = None,
     ):
-        if not self.psychopy_ready:
-            raise RuntimeError("Please use `prepare_psychopy` before running " + \
-                "a trial")
-        
-        if rest_duration is None:
-            rest_duration = evas.REST_DURATION
-        if fixation_pre_duration is None:
-            fixation_pre_duration = evas.FIXATION_PRE_DURATION
-        if instruction_duration is None:
-            instruction_duration = evas.INSTRUCTION_DURATION
-        if fixation_duration_range is None:
-            fixation_duration_range = evas.FIXATION_DURATION_RANGE
-        if response_timeout is None:
-            response_timeout = evas.RESPONSE_TIMEOUT
+        # Check that all dependencies are available
+        # at runtime
+        self._check_dependencies_ready()
 
+        # Check which input parameters where given,
+        # and set None values to defaults
+        (
+            rest_duration,
+            fixation_pre_duration,
+            instruction_duration,
+            fixation_duration_range,
+            response_timeout,
+        ) = self._check_experiment_duration_args(
+            rest_duration,
+            fixation_pre_duration,
+            instruction_duration,
+            fixation_duration_range,
+            response_timeout,
+        )
+
+        # Sample to check if quick-trial or catch-trial
+        quick_trial = False
+        catch_trial = False
+        if random.uniform(low=0, high=1) < .05:
+            quick_trial = True
+            self.trigger.send_trigger(self.trigger_map["quick-trial"])
+        if not quick_trial and random.uniform(low=0, high=1) < .05:
+            catch_trial = True
+            self.trigger.send_trigger(self.trigger_map["catch-trial"])
+        # Wait atleast 30 ms (trigger pulse length) to
+        # avoid staircasing from the previous pulse
+        if quick_trial or catch_trial:
+            self.core.wait(0.03)
+        
         # Display rest period fixation mark
         self.fixation_mark.draw()
         self.window.flip()
         self.trigger.send_trigger(self.trigger_map["rest"])
         self.core.wait(rest_duration)
-        
+
         # Light Stimulus turns on
         self.trigger.send_trigger(self.trigger_map["start-of-trial"])
-        # ledc_left.set_stimuli(stimulus)
-        # ledc_right.set_stimuli(stimulus)
+        self.lc_left.display_preset(self.stimulation_map[stimulus])
+        self.lc_right.display_preset(self.stimulation_map[stimulus])
+        self.lc_left.turn_on()
+        self.lc_right.turn_on()
         self.core.wait(fixation_pre_duration)
-        
+
         # Give lateral attention cue
         msg = self.text_stim(self.window, text=ATT_SIDE_INSTRUCTION_MAP[grating_side])
         msg.draw()
@@ -191,30 +229,45 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         self.fixation_grating.draw()
         self.window.flip()
         self.trigger.send_trigger(self.trigger_map["fixation-grating"])
-        # TODO: IMPLEMENT CATCH TRIALS AND EARLY STOP
-        self.core.wait(random.uniform(*fixation_duration_range))
-
+        # Set the duration of the fixation; varys depending on
+        # whether it is a quick-trial or not
+        if quick_trial:
+            self.core.wait(random.uniform(low=.5, high=1))
+        else:
+            if catch_trial:
+                self.core.wait(fixation_duration_range[1])
+            else:
+                self.core.wait(random.uniform(*fixation_duration_range))
+                
         # Flush trigger serial input buffer and keyboard presses
+        # prior to presenting the task
         self.trigger.ser.reset_input_buffer()
         self.keyboard.clearEvents()
+        
         # Show detection (discrimination) grating along with fixation grating
-        self.detection_grating.pos = evas.GRATING_POSITION_MAP[grating_side]
-        if grating_congruence:
-            detection_grating_orientation = self.fixation_grating.ori
+        if not catch_trial:
+            self.detection_grating.pos = evas.GRATING_POSITION_MAP[grating_side]
+            if grating_congruence:
+                detection_grating_orientation = self.fixation_grating.ori
+            else:
+                detection_grating_orientation = self.fixation_grating.ori * -1
+            self.detection_grating.ori = detection_grating_orientation
+            self.detection_grating.draw()
+            self.fixation_grating.draw()
+            self.window.flip()
+            self.trigger.send_trigger(self.trigger_map["driscrimination-grating"])
+
+            response, rt = self._get_response_and_reaction_time(
+                self.keyboard, self.window, response_timeout
+            )
+            self.trigger.send_trigger(self.trigger_map["response"])
         else:
-            detection_grating_orientation = self.fixation_grating.ori * -1
-        self.detection_grating.ori = detection_grating_orientation
-        self.detection_grating.draw()
-        self.fixation_grating.draw()
-        self.window.flip()
-        self.trigger.send_trigger(self.trigger_map["driscrimination-grating"])
+            response = -2
+            rt = -2
 
-        correct_key = evas.RESPONSE_KEYS[grating_congruence]
-
-        # self.keyboard.getKeys()
-        return self._get_response_and_reaction_time(
-            self.keyboard, self.window, correct_key, response_timeout
-        )
+        self.lc_left.turn_off()
+        self.lc_right.turn_off()
+        return response, rt
 
     def run_experiment(
         self,
@@ -224,23 +277,31 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         fixation_duration_range: tuple[float, float] | None = None,
         response_timeout: float | None = None,
     ):
+        # Check if experiment data has been created or loaded
         if self.experiment_data is None:
             error_msg = f"Please set `experiment_data` before running experiment"
             raise RuntimeError(error_msg)
         
+        # Check which input parameters where given,
+        # and set None values to defaults
+        (
+            rest_duration,
+            fixation_pre_duration,
+            instruction_duration,
+            fixation_duration_range,
+            response_timeout,
+        ) = self._check_experiment_duration_args(
+            rest_duration,
+            fixation_pre_duration,
+            instruction_duration,
+            fixation_duration_range,
+            response_timeout,
+        )
+
         self.prepare_psychopy()
         self.trigger.prepare_trigger()
         # Send a trigger for the start of the experiment
-        self.trigger.send_trigger(
-            self.trigger_map["initial-trigger"]
-        )
-
-        if instruction_duration is None:
-            instruction_duration = evas.INSTRUCTION_DURATION
-        if fixation_duration_range is None:
-            fixation_duration_range = evas.FIXATION_DURATION_RANGE
-        if response_timeout is None:
-            response_timeout = evas.RESPONSE_TIMEOUT
+        self.trigger.send_trigger(self.trigger_map["initial-trigger"])
 
         for _ in range(len(self) - self.trial_progress):
             current_trial = self.get_current_trial_data()
@@ -257,12 +318,41 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
                 fixation_duration_range=fixation_duration_range,
                 response_timeout=response_timeout,
             )
+            
             self.set_current_trial_response(
                 response=response, reaction_time=reaction_time
             )
             self.increment_trial_progress()
             self.save_experiment_data()
 
-        self.trigger.send_trigger(
-            self.trigger_map["final-trigger"]
+        self.trigger.send_trigger(self.trigger_map["final-trigger"])
+
+    def _check_experiment_duration_args(
+        self,
+        rest_duration: float,
+        fixation_pre_duration: float,
+        instruction_duration: float,
+        fixation_duration_range: tuple[float, float],
+        response_timeout: float,
+    ) -> tuple:
+        # Check which input parameters where given,
+        # and set None values to defaults
+        
+        if rest_duration is None:
+            rest_duration = evas.REST_DURATION
+        if fixation_pre_duration is None:
+            fixation_pre_duration = evas.FIXATION_PRE_DURATION
+        if instruction_duration is None:
+            instruction_duration = evas.INSTRUCTION_DURATION
+        if fixation_duration_range is None:
+            fixation_duration_range = evas.FIXATION_DURATION_RANGE
+        if response_timeout is None:
+            response_timeout = evas.RESPONSE_TIMEOUT
+
+        return (
+            rest_duration,
+            fixation_pre_duration,
+            instruction_duration,
+            fixation_duration_range,
+            response_timeout,
         )

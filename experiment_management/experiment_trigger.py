@@ -47,12 +47,12 @@ class ExperimentTrigger():
     def __init__(
         self,
         pulse_dur: int = 30,
-        port: str = "COM1",
+        port: str = "/dev/tty.usbserial-A9007URC",
         baudrate: int = 115200,
         bytesize: int = serial.EIGHTBITS,
         parity: str = serial.PARITY_NONE,
         stopbits: float = serial.STOPBITS_ONE,
-        timeout: float = 1,
+        timeout: float = 0,
         write_timeout: float = 2,
     ) -> None:
         """Initialise the serial parent object and re-configure BITSI
@@ -107,7 +107,7 @@ class ExperimentTrigger():
         
         if not self.ser.is_open:
             msg = "Could not open serial port."
-            raise ConnectionAbortedError(msg)
+            raise serial.SerialException(msg)
         
         if pulse_dur is None:
             pulse_dur = self.pulse_dur
@@ -130,7 +130,11 @@ class ExperimentTrigger():
         self.ser.write(my_byte)
         self.ser.reset_output_buffer()
         # Give the BITSI a moment to process..
-        sleep(0.5)
+        sleep(3)
+        
+        # Flush the input and output buffers
+        self.ser.reset_input_buffer()
+        self.ser.reset_output_buffer()
         
         self.trigger_ready = True
 

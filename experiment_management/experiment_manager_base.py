@@ -1,11 +1,12 @@
 from __future__ import annotations
 from pathlib import Path
-import time
+from typing import Final
 
 import pandas as pd
 from numpy import random
 
 from .experiment_trigger import ExperimentTrigger
+from .dondersLEDController import DondersLEDController
 
 class ExperimentManagerBase:
     """Base class for experiment management
@@ -15,8 +16,15 @@ class ExperimentManagerBase:
 
     See `ExperimentOneManager` class
 
-
     """
+    
+    SERIAL_DEVICES: Final[tuple[str]] = ("FT32TWG5", "FT51RDMI")
+
+    stimulation_map = {
+        "con": 1,
+        "isf": 2,
+        "strobe": 3
+    }
 
     def __init__(
         self,
@@ -48,15 +56,23 @@ class ExperimentManagerBase:
 
         self.__root = root
 
+        # Create a BIDS-like string for the run
         self.__bids_kv_pair_str = (
             f"sub-{self.sub:03}_ses-{self.ses:03}_run-{self.run_:03}"
         )
         
-        self.trigger = ExperimentTrigger()
-
+        # Set initial flags for experiment control
+        # at runtime
         self.end_of_experiment_flag = False
-        
         self.psychopy_ready = False
+        self.led_controllers_ready = False
+        
+        # Define trigger
+        self.trigger = ExperimentTrigger()
+        
+        # Define LED controllers
+        self.lc_left = DondersLEDController(port=self.SERIAL_DEVICES[0])
+        self.lc_right = DondersLEDController(port=self.SERIAL_DEVICES[1])
 
     @property
     def sub(self):
@@ -346,12 +362,11 @@ class ExperimentManagerBase:
         return root
 
     def _get_response_and_reaction_time(
-        self, keyboard, window, target_key, timeout=5
+        self, keyboard, window, timeout=5
     ) -> tuple[int, float]:
         """Evaluate keyboard input and reaction time
 
         Args:
-            target_key (_type_): Target key press.
             timeout (int, optional): How long to wait for input. Defaults to 5.
 
         Returns:
@@ -360,41 +375,38 @@ class ExperimentManagerBase:
                 and reaction time [s] is the delay of response. If no response is given within
                 `timeout`, (-1, `timeout`) is returned.
         """
+        self.timer.reset()
         keyboard.clock.reset()
-        t_start = time.time()
-        key = ""
+        
+        # Wait for keyboard or button box (FORP) input
         while 1:
-            t = time.time() - t_start
-            if t > timeout:
-                return -1, timeout
-
+            # Set timestamp
+            t = self.timer.getTime()
+            # Read the keyboard buffer
             key_response = keyboard.getKeys()
+            # Read the BITSI buffer
             forp_response = self.trigger.read_response()
+            
+            # BITSI returns 0 while empty; check that
+            # the response is not 0
             if forp_response != 0:
-                rt = t
-                key = forp_response
-                return key, rt
+                # Return the timestamp and response
+                return forp_response, t
+            
+            # The keyboard buffer returns and
+            # empty iterable when empty; check if contains anything
+            # it contains any
             elif len(key_response) > 0:
                 key_ = key_response[0]
-                key = key_.value
-                rt = key_.rt
-                if key == "q":
+                if key_.value == "q":
                     window.close()
                     exit()
-                return key, rt
-                    
-                # for key_ in key_response:
-                #     k = key_.value
-                #     rt = key_.rt
-
-                #     if k == target_key:
-                #         return 1, rt
-                #     elif k == "q":
-                #         window.close()
-                #         exit()
-                #     else:
-                #         return 0, rt
-                    
+                return key_.value, key_.rt
+            
+            # Check if we have superceded the timout durations
+            if t > timeout:
+                return -1, -1
+                        
     def _prepare_psychopy(self):
         """Prepare the psychopy dependencies
         
@@ -412,15 +424,46 @@ class ExperimentManagerBase:
         from psychopy import core
         
         self.core = core
+        self.timer = self.core.Clock()
         self.text_stim = TextStim
-        self.window = Window(size=(1200, 1200*.75), fullscr=False, units="pix")
+        self.window = Window(size=(1920, 1200), fullscr=True, units="pix")
         self.keyboard = keyboard.Keyboard()
         self.fixation_mark = TextStim(self.window, text=f"+")
+
+    def prepare_led_controllers(self):
+        self.lc_left.connect_and_restore_defaults()
+        self.lc_right.connect_and_restore_defaults()
+        
+        # Check that the sides were allocated to
+        # the corect variable; otherwise switch them
+        if self.lc_left.device_side == "left":
+            if not self.lc_right.device_side == "right":
+                raise ConnectionError("Devices are same side")
+        else:
+            self.lc_left, self.lc_right = self.lc_right, self.lc_left
+            
+        self.led_controllers_ready = True
         
     def prepare_psychopy(self):
         self._prepare_psychopy()
         self.psychopy_ready = True
 
+    def _check_dependencies_ready(self):
+        if all((
+            self.psychopy_ready,
+            self.trigger.trigger_ready,
+            self.led_controllers_ready
+        )):
+            return
+        
+        error_msg = f"""
+        Not all dependencies were ready at runtime:
+        `self.psychopy_ready`: {self.psychopy_ready},
+        `self.trigger.trigger_ready`: {self.trigger.trigger_ready},
+        `self.led_controllers_ready`: {self.led_controllers_ready}
+        """
+        raise RuntimeError(error_msg)
+        
     def __len__(self) -> int:
         return self.experiment_data.__len__()
 

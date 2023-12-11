@@ -1,29 +1,47 @@
 from __future__ import annotations
 from itertools import product
+from pathlib import Path
+import json
 
 from numpy import random
-import pandas as pd
+from pandas import DataFrame
 
 from .experiment_manager_base import ExperimentManagerBase
 from . import experiment_wm_settings as ewms
 
+
 class WorkingMemoryExperimentManager(ExperimentManagerBase):
-        
+    def __init__(
+        self,
+        sub: int | str,
+        ses: int | str,
+        run: int | str,
+        experiment_data: DataFrame | None = None,
+        trial_progress: int = 0,
+        root: str | Path | None = None,
+    ) -> None:
+        super().__init__(sub, ses, run, experiment_data, trial_progress, root)
+
+        # Load the trigger values
+        trigger_map_file = Path(__file__).parent / "trigger_map_wm.json"
+        with open(trigger_map_file) as json_file:
+            self.trigger_map = json.load(json_file)
+
     def prepare_psychopy(self) -> None:
         """Prepare the psychopy dependencies
-        
+
         Psychopy runs some unwanted code at import
         which we would like to avoid, so we move the
         imports to runtime, requiring this function to
         be run prior to running experiment.
         """
-        
+
         # Import the dependencies shared by experiments
         self._prepare_psychopy()
-        
+
         self.psychopy_ready = True
-        
-    def _make_and_save_experiment_data(self) -> pd.DataFrame:
+
+    def _make_and_save_experiment_data(self) -> DataFrame:
         # Experiment-specific subroutine that overwrites the
         # ExperimentManagerBase._make_and_save_experiment_data method
         stimuli = ewms.STIMULI
@@ -94,7 +112,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         completed = [0] * total_trials
 
         # Create the experiment data table as DataFrame
-        experiment_data = pd.DataFrame.from_dict(
+        experiment_data = DataFrame.from_dict(
             {
                 "trial_number": trial_numbers,
                 "block_number": block_numbers,
@@ -130,28 +148,40 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         fixation_duration_range: tuple[float, float] | None = None,
         response_timeout: float | None = None,
     ):
-        if not self.psychopy_ready:
-            raise RuntimeError("Please use `prepare_psychopy` before running " + \
-                "a trial")
+        # Check that all dependencies are available
+        # at runtime
+        self._check_dependencies_ready()
 
-        if pre_fixation_duration is None:
-            pre_fixation_duration = ewms.PRE_FIXATION_DURATION
-        if wm_task_duration is None:
-            wm_task_duration = ewms.WM_TASK_DURATION
-        if fixation_duration_range is None:
-            fixation_duration_range = ewms.FIXATION_DURATION_RANGE
-        if response_timeout is None:
-            response_timeout = ewms.RESPONSE_TIMEOUT
-
+        # Check which input parameters where given,
+        # and set None values to defaults
+        (
+            pre_fixation_duration,
+            wm_task_duration,
+            fixation_duration_range,
+            response_timeout,
+        ) = self._check_experiment_duration_args(
+            pre_fixation_duration,
+            wm_task_duration,
+            fixation_duration_range,
+            response_timeout,
+        )
+        
+        # Look up the difficulty of the arithmetic task
+        # and sample two corresponding integers.
+        # At this point sample also an offset in a
+        # suitible range compared to the sum
         if task_difficulty == "low":
             values = random.randint(low=1, high=9, size=2)
             offset = random.randint(low=1, high=2)
         elif task_difficulty == "high":
             values = random.randint(low=100, high=900, size=2)
             offset = random.randint(low=10, high=20)
-        
+
+        # Calculate their true sum
         true_sum = values[0] + values[1]
-        
+
+        # Define the presented sum with or without
+        # the addition of the offset
         if presented_sum_correctness:
             presented_sum = true_sum
         else:
@@ -160,33 +190,54 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         # Fixation point
         self.fixation_mark.draw()
         self.window.flip()
+        self.trigger.send_trigger(self.trigger_map["rest"])
         self.core.wait(wm_task_duration)
 
-        # Stimulus
-        # ledc_left.set_stimuli(stimulus)
-        # ledc_right.set_stimuli(stimulus)
-
-        msg = self.text_stim(self.window, text=f" {values[0]}\n+{values[1]}", languageStyle="RTL", height=100)
+        # Light Stimulus turns on
+        self.lc_left.display_preset(self.stimulation_map[stimulus])
+        self.lc_right.display_preset(self.stimulation_map[stimulus])
+        self.lc_left.turn_on()
+        self.lc_right.turn_on()
+        self.trigger.send_trigger(self.trigger_map["start-of-trial"])
+        self.core.wait(pre_fixation_duration)
+        
+        # Present the sum
+        msg = self.text_stim(
+            self.window,
+            text=f" {values[0]}\n+{values[1]}",
+            languageStyle="RTL",
+            height=100,
+        )
         msg.draw()
         self.window.flip()
+        self.trigger.send_trigger(self.trigger_map["sum"])
         self.core.wait(wm_task_duration)
 
         # Fixation point
         self.fixation_mark.draw()
         self.window.flip()
+        self.trigger.send_trigger(self.trigger_map["fixation-wait"])
         self.core.wait(random.uniform(*fixation_duration_range))
         # core.wait(instruction_duration)
 
+        # Flush trigger serial input buffer and keyboard presses
+        # prior to presenting the task
+        self.trigger.ser.reset_input_buffer()
+        self.keyboard.clearEvents()
+        
+        # Present the result (correct or not)
         msg = self.text_stim(self.window, text=f"{presented_sum}", height=100)
         msg.draw()
+        self.trigger.send_trigger(self.trigger_map["result"])
         self.window.flip()
 
-        correct_key = ewms.RESPONSE_KEYS[presented_sum_correctness]
-
-        self.keyboard.getKeys()
-        return self._get_response_and_reaction_time(
-            self.keyboard, self.window, correct_key, response_timeout
+        # Read the response and reaction time
+        reponse, rt = self._get_response_and_reaction_time(
+            self.keyboard, self.window, response_timeout
         )
+        self.lc_left.turn_off()
+        self.lc_right.turn_off()
+        return reponse, rt
 
     def run_experiment(
         self,
@@ -195,20 +246,29 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         fixation_duration_range: tuple[float, float] | None = None,
         response_timeout: float | None = None,
     ):
+        # Check if experiment data has been created or loaded
         if self.experiment_data is None:
             error_msg = f"Please set `experiment_data` before running experiment"
             raise RuntimeError(error_msg)
-        
-        self.prepare_psychopy()
 
-        if pre_fixation_duration is None:
-            pre_fixation_duration = ewms.PRE_FIXATION_DURATION
-        if wm_task_duration is None:
-            wm_task_duration = ewms.WM_TASK_DURATION
-        if fixation_duration_range is None:
-            fixation_duration_range = ewms.FIXATION_DURATION_RANGE
-        if response_timeout is None:
-            response_timeout = ewms.RESPONSE_TIMEOUT
+        # Check which input parameters where given,
+        # and set None values to defaults
+        (
+            pre_fixation_duration,
+            wm_task_duration,
+            fixation_duration_range,
+            response_timeout,
+        ) = self._check_experiment_duration_args(
+            pre_fixation_duration,
+            wm_task_duration,
+            fixation_duration_range,
+            response_timeout,
+        )
+
+        self.prepare_psychopy()
+        self.trigger.prepare_trigger()
+        # Send a trigger for the start of the experiment
+        self.trigger.send_trigger(self.trigger_map["initial-trigger"])
 
         for _ in range(len(self) - self.trial_progress):
             current_trial = self.get_current_trial_data()
@@ -228,3 +288,29 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
             )
             self.increment_trial_progress()
             self.save_experiment_data()
+
+    def _check_experiment_duration_args(
+        self,
+        pre_fixation_duration: float | None = None,
+        wm_task_duration: float | None = None,
+        fixation_duration_range: tuple[float, float] | None = None,
+        response_timeout: float | None = None,
+    ):
+        # Check which input parameters where given,
+        # and set None values to defaults
+        
+        if pre_fixation_duration is None:
+            pre_fixation_duration = ewms.PRE_FIXATION_DURATION
+        if wm_task_duration is None:
+            wm_task_duration = ewms.WM_TASK_DURATION
+        if fixation_duration_range is None:
+            fixation_duration_range = ewms.FIXATION_DURATION_RANGE
+        if response_timeout is None:
+            response_timeout = ewms.RESPONSE_TIMEOUT
+
+        return (
+            pre_fixation_duration,
+            wm_task_duration,
+            fixation_duration_range,
+            response_timeout,
+        )

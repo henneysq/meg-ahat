@@ -1,5 +1,37 @@
 from __future__ import annotations
+import logging
 from pathlib import Path
+from unittest.mock import MagicMock
+
+from serial import SerialException
+
+from experiment_management.experiment_manager_base import ExperimentManagerBase
+
+def check_is_trigger_connected(experiment_manager: ExperimentManagerBase):
+    
+    try:
+        experiment_manager.trigger.prepare_trigger()
+    except SerialException as e:
+        logging.info("Caught exception while connecting serial port:\n" + str(e))
+        logging.info("Continuing with mock trigger")
+        experiment_manager.trigger.ser = MagicMock()
+        experiment_manager.trigger.ser.write = MagicMock()
+        experiment_manager.trigger.ser.read = MagicMock(return_value=bytearray([0]))
+        experiment_manager.trigger.trigger_ready = True
+        
+    return experiment_manager
+
+def check_is_lc_connected(experiment_manager: ExperimentManagerBase):
+    try:
+        experiment_manager.prepare_led_controllers()
+    except ConnectionError as e:
+        logging.info("Caught exception while connecting LED controllers:\n" + str(e))
+        logging.info("Continuing with mock LED controllers")
+        experiment_manager.lc_left = MagicMock()
+        experiment_manager.lc_right = MagicMock()
+        experiment_manager.led_controllers_ready = True    
+    
+    return experiment_manager
 
 def set_git_executable_path(path = None) -> bool:
     import os

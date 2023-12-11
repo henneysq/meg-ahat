@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 from numpy import random
 
 from experiment_management.experiment_manager_va import VisualAttentionExperimentManager
-from experiment_management.experiment_trigger import ExperimentTrigger
+from tests.util import check_is_lc_connected, check_is_trigger_connected
 from tests.__init__ import log_file
 
 logging.basicConfig(filename=log_file, level=logging.INFO, filemode="w")
@@ -69,14 +69,8 @@ class TestVisualAttention(unittest.TestCase):
             sub=SUB, ses=SES, run=RUN, root=ROOT
         )
         
-        try:
-            experiment_manager.trigger.prepare_trigger()
-        except Exception as e:
-            logging.info("Caught exception while connecting serial port:\n" + str(e))
-            experiment_manager.trigger.ser = MagicMock()
-            experiment_manager.trigger.ser.write = MagicMock()
-            experiment_manager.trigger.ser.read = MagicMock(return_value=bytearray([0]))
-            experiment_manager.trigger.trigger_ready = True
+        experiment_manager = check_is_trigger_connected(experiment_manager)
+        experiment_manager = check_is_lc_connected(experiment_manager)
 
         experiment_manager.load_experiment_data()
         experiment_manager.prepare_psychopy()
@@ -85,17 +79,26 @@ class TestVisualAttention(unittest.TestCase):
         attention_side = current_trial.task
         stimulus = current_trial.stimulus_condition
         task_congruence = current_trial.task_congruence
-        _ = experiment_manager.execute_current_trial(
+        response, rt = experiment_manager.execute_current_trial(
             grating_side=attention_side,
             grating_congruence=task_congruence,
             stimulus=stimulus,
         )
+
+        experiment_manager.set_current_trial_response(
+            response=response, reaction_time=rt
+        )
+        experiment_manager.increment_trial_progress()
+        experiment_manager.save_experiment_data()
 
     def test_6_run_experiment_externally(self):
         experiment_manager = VisualAttentionExperimentManager(
             sub=SUB, ses=SES, run=RUN, root=ROOT
         )
 
+        experiment_manager = check_is_trigger_connected(experiment_manager)
+        experiment_manager = check_is_lc_connected(experiment_manager)
+        
         experiment_manager.load_experiment_data()
         experiment_manager.prepare_psychopy()
             
@@ -137,6 +140,9 @@ class TestVisualAttention(unittest.TestCase):
             sub=SUB, ses=SES, run=RUN, root=ROOT
         )
 
+        experiment_manager = check_is_trigger_connected(experiment_manager)
+        experiment_manager = check_is_lc_connected(experiment_manager)
+        
         experiment_manager.load_experiment_data()
         experiment_manager.prepare_psychopy()
 
@@ -171,3 +177,31 @@ class TestVisualAttention(unittest.TestCase):
             
         self.assertEqual(len(trigger_names), len(set(trigger_names)))
         self.assertEqual(len(trigger_values), len(set(trigger_values)))
+
+
+    def test_9_realtime_test(self):
+        experiment_manager = VisualAttentionExperimentManager(
+            sub=SUB, ses=SES, run=RUN, root=ROOT
+        )
+
+        experiment_manager = check_is_trigger_connected(experiment_manager)
+        experiment_manager = check_is_lc_connected(experiment_manager)
+        
+        experiment_manager.load_experiment_data()
+        experiment_manager.prepare_psychopy()
+
+        try:
+            experiment_manager.trigger.prepare_trigger()
+        except Exception as e:
+            logging.info("Caught exception while connecting serial port:\n" + str(e))
+            experiment_manager.trigger.ser = MagicMock()
+            experiment_manager.trigger.ser.write = MagicMock()
+            experiment_manager.trigger.ser.read = MagicMock(return_value=bytearray([42]))
+
+        try:
+            experiment_manager.run_experiment()
+        except SystemExit:
+            return
+        
+        self.assertTrue(experiment_manager.end_of_experiment_flag)
+

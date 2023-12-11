@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from experiment_management.experiment_manager_wm import WorkingMemoryExperimentManager
+from tests.util import check_is_lc_connected, check_is_trigger_connected
 from tests.__init__ import log_file
 
 logging.basicConfig(filename=log_file, level=logging.INFO, filemode="w")
@@ -66,16 +67,22 @@ class TestWorkingMemory(unittest.TestCase):
             sub=SUB, ses=SES, run=RUN, root=ROOT
         )
 
+        experiment_manager = check_is_trigger_connected(experiment_manager)
+        experiment_manager = check_is_lc_connected(experiment_manager)
+        
         experiment_manager.load_experiment_data()
         experiment_manager.prepare_psychopy()
         
         try:
             experiment_manager.trigger.prepare_trigger()
+            import time; time.sleep(3)
+            experiment_manager.trigger.ser.reset_input_buffer()
         except Exception as e:
             logging.info("Caught exception while connecting serial port:\n" + str(e))
             experiment_manager.trigger.ser = MagicMock()
             experiment_manager.trigger.ser.write = MagicMock()
-            experiment_manager.trigger.ser.read = MagicMock(return_value=42)
+            experiment_manager.trigger.ser.read = MagicMock(return_value=bytearray([0]))
+            experiment_manager.trigger.trigger_ready = True
 
         current_trial = experiment_manager.get_current_trial_data()
         stimulus = current_trial.stimulus_condition
@@ -120,6 +127,9 @@ class TestWorkingMemory(unittest.TestCase):
             sub=SUB, ses=SES, run=RUN, root=ROOT
         )
 
+        experiment_manager = check_is_trigger_connected(experiment_manager)
+        experiment_manager = check_is_lc_connected(experiment_manager)
+        
         experiment_manager.load_experiment_data()
         experiment_manager.prepare_psychopy()
         
@@ -139,3 +149,17 @@ class TestWorkingMemory(unittest.TestCase):
         )
 
         self.assertTrue(experiment_manager.end_of_experiment_flag)
+
+    def test_8_check_unique_triggers(self):
+        experiment_manager = WorkingMemoryExperimentManager(
+            sub=SUB, ses=SES, run=RUN, root=ROOT
+        )
+        
+        trigger_names = []
+        trigger_values = []
+        for k, v in experiment_manager.trigger_map.items():
+            trigger_names.append(k)
+            trigger_values.append(v)
+            
+        self.assertEqual(len(trigger_names), len(set(trigger_names)))
+        self.assertEqual(len(trigger_values), len(set(trigger_values)))
