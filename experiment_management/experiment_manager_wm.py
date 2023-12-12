@@ -267,6 +267,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         )
 
         self.prepare_psychopy()
+        self.prepare_led_controllers()
         self.trigger.prepare_trigger()
         # Send a trigger for the start of the experiment
         self.trigger.send_trigger(self.trigger_map["initial-trigger"])

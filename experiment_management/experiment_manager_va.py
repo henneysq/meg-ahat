@@ -299,6 +299,7 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         )
 
         self.prepare_psychopy()
+        self.prepare_led_controllers()
         self.trigger.prepare_trigger()
         
         # Show a start screen
