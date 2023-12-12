@@ -9,7 +9,7 @@ from experiment_management.experiment_trigger import ExperimentTrigger
 class TestTrigger(unittest.TestCase):
     
     def test_trigger(self):
-        trigger = ExperimentTrigger(port="/dev/tty.usbserial-A9007URC")
+        trigger = ExperimentTrigger()
         # trigger_mock.write = MagicMock()
         
         
@@ -42,7 +42,7 @@ class TestTrigger(unittest.TestCase):
         #     trigger.ser.read = MagicMock(return_value=bytearray([42]))
 
     def test_receive(self):
-        trigger = ExperimentTrigger(port="/dev/tty.usbserial-A9007URC")
+        trigger = ExperimentTrigger()
         # trigger_mock.write = MagicMock()
         
         
