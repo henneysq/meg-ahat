@@ -48,7 +48,7 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
             mask="gauss",
             units="pix",
             contrast=1,
-            sf=0.02,
+            sf=0.01,
             size=300,
         )
         self.detection_grating = grating.GratingStim(
@@ -57,8 +57,8 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
             mask="gauss",
             units="pix",
             contrast=1,
-            sf=0.02,
-            size=300,
+            sf=0.01,
+            size=500,
         )
 
         self.psychopy_ready = True
