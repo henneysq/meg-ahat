@@ -1,10 +1,11 @@
 import unittest
 from pathlib import Path
+import time
 
 import pandas as pd
 
 from experiment_management.experiment_manager_base import ExperimentManagerBase
-from tests.util import check_is_trigger_connected
+from tests.util import check_is_trigger_connected, check_is_lc_connected
 
 SUB = 42
 SES = 42
@@ -127,3 +128,25 @@ class TestExperimentBase(unittest.TestCase):
         
         experiment_manager.increment_trial_progress()
         experiment_manager.show_pause_screen()
+        
+    def test_led_controller(self):
+        experiment_manager = ExperimentManagerBase(
+            sub=SUB, ses=SES, run=RUN
+        )
+        
+        experiment_manager = check_is_lc_connected(experiment_manager)
+        
+        experiment_manager.lc_left.display_preset(3)
+        experiment_manager.lc_right.display_preset(3)
+        experiment_manager.lc_left.turn_on()
+        experiment_manager.lc_right.turn_on()
+        time.sleep(3)
+        
+        experiment_manager.lc_left.display_preset(2)
+        experiment_manager.lc_right.display_preset(2)
+        time.sleep(3)
+        
+        experiment_manager.lc_left.display_preset(1)
+        experiment_manager.lc_right.display_preset(1)
+        time.sleep(3)
+        
