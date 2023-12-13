@@ -150,3 +150,20 @@ class TestExperimentBase(unittest.TestCase):
         experiment_manager.lc_right.display_preset(1)
         time.sleep(3)
         
+    def test_scout_lights(self):
+        experiment_manager = ExperimentManagerBase(
+            sub=SUB, ses=SES, run=RUN
+        )
+        
+        experiment_manager = check_is_lc_connected(experiment_manager)
+        
+        experiment_manager.lc_left.display_preset(3)
+        experiment_manager.lc_left.turn_on()
+        time.sleep(3)
+        experiment_manager.lc_left.turn_off()
+        
+        experiment_manager.lc_right.display_preset(3)
+        experiment_manager.lc_right.turn_on()
+        time.sleep(3)
+        experiment_manager.lc_right.turn_off()
+        
