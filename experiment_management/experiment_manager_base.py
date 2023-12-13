@@ -60,6 +60,9 @@ class ExperimentManagerBase:
         self.__bids_kv_pair_str = (
             f"sub-{self.sub:03}_ses-{self.ses:03}_run-{self.run_:03}"
         )
+        # experiment data file names
+        self.exp_dat_fname = f"{self.bids_kv_pair_str}_experimentdata.csv"
+        self.exp_dat_mandump_fname = f"{self.bids_kv_pair_str}_experimentdata_managerdump.csv"
         
         # Set initial flags for experiment control
         # at runtime
@@ -148,7 +151,7 @@ class ExperimentManagerBase:
         root = self._check_root(root)
 
         # Specify path to outputted experiment data file
-        file_path = Path(root / f"{self.bids_kv_pair_str}_experimentdata.csv")
+        file_path = Path(root / self.exp_dat_fname)
 
         # If no seed is provided, hash the unique experiment metadata
         if rng_seed is None:
@@ -202,12 +205,30 @@ class ExperimentManagerBase:
         # Check if root is given now or at instantiation
         root = self._check_root(root)
 
-        file_path = Path(root / f"{self.bids_kv_pair_str}_experimentdata.csv")
+        file_path = Path(root / self.exp_dat_fname)
         self.experiment_data = pd.read_csv(file_path)
+        # Check if the experiment data has been previously
+        # been dumped by manager with responses
+        self._update_manager_dump()
 
         if self.root is None:
             self.__root = root
 
+    def _update_manager_dump(self):
+        path = Path(self.root / self.exp_dat_mandump_fname)
+        if not path.exists():
+            return
+        
+        for n in range(10):
+            fname = f"{path.stem}_{n:02}.csv"
+            tmp_path = self.root / fname
+            if not tmp_path.exists():
+                self.exp_dat_mandump_fname = fname
+                return
+            
+        raise FileExistsError("Too many existing versions of " + \
+            "the manager dump file exists (=10).")
+            
     def save_experiment_data(self, root: str | Path | None = None) -> None:
         """Save experiment data with updated progress.
 
@@ -225,12 +246,9 @@ class ExperimentManagerBase:
 
         # Check if root is given now or at instantiation
         root = self._check_root(root)
-        file_path = Path(
-            root / f"{self.bids_kv_pair_str}_experimentdata_managerdump.csv"
-        )
 
         # Save the experiment data to csv
-        self.experiment_data.to_csv(file_path, index=False)
+        self.experiment_data.to_csv(self.root / self.exp_dat_mandump_fname, index=False)
 
     def set_trial_progress(self, trial_progress: int) -> None:
         """Set trial progress (i.e. trial number)
@@ -317,8 +335,7 @@ class ExperimentManagerBase:
             
         # Increment trial progress number
         self.__trial_progress += 1
-
-        
+      
     def get_current_trial_data(self) -> pd.Series:
         """Get the conditions for the current trial
 

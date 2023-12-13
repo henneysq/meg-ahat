@@ -167,3 +167,49 @@ class TestExperimentBase(unittest.TestCase):
         time.sleep(3)
         experiment_manager.lc_right.turn_off()
         
+    def test_manager_dump_versions(self):
+        experiment_manager = ExperimentManagerBase(
+            sub=SUB, ses=SES, run=RUN, root=ROOT
+        )
+        mdump_path = Path(
+            experiment_manager.root /
+            experiment_manager.exp_dat_mandump_fname
+        )
+        mdump_path.touch()
+        
+        experiment_manager._update_manager_dump()
+        new_mdump_path = Path(
+            experiment_manager.root /
+            experiment_manager.exp_dat_mandump_fname
+        )
+        new_mdump_path.touch()
+        
+        self.assertTrue(mdump_path.exists())
+        self.assertTrue(new_mdump_path.exists())
+        self.assertIsNot(mdump_path.absolute(), new_mdump_path.absolute())
+        
+        new_mdump_path.unlink()
+        self.assertFalse(new_mdump_path.exists())
+        
+        experiment_manager = ExperimentManagerBase(
+            sub=SUB, ses=SES, run=RUN, root=ROOT
+        )
+        
+        paths = []
+        with self.assertRaises(FileExistsError):
+            for n in range(11):
+                fname = f"{experiment_manager.exp_dat_mandump_fname[:-4]}_{n:02}.csv"
+                mdump_path_ = Path(
+                    experiment_manager.root /
+                    fname
+                )
+                mdump_path_.touch()
+                paths.append(mdump_path_)
+                
+            experiment_manager._update_manager_dump()
+        
+        for path in paths:
+            path.unlink()
+        
+        mdump_path.unlink()
+        self.assertFalse(mdump_path.exists())
