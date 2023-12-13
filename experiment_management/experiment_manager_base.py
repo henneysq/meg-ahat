@@ -263,11 +263,11 @@ class ExperimentManagerBase:
 
         # Check whether the end of the experiment is reached,
         # and return flag for the status
-        self._check_end_of_trial()
+        self._check_end_of_experiment()
 
-    def _check_end_of_trial(self) -> None:
+    def _check_end_of_experiment(self) -> None:
         # Check whether the end of the experiment is reached
-        self.end_of_experiment_flag = self.__trial_progress >= self.__len__()
+        self.end_of_experiment_flag = self.__trial_progress == self.__len__() - 1
 
         if self.__trial_progress > self.__len__():
             raise RuntimeError(
@@ -275,6 +275,8 @@ class ExperimentManagerBase:
                 + f"Trial progress reached {self.__trial_progress}, which is beyond "
                 + f"the experiment length of {self.__len__()}"
             )
+            
+        return self.end_of_experiment_flag
 
     def increment_trial_progress(self) -> None:
         """Increment trial progress (i.e. trial number)
@@ -290,7 +292,7 @@ class ExperimentManagerBase:
             bool: Flag that indicates whether the end of the experiment
                 has been reached.
         """
-
+        
         # Set current trial to completed in the experiment data
         self.experiment_data.at[self.trial_progress, "completed"] = 1
 
@@ -301,6 +303,13 @@ class ExperimentManagerBase:
                 + f"of the experiment {self.__len__()}."
             )
 
+        # Check whether the end of the experiment is reached,
+        # and return flag for the status
+        self._check_end_of_experiment()
+        if self.end_of_experiment_flag:
+            self.show_pause_screen()
+            return
+        
         # Check if end of a block is reached
         if self._check_end_of_block():
             self.show_pause_screen()
@@ -309,11 +318,7 @@ class ExperimentManagerBase:
         # Increment trial progress number
         self.__trial_progress += 1
 
-        # Check whether the end of the experiment is reached,
-        # and return flag for the status
-        self._check_end_of_trial()
         
-
     def get_current_trial_data(self) -> pd.Series:
         """Get the conditions for the current trial
 
@@ -471,6 +476,8 @@ class ExperimentManagerBase:
         raise RuntimeError(error_msg)
         
     def _check_end_of_block(self):
+        if self.end_of_experiment_flag:
+            return 0
         current_block = self.experiment_data.at[self.trial_progress, "block_number"]
         next_block = self.experiment_data.at[self.trial_progress + 1, "block_number"]
         
