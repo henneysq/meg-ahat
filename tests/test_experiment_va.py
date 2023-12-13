@@ -68,6 +68,8 @@ class TestVisualAttention(unittest.TestCase):
         experiment_manager = VisualAttentionExperimentManager(
             sub=SUB, ses=SES, run=RUN, root=ROOT
         )
+        experiment_manager.show_start_screen = MagicMock()
+        experiment_manager.show_pause_screen = MagicMock()
         
         experiment_manager = check_is_trigger_connected(experiment_manager)
         experiment_manager = check_is_lc_connected(experiment_manager)
@@ -95,6 +97,8 @@ class TestVisualAttention(unittest.TestCase):
         experiment_manager = VisualAttentionExperimentManager(
             sub=SUB, ses=SES, run=RUN, root=ROOT
         )
+        experiment_manager.show_start_screen = MagicMock()
+        experiment_manager.show_pause_screen = MagicMock()
 
         experiment_manager = check_is_trigger_connected(experiment_manager)
         experiment_manager = check_is_lc_connected(experiment_manager)
@@ -129,6 +133,8 @@ class TestVisualAttention(unittest.TestCase):
         experiment_manager = VisualAttentionExperimentManager(
             sub=SUB, ses=SES, run=RUN, root=ROOT
         )
+        experiment_manager.show_start_screen = MagicMock()
+        experiment_manager.show_pause_screen = MagicMock()
 
         experiment_manager = check_is_trigger_connected(experiment_manager)
         experiment_manager = check_is_lc_connected(experiment_manager)
@@ -153,6 +159,7 @@ class TestVisualAttention(unittest.TestCase):
         )
 
         self.assertTrue(experiment_manager.end_of_experiment_flag)
+        self.assertTrue(experiment_manager.experiment_data.at[len(experiment_manager) - 1, "completed"])
 
     def test_8_check_unique_triggers(self):
         experiment_manager = VisualAttentionExperimentManager(
@@ -185,4 +192,3 @@ class TestVisualAttention(unittest.TestCase):
             return
         
         self.assertTrue(experiment_manager.end_of_experiment_flag)
-
