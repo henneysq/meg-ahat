@@ -1,7 +1,9 @@
-import unittest
 from pathlib import Path
 import time
+import unittest
+from unittest.mock import MagicMock
 
+from dotmap import DotMap
 import pandas as pd
 
 from experiment_management.experiment_manager_base import ExperimentManagerBase
@@ -109,13 +111,27 @@ class TestExperimentBase(unittest.TestCase):
         )
 
     def test_start_screen(self):
+        from dotmap import DotMap
         experiment_manager = ExperimentManagerBase(
             sub=SUB, ses=SES, run=RUN
         )
         
         experiment_manager = check_is_trigger_connected(experiment_manager)
         experiment_manager.prepare_psychopy()
-        experiment_manager.show_start_screen()
+        try:
+            experiment_manager.show_start_screen(timeout=10)
+        except TimeoutError:
+            pass
+        
+        with self.assertRaises(TimeoutError):
+            experiment_manager.show_start_screen(timeout=.01)
+        
+        with self.assertRaises(SystemExit):
+            key = DotMap()
+            key.value = "q"
+            return_val = [key,]
+            experiment_manager.keyboard.getKeys = MagicMock(return_value=return_val)
+            experiment_manager.show_start_screen(timeout=1)
 
     def test_pause_screen(self):
         data = self._make_exp_dat()
@@ -213,3 +229,4 @@ class TestExperimentBase(unittest.TestCase):
         
         mdump_path.unlink()
         self.assertFalse(mdump_path.exists())
+        
