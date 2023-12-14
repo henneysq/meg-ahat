@@ -52,6 +52,9 @@ class TestVisualAttention(unittest.TestCase):
         experiment_manager = VisualAttentionExperimentManager(
             sub=SUB, ses=SES, run=RUN, root=ROOT
         )
+        
+        experiment_manager.show_start_screen = MagicMock()
+        experiment_manager.show_pause_screen = MagicMock()
 
         experiment_manager.load_experiment_data()
 

@@ -67,6 +67,9 @@ class TestWorkingMemory(unittest.TestCase):
             sub=SUB, ses=SES, run=RUN, root=ROOT
         )
 
+        experiment_manager.show_start_screen = MagicMock()
+        experiment_manager.show_pause_screen = MagicMock()
+        
         experiment_manager = check_is_trigger_connected(experiment_manager)
         experiment_manager = check_is_lc_connected(experiment_manager)
         
@@ -127,6 +130,9 @@ class TestWorkingMemory(unittest.TestCase):
             sub=SUB, ses=SES, run=RUN, root=ROOT
         )
 
+        experiment_manager.show_start_screen = MagicMock()
+        experiment_manager.show_pause_screen = MagicMock()
+        
         experiment_manager = check_is_trigger_connected(experiment_manager)
         experiment_manager = check_is_lc_connected(experiment_manager)
         
