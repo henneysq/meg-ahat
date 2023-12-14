@@ -174,7 +174,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
             values = random.randint(low=1, high=9, size=2)
             offset = random.randint(low=1, high=2)
         elif task_difficulty == "high":
-            values = random.randint(low=100, high=900, size=2)
+            values = random.randint(low=100, high=400, size=2)
             offset = random.randint(low=10, high=20)
 
         # Calculate their true sum
