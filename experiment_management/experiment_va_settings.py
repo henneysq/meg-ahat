@@ -4,12 +4,12 @@ TASKS = ("left", "right")
 # OBS: With representation of both congruent and incongruent tasks for
 # each stimulus/attenention pair, the number of repetitions is always a
 # factor two higher than this int
-REPETITIONS = 4
+REPETITIONS = 2
 TASK_CONGRUENCE = (1, 0)
 
-REST_DURATION = 2.5 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
+REST_DURATION = 2 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
 FIXATION_PRE_DURATION = .001 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
-INSTRUCTION_DURATION = 1 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
+INSTRUCTION_DURATION = 1.5 # Currently rest period (3 s) + fixation cross (.2 s) + lateral cue (.5 s)
 FIXATION_DURATION_RANGE = (1, 2.5)
 GRATING_POS_LEFT = (-700, -400)
 GRATING_POS_RIGHT = (700, -400)
