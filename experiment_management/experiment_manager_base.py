@@ -270,7 +270,7 @@ class ExperimentManagerBase:
         if trial_progress < 0:
             raise ValueError(arg_error_msg)
 
-        if trial_progress > self.__len__():
+        if trial_progress >= self.__len__():
             error_msg = (
                 f"Got value `trial_progress` of {trial_progress}, which"
                 + f" or exceeds that length of the experiment, {self.__len__()}"
@@ -287,7 +287,7 @@ class ExperimentManagerBase:
         # Check whether the end of the experiment is reached
         self.end_of_experiment_flag = self.__trial_progress == self.__len__() - 1
 
-        if self.__trial_progress > self.__len__():
+        if self.__trial_progress >= self.__len__():
             raise RuntimeError(
                 "Trial progress overshoot:\n"
                 + f"Trial progress reached {self.__trial_progress}, which is beyond "
