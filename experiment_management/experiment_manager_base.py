@@ -403,6 +403,11 @@ class ExperimentManagerBase:
                 and reaction time [s] is the delay of response. If no response is given within
                 `timeout`, (-1, `timeout`) is returned.
         """
+        # Flush trigger serial input buffer and keyboard presses
+        # prior to checking inputs
+        self.trigger.ser.reset_input_buffer()
+        self.keyboard.clearEvents()
+        
         self.timer.reset()
         keyboard.clock.reset()
         
@@ -518,13 +523,17 @@ class ExperimentManagerBase:
         self.core.wait(2)
         
     def show_start_screen(self, timeout: int = 60*10):
-        msg = self.text_stim(self.window, text="Press any button to continue", height=50)
+        msg = self.text_stim(self.window, text="Press right index finger to continue", height=50)
         msg.draw()
         self.window.flip()
         
-        response, _ = self._get_response_and_reaction_time(self.keyboard, self.window, timeout)
-        if response == -1:
-            raise TimeoutError("Took too long to respond, exiting.")
+        self.timer.reset()
+        while self.timer.getTime() < timeout:
+            response, _ = self._get_response_and_reaction_time(self.keyboard, self.window, timeout)
+            if response == -1:
+                raise TimeoutError("Took too long to respond, exiting.")
+            if response == 97 or response == "left":
+                break
 
         self.window.flip()
         self.core.wait(1)

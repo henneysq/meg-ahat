@@ -238,11 +238,6 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
                 self.core.wait(fixation_duration_range[1])
             else:
                 self.core.wait(random.uniform(*fixation_duration_range))
-                
-        # Flush trigger serial input buffer and keyboard presses
-        # prior to presenting the task
-        self.trigger.ser.reset_input_buffer()
-        self.keyboard.clearEvents()
         
         # Show detection (discrimination) grating along with fixation grating
         if not catch_trial:

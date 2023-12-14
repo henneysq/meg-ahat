@@ -219,11 +219,6 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         self.trigger.send_trigger(self.trigger_map["fixation-wait"])
         self.core.wait(random.uniform(*fixation_duration_range))
         # core.wait(instruction_duration)
-
-        # Flush trigger serial input buffer and keyboard presses
-        # prior to presenting the task
-        self.trigger.ser.reset_input_buffer()
-        self.keyboard.clearEvents()
         
         # Present the result (correct or not)
         msg = self.text_stim(self.window, text=f"{presented_sum}", height=100)
