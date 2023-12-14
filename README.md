@@ -39,7 +39,7 @@ Note that the proprietary `libLEDController` package is not publicly available.
 
 ### Portable-Git for DCCN MEG presentation PC
 
-Git is not installed on the DCCN MEG presentation PC, which is why the path to a (portable) Git executable can be set with `util.set_git_executable_path`. Some additional GitPython wrappers are also contained in `util`.
+Git is not installed on the DCCN MEG presentation PC, which is why the path to a (portable) Git executable can be set with [`util.set_git_executable_path`](tests/util.py#L36). Some additional GitPython wrappers are also contained in `util`.
 
 
 ## Quick-Start Guide <a name="quickstart"></a>
@@ -51,8 +51,8 @@ Two scripts are provided in the root directory to prepare, run, and save outputs
 ### Experiment Managers <a name="managers"></a>
 
 Control of the two experiments, trial condition randomisation, and progress monitoring is implemented with the two classes 
-[`ExperimentManagerVA`](experiment_management/experiment_manager_va.py#L18)
-and [`ExperimentManagerWM`](experiment_management/experiment_manager_wm.py#L13) for the VA- and WM-experiments, respectively. Internally, they are built on a common parent class [`ExperimentManagerBase`](experiment_management/experiment_manager_base.py#L9) which handles most of the shared data- and experiment flow management.
+[`ExperimentManagerVA`](experiment_management/experiment_manager_va.py#L15)
+and [`ExperimentManagerWM`](experiment_management/experiment_manager_wm.py#L13) for the VA- and WM-experiments, respectively. Internally, they are built on a common parent class [`ExperimentManagerBase`](experiment_management/experiment_manager_base.py#L11) which handles most of the shared data- and experiment flow management.
 
 Experimental settings such as durations, blocks, repetitions etc. are configured manually in [`experiment_va_settings.py`](experiment_management/experiment_va_settings.py) and [`experiment_wm_settings.py`](experiment_management/experiment_wm_settings.py) for the VA and WM experiments, repectively. These are loaded by the manager classes.
 
@@ -68,7 +68,8 @@ It implements a function [`send_trigger`](experiment_management/experiment_trigg
 ## Example of using the ExperimentTrigger
 # Import the experiment trigger
 from experiment_management.experiment_trigger import ExperimentTrigger as ET
-et = ET() # At instatiation, the BITSI is reprogrammed by ET._prepare_trigger
+et = ET() # The BITSI is reprogrammed by the `prepare_trigger` method
+et.prepare_trigger()
 et.send_trigger(65) # 65 is encoded as ASCII to 'A' and written to serial
 ```
 
@@ -121,13 +122,7 @@ When creating experiment data, the conditions are randomised uniquely based on t
 
 ## Testing
 
-A test suite is provided in `tests/` based on the `unittest`-module available in the standard Python library. To run this locally, use.
-
-```sh
-bash run_tests.sh
-```
-
-which simply wraps
+A test suite is provided in `tests/` based on the `unittest`-module available in the standard Python library. To run this locally, use:
 
 ```
 python -m unittest discover tests/
