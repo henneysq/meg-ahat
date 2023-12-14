@@ -39,7 +39,7 @@ class TestExperimentBase(unittest.TestCase):
         experiment_manager.set_trial_progress(2)
         self.assertAlmostEqual(experiment_manager.trial_progress, 2)
 
-        experiment_manager.set_trial_progress(len(experiment_manager))
+        experiment_manager.set_trial_progress(len(experiment_manager) - 1)
         self.assertTrue(experiment_manager.end_of_experiment_flag)
 
         with self.assertRaises(RuntimeError):
@@ -49,7 +49,7 @@ class TestExperimentBase(unittest.TestCase):
             experiment_manager.set_trial_progress(1.1)
 
         with self.assertRaises(ValueError):
-            experiment_manager.set_trial_progress(len(experiment_manager) + 1)
+            experiment_manager.set_trial_progress(len(experiment_manager))
 
         with self.assertRaises(ValueError):
             experiment_manager.set_trial_progress(-1)
