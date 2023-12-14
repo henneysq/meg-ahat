@@ -19,7 +19,7 @@ Example of using the ExperimentTrigger in your python script:
 """
 
 from __future__ import annotations
-
+import inspect
 import serial
 from time import sleep
 
@@ -101,9 +101,26 @@ class ExperimentTrigger():
                 could not be opened.
         """
         if self.ser is None:
-            self.ser = serial.Serial(
-                self.port, self.baudrate, self.bytesize, self.parity, self.stopbits, self.timeout, self.write_timeout
-            )
+            signature = inspect.signature(ExperimentTrigger)
+            port = signature.parameters["port"].default
+            try:
+                self.ser = serial.Serial(
+                    self.port, self.baudrate, self.bytesize, self.parity,
+                    self.stopbits, self.timeout, self.write_timeout
+                )
+            except serial.SerialException as e:
+                msg = f"[Errno 2] could not open port {port}: [Errno 2] No such file or directory: '{port}'"
+                if str(e) == msg:
+                    mini_bitsi_port = "/dev/tty.usbserial-A9007URC"
+                    try:
+                        self.ser = serial.Serial(
+                            mini_bitsi_port, self.baudrate, self.bytesize, self.parity,
+                            self.stopbits, self.timeout, self.write_timeout
+                        )
+                    except serial.SerialException as f:
+                        raise serial.SerialException([e, f])
+                else:
+                    raise e
         
         if not self.ser.is_open:
             msg = "Could not open serial port."
