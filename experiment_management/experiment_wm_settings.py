@@ -9,10 +9,10 @@ PRESENTED_SUM_CORRECTNESS = (0, 1)
 # OBS: With representation of both a correct and incorrect task for
 # each stimulus/difficulty pair, the number of repetitions is always a
 # factor two higher than this:
-REPETITIONS = 2
+REPETITIONS = 1
 # Number of blocks. All of the above is repeated once
 # in each block (though randomised for each block)
-BLOCKS = 6
+BLOCKS = 10
 
 ## Trial design parameters
 # Duration of fixation prior to task
