@@ -7,6 +7,7 @@ from numpy import random
 
 from .experiment_trigger import ExperimentTrigger
 from .dondersLEDController import DondersLEDController
+from util.util import get_git_sha
 
 class ExperimentManagerBase:
     """Base class for experiment management
@@ -62,7 +63,8 @@ class ExperimentManagerBase:
         )
         # experiment data file names
         self.exp_dat_fname = f"{self.bids_kv_pair_str}_experimentdata.csv"
-        self.exp_dat_mandump_fname = f"{self.bids_kv_pair_str}_experimentdata_managerdump.csv"
+        git_sha = get_git_sha()
+        self.exp_dat_mandump_fname = f"{self.bids_kv_pair_str}_experimentdata_managerdump-{git_sha}.csv"
         
         # Set initial flags for experiment control
         # at runtime
