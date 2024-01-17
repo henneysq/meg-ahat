@@ -70,16 +70,6 @@ for subindx=1:numel(subj)
         disp(lasterr)
     end
 
-    % HEAD POSITION (Polhemus)
-    head_pos_file = sprintf('sub-%s.pos', subj{subindx});
-    source_ses1_dir = sprintf('%s/source/sub-%s/ses-001/', data_dir, subj{subindx});
-    head_pos_file_raw1 = sprintf('sub-%s_ses-001_headshape.pos', subj{subindx});
-    source_ses1_raw1_dir = sprintf('%s/sub-%s/ses-001/', general_cfg.bidsroot, subj{subindx});
-    % head_pos_d = sprintf('sub-%s_ses-00%d_run-00%d_experimentdata_managerdump.csv', subj{subindx}, sesindx, runindx);
-    head_pos_d = strcat(source_ses1_dir, head_pos_file);
-    head_pos_raw1_d = strcat(source_ses1_raw1_dir, head_pos_file_raw1);
-    copyfile(head_pos_d, head_pos_raw1_d)
-
     % Iterate over each session
     for sesindx=1:2
         % MEG data
@@ -166,26 +156,20 @@ for subindx=1:numel(subj)
             cfg = [];%general_cfg; % copy the general fields
             task_name = tasks{runindx};
             trial = [];
+            trial.LongName = 'Lateralised visual attention';
+            trial.Description = 'Lateralised visual attention combined with a detection tasks that is congruent or incongruent';
             trial.Levels = [];
-            if runindx == 1
-                trial.LongName = 'Lateralised visual attention';
-                trial.Description = 'Lateralised visual attention combined with a detection tasks that is congruent or incongruent';
-                trial.Levels.congruent = 'Fixation- and detection grating orientations match.';
-                trial.Levels.incongruent = 'Fixation- and detection grating orientations do not match.';
-            else
-                trial.LongName = 'Working memory arithmetic task';
-                trial.Description = 'Mental arithmetic constisting of addition of two integers with simultaneous visual stimulation';
-                trial.Levels.high = 'Integers are in the range [100;500].';
-                trial.Levels.low = 'Integers are in the range [1;9].';
-            end
+            if runindx=1
+            trial.Levels.congruent = 'Fixation- and detection grating orientations match.';
+            trial.Levels.incongruent = 'Fixation- and detection grating orientations do not match.';
             cfg.trial = trial;
             cfg.TaskName = tasks{runindx};
             json_txt = jsonencode(cfg, "PrettyPrint", true);
 
             out_json_file = sprintf('sub-%s_ses-00%d_run-00%d_beh.json', subj{subindx}, sesindx, runindx);
-            out_json_d = fullfile(strcat(out_dir, out_json_file));
-            fid = fopen(out_json_d,'w');
-            fprintf(fid,'%s',json_txt);
+            out_d = fullfile(strcat(out_dir, out_json_file));
+            fid = fopen(out_d,'w');
+            fprintf(fid,'%s',encoded);
             fclose(fid);
     
           % read the ascii log file
