@@ -2,7 +2,7 @@ import logging
 import platform
 import unittest
 
-from tests.util import set_git_executable_path, git_status
+from tests.test_util import set_git_executable_path, git_status
 
 class TestGitUtils(unittest.TestCase):
     def test1_set_exec_path(self):

@@ -7,7 +7,7 @@ from dotmap import DotMap
 import pandas as pd
 
 from experiment_management.experiment_manager_base import ExperimentManagerBase
-from tests.util import check_is_trigger_connected, check_is_lc_connected
+from tests.test_util import check_is_trigger_connected, check_is_lc_connected
 
 SUB = 42
 SES = 42

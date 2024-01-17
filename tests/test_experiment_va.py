@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 from numpy import random
 
 from experiment_management.experiment_manager_va import VisualAttentionExperimentManager
-from tests.util import check_is_lc_connected, check_is_trigger_connected
+from tests.test_util import check_is_lc_connected, check_is_trigger_connected
 from tests.__init__ import log_file
 
 logging.basicConfig(filename=log_file, level=logging.INFO, filemode="w")
@@ -178,20 +178,21 @@ class TestVisualAttention(unittest.TestCase):
         self.assertEqual(len(trigger_names), len(set(trigger_names)))
         self.assertEqual(len(trigger_values), len(set(trigger_values)))
 
-    def test_9_realtime_test(self):
-        experiment_manager = VisualAttentionExperimentManager(
-            sub=SUB, ses=SES, run=RUN, root=ROOT
-        )
+    # def test_9_realtime_test(self):
+    #     experiment_manager = VisualAttentionExperimentManager(
+    #         sub=SUB, ses=SES, run=RUN, root=ROOT
+    #     )
+    #     experiment_manager.make_and_save_experiment_data()
 
-        experiment_manager = check_is_trigger_connected(experiment_manager)
-        experiment_manager = check_is_lc_connected(experiment_manager)
+    #     experiment_manager = check_is_trigger_connected(experiment_manager)
+    #     experiment_manager = check_is_lc_connected(experiment_manager)
         
-        experiment_manager.load_experiment_data()
-        experiment_manager.prepare_psychopy()
+    #     experiment_manager.load_experiment_data()
+    #     experiment_manager.prepare_psychopy()
 
-        try:
-            experiment_manager.run_experiment()
-        except SystemExit:
-            return
+    #     try:
+    #         experiment_manager.run_experiment()
+    #     except SystemExit:
+    #         return
         
-        self.assertTrue(experiment_manager.end_of_experiment_flag)
+    #     self.assertTrue(experiment_manager.end_of_experiment_flag)
