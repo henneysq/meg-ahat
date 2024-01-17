@@ -11,6 +11,42 @@
 % In part 2, behevioural data recorded along with MEG
 % will be moved to the /meg directory, and files will
 % be enriched and aligned in time.
+%
+% The result of this conversion is reflected in the difference
+% between the organisation of /source/ and /raw1/ directories:
+%
+% pilot-data
+% |-- raw1
+% |   |-- dataset_description.json
+% |   |-- participants.tsv
+% |   `-- sub-099
+% |       |-- ses-001
+% |       |   |-- anat
+% |       |   |-- beh
+% |       |   |-- meg
+% |       |   `-- sub-099_ses-001_scans.tsv
+% |       |-- ses-002
+% |       |   |-- beh
+% |       |   |-- meg
+% |       |   `-- sub-099_ses-002_scans.tsv
+% |       `-- sub-099_sessions.tsv
+% `-- source
+%     `-- sub-099
+%         |-- ses-001
+%         |   |-- 099_1.ds
+%         |   |-- behaviour
+%         |   |-- pilot001_3031000.01_20231212_01.ds
+%         |   |-- sub-099.pos
+%         |   |-- sub-099_ses-001-eyetracking.asc
+%         |   |-- sub-099_ses-001-eyetracking.edf
+%         |   `-- sub-20231212T163000
+%         `-- ses-002
+%             |-- 099_2.ds
+%             |-- behaviour
+%             |-- pilot002_3031000.01_20231214_01.ds
+%             |-- sub-099_ses-002-eyetracking.asc
+%             `-- sub-099_ses-002-eyetracking.edf
+
 
 
 %% Add util dir to path
