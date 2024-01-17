@@ -6,9 +6,12 @@ Principle Investigator: Robert Oostenveld
 
 Collaborators: Gustavo Feijoo, Henrik Hansen, Marcus Carstensen, Kristoffer Madsen, Eelke Spaak
 
+This repository contains the files required to run the experiment, currate the data, and run the analyses.
+
 # Table of contents
 
 1. [About the Project](#about)
+2. [Data Curration](#data-curration)
 2. [Dependencies](#dependencies)
 3. [Quick-Start Guide](#quickstart)
 4. [Structure](#structure)
@@ -27,9 +30,30 @@ It investigates the effects of 40 Hz visible and *invisible spectral flicker* (s
 See also the 
 [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx).
 
-## Data curration <a name="data-curration"></a>
+## Data Curration <a name="data-curration"></a>
 
-Something about BIDS should go here
+### Data Versions
+The project pilot-data exists in several versions that can all be accessed in the MEG-AHAT
+project directory on the DCCN cluster under `/project/3031004.01/pilot-data`. These versions
+include:
+
+1. Source data (`/source/`) contains the data files as they were obtained from their
+    respective recording devices and includes MEG scans, simultaneous eye-tracking
+    and presentation log-files, polhemous positional data, and MRI scans.
+2. First iteration raw data (`/raw1/`) contains a BIDS-compliant version with minimal
+    changes
+2. Second iteration raw data (`/raw2/`) contains a BIDS-compliant version of the data
+    in which the behevioural data recorded along with MEG has been moved to the /meg
+    directory, and files will are enriched and aligned in time.
+
+### Converting Data
+
+Source data is converted to raw1 using the 
+[`/data_curration/convert_source_to_raw1.m`](data_curration/convert_source_to_raw1.m) script.
+
+Raw1 data is converted to raw2 using the 
+[`/data_curration/convert_raw1_to_raw2.m`](data_curration/convert_raw1_to_raw2.m) script.
+
 
 ## Dependencies <a name="dependencies"></a>
 
@@ -43,7 +67,7 @@ Note that the proprietary `libLEDController` package is not publicly available.
 
 ### Portable-Git for DCCN MEG presentation PC
 
-Git is not installed on the DCCN MEG presentation PC, which is why the path to a (portable) Git executable can be set with [`util.set_git_executable_path`](tests/util.py#L36). Some additional GitPython wrappers are also contained in `util`.
+Git is not installed on the DCCN MEG presentation PC, which is why the path to a (portable) Git executable can be set with [`test_util.set_git_executable_path`](tests/test_util.py#L36). Some additional GitPython wrappers are also contained in `test_util`.
 
 
 ## Quick-Start Guide <a name="quickstart"></a>
