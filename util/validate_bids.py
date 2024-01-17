@@ -29,8 +29,10 @@ def check_if_dir_is_bids(dir):
             valid_files.append(item.as_posix())
 
 check_if_dir_is_bids(PILOT_RAW1_PATH)
-print("\nValid files:")
-[print(valid_file) for valid_file in valid_files]
 
-print("\nInvalid files:")
-[print(invalid_file) for invalid_file in invalid_files]
+with open("/project/3031004.01/pilot-data/bids_validation.log", 'w') as f:
+    f.write("\nValid files:")
+    [f.write(f"{valid_file}\n") for valid_file in valid_files]
+
+    f.write("\nInvalid files:")
+    [f.write(f"{invalid_file}\n") for invalid_file in invalid_files]
