@@ -265,6 +265,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         self.prepare_led_controllers()
         self.trigger.prepare_trigger()
         # Send a trigger for the start of the experiment
+        self.show_start_screen()
         self.trigger.send_trigger(self.trigger_map["initial-trigger"])
 
         for _ in range(len(self) - self.trial_progress):
