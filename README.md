@@ -27,6 +27,10 @@ It investigates the effects of 40 Hz visible and *invisible spectral flicker* (s
 See also the 
 [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx).
 
+## Data curration <a name="data-curration"></a>
+
+Something about BIDS
+
 ## Dependencies <a name="dependencies"></a>
 
 The experiments require visual presentations and participant feedback is implemented in Python with `psychopy`, and light stimulation with custom and proprietary equipment and drivers are provided by OC. The required software can be installed by:
