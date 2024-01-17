@@ -8,3 +8,4 @@ protocol/~$*.pptx
 .vscode*
 experiment_management/dondersLEDController.py
 TODO.md
+*.asv
