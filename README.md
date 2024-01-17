@@ -29,7 +29,7 @@ See also the
 
 ## Data curration <a name="data-curration"></a>
 
-Something about BIDS
+Something about BIDS should go here
 
 ## Dependencies <a name="dependencies"></a>
 
