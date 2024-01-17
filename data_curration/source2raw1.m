@@ -82,7 +82,7 @@ for subindx=1:numel(subj)
     
     % Specify destination file path
     head_pos_file_raw1 = sprintf('sub-%s_ses-001_headshape.pos', subj{subindx})
-    source_ses1_raw1_dir = sprintf('%s/sub-%s/ses-001/', general_cfg.bidsroot, subj{subindx});
+    source_ses1_raw1_dir = sprintf('%s/sub-%s/ses-001/meg/', general_cfg.bidsroot, subj{subindx});
     head_pos_raw1_d = strcat(source_ses1_raw1_dir, head_pos_file_raw1);
     
     % Copy source to raw1 destination
