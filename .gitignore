@@ -1,7 +1,7 @@
 *venv/
 *__pycache__/
 *code-workspace
-*data*
+*data/
 *log*
 protocol/~$*.pptx
 .DS_Store
