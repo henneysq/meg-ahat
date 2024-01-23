@@ -26,6 +26,7 @@ jobs:
       - name: Push changes # push the output folder to your repo
         if: ${{ env.changes_to_push == 'true' }}
         uses: ad-m/github-push-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           force: true
