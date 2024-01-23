@@ -1,3 +1,7 @@
+permissions:                    # Global permissions configuration starts here
+  contents: read                # 'read' access to repository contents
+  pull-requests: write          # 'write' access to pull requests
+
 name: update-readme
 
 on:
@@ -26,6 +30,7 @@ jobs:
       - name: Push changes # push the output folder to your repo
         if: ${{ env.changes_to_push == 'true' }}
         uses: ad-m/github-push-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           force: true
