@@ -10,17 +10,21 @@ This repository contains the files required to run the experiment, currate the d
 
 # Table of contents
 
-1. [About the Project](#about)
-2. [Data Curration](#data-curration)
-2. [Dependencies](#dependencies)
-3. [Quick-Start Guide](#quickstart)
-4. [Structure](#structure)
-    1. [Experiment managers](#managers)
-    2. [Experiment triggers](#triggers)
-5. [Advanced Option](#advanced)
-    1. [Setting custom root](#root)
-    2. [Setting experiment progress](#root)
-    3. [Using a custom random seed](#root)
+- [MEG-AHAT: Propagation of spectral flicker during visual- and non-visual cognitive tasks](#meg-ahat-propagation-of-spectral-flicker-during-visual--and-non-visual-cognitive-tasks)
+- [Table of contents](#table-of-contents)
+  - [About the Project ](#about-the-project-)
+  - [Data Curration ](#data-curration-)
+  - [Dependencies ](#dependencies-)
+    - [Portable-Git for DCCN MEG presentation PC](#portable-git-for-dccn-meg-presentation-pc)
+  - [Quick-Start Guide ](#quick-start-guide-)
+  - [Structure ](#structure-)
+    - [Experiment Managers ](#experiment-managers-)
+    - [Experiment Triggers ](#experiment-triggers-)
+  - [Advanced Options ](#advanced-options-)
+    - [Setting custom root ](#setting-custom-root-)
+    - [Setting experiment progresss ](#setting-experiment-progresss-)
+    - [Using a custom random seed ](#using-a-custom-random-seed-)
+  - [Testing](#testing)
 
 ## About the Project <a name="about"></a>
 
@@ -31,11 +35,6 @@ See also the
 [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx).
 
 ## Data Curration <a name="data-curration"></a>
-
-
-Design philosophy:
-
-
 
 ### Data Versions
 The project pilot-data exists in several versions that can all be accessed in the MEG-AHAT
