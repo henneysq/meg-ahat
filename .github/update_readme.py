@@ -1,7 +1,18 @@
 from re import search, findall
-from pdb import set_trace
 
 def _update_readme(readme: str) -> str:
+    """Find markdown headers and update
+    
+    Finds all markdown h2 and h3 headers (##, ###),
+    adds html tags to them, and creates a table of
+    contents that is added to the readme.
+    
+    Args:
+        readme (str): Contents of README file
+
+    Returns:
+        str: Updated contents of README file
+    """
     toc_candidates = findall("(#+\s.*?)\n\n", readme)
     
     header_counter = -1
@@ -47,18 +58,22 @@ def header_with_html_tag(header: str) -> str:
     html_tag = "<a name=\"" + tag + "\"></a>"
     return header + " " + html_tag
     
+if __name__ == "__main__":
+    # code that builds the data curration str entry
+    with open('DATA_MANAGEMENT.stub') as f:
+        data_curation_str = f.read()
+        
+    with open('EXPERIMENT_MANAGEMENT.stub') as f:
+        experiment_management_str = f.read()
 
-# code that builds the data curration str entry
-with open('DATA_MANAGEMENT.stub') as f:
-    data_curation_str = f.read()
+    # Read the README.stub file
+    with open('README.stub') as f:
+        readme_stub = f.read()
 
-# Read the README.stub file
-with open('README.stub') as f:
-    readme_stub = f.read()
+    # simple replacement, use whatever stand-in value is useful for you.
+    readme = readme_stub.replace('{DATACURATION}', data_curation_str)
+    readme = readme_stub.replace('{EXPERIMENT_MANAGEMENT}', experiment_management_str)
+    readme = _update_readme(readme)
 
-# simple replacement, use whatever stand-in value is useful for you.
-readme = readme_stub.replace('{DATACURATION}', data_curation_str)
-readme = _update_readme(readme)
-
-with open('README.md','w') as f:
-    f.write(readme)
+    with open('README.md','w') as f:
+        f.write(readme)
