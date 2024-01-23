@@ -8,11 +8,19 @@ Collaborators: Gustavo Feijoo, Henrik Hansen, Marcus Carstensen, Kristoffer Mads
 
 This repository contains the files required to run the experiment, currate the data, and run the analyses.
 
+## About the Project <a name="about-the-project"></a>
+
+MEG-AHAT is run at the Donders Center for Cognitive Neuroimaing (DCCN) in collaboration with the Technical University of Denmark and OptoCeutics ApS (OC).
+It investigates the effects of 40 Hz visible and *invisible spectral flicker* (see [Carstensen et. al. 2020](https://doi.org/10.1117/12.2544338)) on the brain during a visual attention (VA) task and a non-visual working memory (WM) task with simultaneous megnetoencephalography (MEG).
+
+See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx).
+
 # Table of contents
 
 1. [About the Project](#about-the-project)
-2. [Data Curration](#data-curration)
-	1. [Converting Data](#converting-data)
+2. [Data Analysis and -Management](#data-analysis-and--management)
+	1. [Philosophy](#philosophy)
+	2. [Converting Data](#converting-data)
 3. [Experiment Management](#experiment-management)
 4. [Dependencies](#dependencies)
 	1. [Portable-Git for DCCN MEG presentation PC](#portable-git-for-dccn-meg-presentation-pc)
@@ -27,15 +35,11 @@ This repository contains the files required to run the experiment, currate the d
 8. [Testing](#testing)
 
 
-## About the Project <a name="about-the-project"></a>
+## Data Analysis and -Management <a name="data-analysis-and--management"></a>
 
-MEG-AHAT is run at the Donders Center for Cognitive Neuroimaing (DCCN) in collaboration with the Technical University of Denmark and OptoCeutics ApS (OC).
-It investigates the effects of 40 Hz visible and *invisible spectral flicker* (see [Carstensen et. al. 2020](https://doi.org/10.1117/12.2544338)) on the brain during a visual attention (VA) task and a non-visual working memory (WM) task with simultaneous megnetoencephalography (MEG).
+### Philosophy <a name="philosophy"></a>
 
-See also the 
-[`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx).
-
-## Data Curration <a name="data-curration"></a>
+This project
 
 ### Data Versions
 The project pilot-data exists in several versions that can all be accessed in the MEG-AHAT
