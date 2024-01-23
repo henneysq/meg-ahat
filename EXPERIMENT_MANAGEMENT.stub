@@ -1,5 +1,5 @@
 
-## Dependencies
+### Dependencies
 
 The experiments require visual presentations and participant feedback is implemented in Python with `psychopy`, and light stimulation with custom and proprietary equipment and drivers are provided by OC. The required software can be installed by:
 
@@ -9,18 +9,18 @@ pip install -r requirements.txt
 
 Note that the proprietary `libLEDController` package is not publicly available.
 
-### Portable-Git for DCCN MEG presentation PC
+#### Portable-Git for DCCN MEG presentation PC
 
 Git is not installed on the DCCN MEG presentation PC, which is why the path to a (portable) Git executable can be set with [`test_util.set_git_executable_path`](tests/test_util.py#L36). Some additional GitPython wrappers are also contained in `test_util`.
 
 
-## Quick-Start Guide
+### Quick-Start Guide
 
 Two scripts are provided in the root directory to prepare, run, and save outputs for the experiments. Update the `SUB`, `SES`, and `RUN` constants appropriately before executing the script.
 
-## Structure
+### Code Structure
 
-### Experiment Managers
+#### Experiment Managers
 
 Control of the two experiments, trial condition randomisation, and progress monitoring is implemented with the two classes 
 [`ExperimentManagerVA`](experiment_management/experiment_manager_va.py#L15)
@@ -28,7 +28,7 @@ and [`ExperimentManagerWM`](experiment_management/experiment_manager_wm.py#L13) 
 
 Experimental settings such as durations, blocks, repetitions etc. are configured manually in [`experiment_va_settings.py`](experiment_management/experiment_va_settings.py) and [`experiment_wm_settings.py`](experiment_management/experiment_wm_settings.py) for the VA and WM experiments, repectively. These are loaded by the manager classes.
 
-### Experiment Triggers
+#### Experiment Triggers
 
 Serial interface with the BITSI trigger system is controlled by the [`ExperimentTrigger`](experiment_management/experiment_trigger.py#L27) class. It inherits from the [`Serial`](https://pyserial.readthedocs.io/en/latest/pyserial_api.html) object as a thin wrapper with standard values specified in the [DCCN BITSI documentation](https://intranet.donders.ru.nl/index.php?id=lab-bitsi&no_cache=1&sword_list%5B%5D=bitsi).
 
@@ -45,11 +45,11 @@ et.prepare_trigger()
 et.send_trigger(65) # 65 is encoded as ASCII to 'A' and written to serial
 ```
 
-## Advanced Options
+### Advanced Options
 
 Several handy features are implemented to handle the experiments.
 
-### Setting custom root
+#### Setting custom root
 
 A custom root directory can be defined in which experiment data is stored. This can be done either at instantiation of the experiment objects, when making experiment data with `make_and_save_experiment_data`, when loading existing experiment data from a file with `load_experiment_data` - all via the `root` argument.
 
@@ -73,7 +73,7 @@ experiment_manager = VisualAttentionExperimentManager(
 
 Note that the `root` argument is required the first time calling `make_and_save_experiment_data` and `load_experiment_data` if it was not given at instantiation. In these cases, the root is subsequently stored in `experiment_manager.root` property.
 
-### Setting experiment progresss
+#### Setting experiment progresss
 
 In case of a crash during the experiment, it can be restarted at a customly selected trial. The experiment data
 is saved to the `>ROOT</data/` directory, and completed trials are indicates in the "completed" column.
@@ -88,6 +88,6 @@ experiment_manager.run_experiment()
 
 In this case, the experiment will run from trial 10 (the 11th).
 
-### Using a custom random seed
+#### Using a custom random seed
 
 When creating experiment data, the conditions are randomised uniquely based on the provided `sub`, `ses`, and `run` arguments at instantiation. In `make_and_save_experiment_data`, a custom seed can be provided via the `seed` argument, though this is not necessarly desireble.
