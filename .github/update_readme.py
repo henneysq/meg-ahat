@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
     # simple replacement, use whatever stand-in value is useful for you.
     readme = readme_stub.replace('{DATACURATION}', data_curation_str)
-    readme = readme_stub.replace('{EXPERIMENT_MANAGEMENT}', experiment_management_str)
+    readme = readme.replace('{EXPERIMENT_MANAGEMENT}', experiment_management_str)
     readme = _update_readme(readme)
 
     with open('README.md','w') as f:
