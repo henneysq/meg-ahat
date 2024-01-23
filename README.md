@@ -39,7 +39,8 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 
 ### Philosophy <a name="philosophy"></a>
 
-This project aims to conduct data analysis on BIDS-compliant data from the get-go.
+This project aims to conduct data analysis on BIDS-compliant data from the get-go. Thus,
+the source data is converted to BIDS prior to data analysis.
 
 ### Data Versions
 The project pilot-data exists in several versions that can all be accessed in the MEG-AHAT
