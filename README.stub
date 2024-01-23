@@ -8,21 +8,20 @@ Collaborators: Gustavo Feijoo, Henrik Hansen, Marcus Carstensen, Kristoffer Mads
 
 This repository contains the files required to run the experiment, currate the data, and run the analyses.
 
-# Table of contents
-
-{TOC}
-
 ## About the Project
 
 MEG-AHAT is run at the Donders Center for Cognitive Neuroimaing (DCCN) in collaboration with the Technical University of Denmark and OptoCeutics ApS (OC).
 It investigates the effects of 40 Hz visible and *invisible spectral flicker* (see [Carstensen et. al. 2020](https://doi.org/10.1117/12.2544338)) on the brain during a visual attention (VA) task and a non-visual working memory (WM) task with simultaneous megnetoencephalography (MEG).
 
-See also the 
-[`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx).
+See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx).
 
-## Data Curration
+# Table of contents
 
-{DATACURATION}
+{TOC}
+
+## Data Analysis and -Management
+
+{DATA_MANAGEMENT}
 
 ## Experiment Management
 

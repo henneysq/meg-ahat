@@ -71,7 +71,7 @@ if __name__ == "__main__":
         readme_stub = f.read()
 
     # simple replacement, use whatever stand-in value is useful for you.
-    readme = readme_stub.replace('{DATACURATION}', data_curation_str)
+    readme = readme_stub.replace('{DATA_MANAGEMENT}', data_curation_str)
     readme = readme.replace('{EXPERIMENT_MANAGEMENT}', experiment_management_str)
     readme = _update_readme(readme)
 
