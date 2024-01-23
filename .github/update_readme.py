@@ -60,14 +60,14 @@ def header_with_html_tag(header: str) -> str:
     
 if __name__ == "__main__":
     # code that builds the data curration str entry
-    with open('DATA_MANAGEMENT.stub') as f:
+    with open('documentation/DATA_MANAGEMENT.stub') as f:
         data_curation_str = f.read()
         
-    with open('EXPERIMENT_MANAGEMENT.stub') as f:
+    with open('documentation/EXPERIMENT_MANAGEMENT.stub') as f:
         experiment_management_str = f.read()
 
     # Read the README.stub file
-    with open('README.stub') as f:
+    with open('documentation/README.stub') as f:
         readme_stub = f.read()
 
     # simple replacement, use whatever stand-in value is useful for you.
