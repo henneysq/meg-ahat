@@ -32,6 +32,11 @@ See also the
 
 ## Data Curration <a name="data-curration"></a>
 
+
+Design philosophy:
+
+
+
 ### Data Versions
 The project pilot-data exists in several versions that can all be accessed in the MEG-AHAT
 project directory on the DCCN cluster under `/project/3031004.01/pilot-data`. These versions
