@@ -1,7 +1,6 @@
 # code that builds the data curration str entry
-data_curation_str = """
-Design philosophy:\n
-"""
+with open('DATA_MANAGEMENT.stub') as f:
+    data_curation_str = f.read()
 
 # Read the README.stub file
 with open('README.stub') as f:
