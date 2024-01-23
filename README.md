@@ -22,17 +22,11 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 	1. [Philosophy](#philosophy)
 	2. [Converting Data](#converting-data)
 3. [Experiment Management](#experiment-management)
-4. [Dependencies](#dependencies)
-	1. [Portable-Git for DCCN MEG presentation PC](#portable-git-for-dccn-meg-presentation-pc)
-5. [Quick-Start Guide](#quick-start-guide)
-6. [Structure](#structure)
-	1. [Experiment Managers](#experiment-managers)
-	2. [Experiment Triggers](#experiment-triggers)
-7. [Advanced Options](#advanced-options)
-	1. [Setting custom root](#setting-custom-root)
-	2. [Setting experiment progresss](#setting-experiment-progresss)
-	3. [Using a custom random seed](#using-a-custom-random-seed)
-8. [Testing](#testing)
+	1. [Dependencies](#dependencies)
+	2. [Quick-Start Guide](#quick-start-guide)
+	3. [Code Structure](#code-structure)
+	4. [Advanced Options](#advanced-options)
+4. [Testing](#testing)
 
 
 ## Data Analysis and -Management <a name="data-analysis-and--management"></a>
@@ -69,7 +63,7 @@ Raw1 data is converted to raw2 using the
 ## Experiment Management <a name="experiment-management"></a>
 
 
-## Dependencies <a name="dependencies"></a>
+### Dependencies <a name="dependencies"></a>
 
 The experiments require visual presentations and participant feedback is implemented in Python with `psychopy`, and light stimulation with custom and proprietary equipment and drivers are provided by OC. The required software can be installed by:
 
@@ -79,18 +73,18 @@ pip install -r requirements.txt
 
 Note that the proprietary `libLEDController` package is not publicly available.
 
-### Portable-Git for DCCN MEG presentation PC <a name="portable-git-for-dccn-meg-presentation-pc"></a>
+#### Portable-Git for DCCN MEG presentation PC
 
 Git is not installed on the DCCN MEG presentation PC, which is why the path to a (portable) Git executable can be set with [`test_util.set_git_executable_path`](tests/test_util.py#L36). Some additional GitPython wrappers are also contained in `test_util`.
 
 
-## Quick-Start Guide <a name="quick-start-guide"></a>
+### Quick-Start Guide <a name="quick-start-guide"></a>
 
 Two scripts are provided in the root directory to prepare, run, and save outputs for the experiments. Update the `SUB`, `SES`, and `RUN` constants appropriately before executing the script.
 
-## Structure <a name="structure"></a>
+### Code Structure <a name="code-structure"></a>
 
-### Experiment Managers <a name="experiment-managers"></a>
+#### Experiment Managers
 
 Control of the two experiments, trial condition randomisation, and progress monitoring is implemented with the two classes 
 [`ExperimentManagerVA`](experiment_management/experiment_manager_va.py#L15)
@@ -98,7 +92,7 @@ and [`ExperimentManagerWM`](experiment_management/experiment_manager_wm.py#L13) 
 
 Experimental settings such as durations, blocks, repetitions etc. are configured manually in [`experiment_va_settings.py`](experiment_management/experiment_va_settings.py) and [`experiment_wm_settings.py`](experiment_management/experiment_wm_settings.py) for the VA and WM experiments, repectively. These are loaded by the manager classes.
 
-### Experiment Triggers <a name="experiment-triggers"></a>
+#### Experiment Triggers
 
 Serial interface with the BITSI trigger system is controlled by the [`ExperimentTrigger`](experiment_management/experiment_trigger.py#L27) class. It inherits from the [`Serial`](https://pyserial.readthedocs.io/en/latest/pyserial_api.html) object as a thin wrapper with standard values specified in the [DCCN BITSI documentation](https://intranet.donders.ru.nl/index.php?id=lab-bitsi&no_cache=1&sword_list%5B%5D=bitsi).
 
@@ -115,11 +109,11 @@ et.prepare_trigger()
 et.send_trigger(65) # 65 is encoded as ASCII to 'A' and written to serial
 ```
 
-## Advanced Options <a name="advanced-options"></a>
+### Advanced Options <a name="advanced-options"></a>
 
 Several handy features are implemented to handle the experiments.
 
-### Setting custom root <a name="setting-custom-root"></a>
+#### Setting custom root
 
 A custom root directory can be defined in which experiment data is stored. This can be done either at instantiation of the experiment objects, when making experiment data with `make_and_save_experiment_data`, when loading existing experiment data from a file with `load_experiment_data` - all via the `root` argument.
 
@@ -143,7 +137,7 @@ experiment_manager = VisualAttentionExperimentManager(
 
 Note that the `root` argument is required the first time calling `make_and_save_experiment_data` and `load_experiment_data` if it was not given at instantiation. In these cases, the root is subsequently stored in `experiment_manager.root` property.
 
-### Setting experiment progresss <a name="setting-experiment-progresss"></a>
+#### Setting experiment progresss
 
 In case of a crash during the experiment, it can be restarted at a customly selected trial. The experiment data
 is saved to the `>ROOT</data/` directory, and completed trials are indicates in the "completed" column.
@@ -158,7 +152,7 @@ experiment_manager.run_experiment()
 
 In this case, the experiment will run from trial 10 (the 11th).
 
-### Using a custom random seed <a name="using-a-custom-random-seed"></a>
+#### Using a custom random seed
 
 When creating experiment data, the conditions are randomised uniquely based on the provided `sub`, `ses`, and `run` arguments at instantiation. In `make_and_save_experiment_data`, a custom seed can be provided via the `seed` argument, though this is not necessarly desireble.
 
