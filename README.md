@@ -12,17 +12,19 @@ This repository contains the files required to run the experiment, currate the d
 
 1. [About the Project](#about-the-project)
 2. [Data Curration](#data-curration)
-3. [Dependencies](#dependencies)
+	1. [Converting Data](#converting-data)
+3. [Experiment Management](#experiment-management)
+4. [Dependencies](#dependencies)
 	1. [Portable-Git for DCCN MEG presentation PC](#portable-git-for-dccn-meg-presentation-pc)
-4. [Quick-Start Guide](#quick-start-guide)
-5. [Structure](#structure)
+5. [Quick-Start Guide](#quick-start-guide)
+6. [Structure](#structure)
 	1. [Experiment Managers](#experiment-managers)
 	2. [Experiment Triggers](#experiment-triggers)
-6. [Advanced Options](#advanced-options)
+7. [Advanced Options](#advanced-options)
 	1. [Setting custom root](#setting-custom-root)
 	2. [Setting experiment progresss](#setting-experiment-progresss)
 	3. [Using a custom random seed](#using-a-custom-random-seed)
-7. [Testing](#testing)
+8. [Testing](#testing)
 
 
 ## About the Project <a name="about-the-project"></a>
@@ -35,7 +37,31 @@ See also the
 
 ## Data Curration <a name="data-curration"></a>
 
-{DATACURATION}
+### Data Versions
+The project pilot-data exists in several versions that can all be accessed in the MEG-AHAT
+project directory on the DCCN cluster under `/project/3031004.01/pilot-data`. These versions
+include:
+
+1. Source data (`/source/`) contains the data files as they were obtained from their
+    respective recording devices and includes MEG scans, simultaneous eye-tracking
+    and presentation log-files, polhemous positional data, and MRI scans.
+2. First iteration raw data (`/raw1/`) contains a BIDS-compliant version with minimal
+    changes
+2. Second iteration raw data (`/raw2/`) contains a BIDS-compliant version of the data
+    in which the behevioural data recorded along with MEG has been moved to the /meg
+    directory, and files will are enriched and aligned in time.
+
+### Converting Data <a name="converting-data"></a>
+
+Source data is converted to raw1 using the 
+[`/data_curration/convert_source_to_raw1.m`](data_curration/convert_source_to_raw1.m) script.
+
+Raw1 data is converted to raw2 using the 
+[`/data_curration/convert_raw1_to_raw2.m`](data_curration/convert_raw1_to_raw2.m) script.
+
+
+## Experiment Management <a name="experiment-management"></a>
+
 
 ## Dependencies <a name="dependencies"></a>
 
