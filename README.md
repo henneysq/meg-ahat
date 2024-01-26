@@ -24,12 +24,11 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 	2. [Data Versions](#data-versions)
 	3. [Converting Data](#converting-data)
 3. [Experiment Management](#experiment-management)
-4. [Experiment Management](#experiment-management)
 	1. [Dependencies](#dependencies)
 	2. [Quick-Start Guide](#quick-start-guide)
 	3. [Code Structure](#code-structure)
 	4. [Advanced Options](#advanced-options)
-5. [Testing](#testing)
+4. [Testing](#testing)
 
 
 ## Data Analysis and -Management <a name="data-analysis-and--management"></a>
@@ -101,9 +100,7 @@ pilot-data
 ```
 
 
-## Experiment Management <a name="experiment-management"></a> <a name="experiment-management"></a>
-
-## Experiment Management <a name="experiment-management"></a> <a name="experiment-management"></a>
+## Experiment Management <a name="experiment-management"></a>
 
 ### Dependencies <a name="dependencies"></a>
 
