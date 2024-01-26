@@ -21,10 +21,4 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 
 {EXPERIMENT_MANAGEMENT}
 
-## Testing
-
-A test suite is provided in `tests/` based on the `unittest`-module available in the standard Python library. To run this locally, use:
-
-```
-python -m unittest discover tests/
-```
+{TESTING}
