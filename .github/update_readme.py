@@ -42,7 +42,7 @@ def _update_readme(readme: str) -> str:
             toc_strs.append(f"\t{sh+1}. [{sub_header}](#{make_tag(sub_header)})\n")
             readme = readme.replace(sub_header, header_with_html_tag(sub_header))
         
-    toc_str = "".join(toc_strs)
+    toc_str = "\n# Table of contents\n\n" + "".join(toc_strs)
 
     readme = readme.replace('{TOC}', toc_str)
     

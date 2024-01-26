@@ -1,10 +1,14 @@
+## Data Analysis and -Management
+
 ### Philosophy
 
-This project aims to conduct data analysis on BIDS-compliant data from the get-go. Thus,
+For the purpose of transparency, interpretability, and reproducibility,
+this project aims to conduct data analysis on BIDS-compliant data from the get-go. Thus,
 the source data is converted to BIDS prior to data analysis. However, the conversion
 takes place in two steps to incrementally enrich the data structure.
 
 ### Data Versions
+
 The project pilot-data exists in several versions that can all be accessed in the MEG-AHAT
 project directory on the DCCN cluster under `/project/3031004.01/pilot-data`. These versions
 include:
