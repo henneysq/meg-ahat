@@ -1,3 +1,18 @@
+"""
+Module to run on github to gather stubs for README
+
+Loads `.stub` files from /documentation and compiles them
+to a single string. Then, the string is scanned
+for h2 and h3 markdown headers which are enriched with
+html tags for hyperlinking, and a table of contents is
+created with these headers and hyperlinks and inserted
+into the str.
+
+Finally, the string is written to a complete README.md file.
+
+See the workflow defined in /.github/workflows/main.yaml
+"""
+
 from re import search, findall
 
 def _update_readme(readme: str) -> str:
