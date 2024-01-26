@@ -1,0 +1,7 @@
+## Testing
+
+A test suite is provided in `tests/` based on the `unittest`-module available in the standard Python library. To run this locally, use:
+
+```
+python -m unittest discover tests/
+```

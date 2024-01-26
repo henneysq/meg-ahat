@@ -65,6 +65,9 @@ if __name__ == "__main__":
         
     with open('documentation/EXPERIMENT_MANAGEMENT.stub') as f:
         experiment_management_str = f.read()
+        
+    with open('documentation/TESTING.stub') as f:
+        testing_str = f.read()
 
     # Read the README.stub file
     with open('documentation/README.stub') as f:
@@ -73,6 +76,7 @@ if __name__ == "__main__":
     # simple replacement, use whatever stand-in value is useful for you.
     readme = readme_stub.replace('{DATA_MANAGEMENT}', data_curation_str)
     readme = readme.replace('{EXPERIMENT_MANAGEMENT}', experiment_management_str)
+    readme = readme.replace('{TESTING}', testing_str)
     readme = _update_readme(readme)
 
     with open('README.md','w') as f:
