@@ -15,29 +15,34 @@ It investigates the effects of 40 Hz visible and *invisible spectral flicker* (s
 
 See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx).
 
+
 # Table of contents
 
 1. [About the Project](#about-the-project)
 2. [Data Analysis and -Management](#data-analysis-and--management)
 	1. [Philosophy](#philosophy)
-	2. [Converting Data](#converting-data)
+	2. [Data Versions](#data-versions)
+	3. [Converting Data](#converting-data)
 3. [Experiment Management](#experiment-management)
+4. [Experiment Management](#experiment-management)
 	1. [Dependencies](#dependencies)
 	2. [Quick-Start Guide](#quick-start-guide)
 	3. [Code Structure](#code-structure)
 	4. [Advanced Options](#advanced-options)
-4. [Testing](#testing)
+5. [Testing](#testing)
 
 
 ## Data Analysis and -Management <a name="data-analysis-and--management"></a>
 
 ### Philosophy <a name="philosophy"></a>
 
-This project aims to conduct data analysis on BIDS-compliant data from the get-go. Thus,
+For the purpose of transparency, interpretability, and reproducibility,
+this project aims to conduct data analysis on BIDS-compliant data from the get-go. Thus,
 the source data is converted to BIDS prior to data analysis. However, the conversion
 takes place in two steps to incrementally enrich the data structure.
 
-### Data Versions
+### Data Versions <a name="data-versions"></a>
+
 The project pilot-data exists in several versions that can all be accessed in the MEG-AHAT
 project directory on the DCCN cluster under `/project/3031004.01/pilot-data`. These versions
 include:
@@ -96,8 +101,9 @@ pilot-data
 ```
 
 
-## Experiment Management <a name="experiment-management"></a>
+## Experiment Management <a name="experiment-management"></a> <a name="experiment-management"></a>
 
+## Experiment Management <a name="experiment-management"></a> <a name="experiment-management"></a>
 
 ### Dependencies <a name="dependencies"></a>
 
