@@ -23,7 +23,6 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 	1. [Philosophy](#philosophy)
 	2. [Data Versions](#data-versions)
 	3. [Converting Data](#converting-data)
-	4. [Eyetrack data](#eyetrack-data)
 3. [Experiment Management](#experiment-management)
 	1. [Dependencies](#dependencies)
 	2. [Quick-Start Guide](#quick-start-guide)
@@ -53,18 +52,29 @@ include:
     respective recording devices and includes MEG scans, simultaneous eye-tracking
     and presentation log-files, polhemous positional data, and MRI scans.
 2. First iteration raw data (`/raw1/`) contains a BIDS-compliant version with minimal
-    changes
+    changes. One implication of this is that events are not yet alligned, as the recorded
+    behavioural data is not set on a time axis at the point of recording.
 2. Second iteration raw data (`/raw2/`) contains a BIDS-compliant version of the data
     in which the behevioural data recorded along with MEG has been moved to the /meg
-    directory, and files will are enriched and aligned in time.
+    directory, and MEG, eyetrack, and behavioural events are enriched and aligned in time.
 
 ### Converting Data <a name="converting-data"></a>
+
+Converting data between versions is non-trivial and requires both commonly used public
+tools and custom scripts. This projects uses the FieldTrip tool (`data2bids`)[https://github.com/fieldtrip/fieldtrip/blob/master/data2bids.m]
+and custom matlab scripts.
 
 Source data is converted to raw1 using the 
 [`/data_curration/convert_source_to_raw1.m`](https://github.com/henneysq/meg-ahat/blob/main/data_curration/convert_source_to_raw1.m) script.
 
 Raw1 data is converted to raw2 using the 
 [`/data_curration/convert_raw1_to_raw2.m`](data_curration/convert_raw1_to_raw2.m) script.
+
+#### Eyetrack data
+
+Currently, eyetracking data is not covered by BIDS, but is added with the [BIDS extension proposal BEP020](https://docs.google.com/document/d/1eggzTCzSHG3AEKhtnEDbcdk-2avXN6I94X8aUPEBVsw/edit#heading=h.9tphvz6ot0j1).
+
+With this change, eyetracker data is allocated to the `eyetrack/` scans directory and has the `_eyetrack` suffix.
 
 #### Directory Layout
 
@@ -103,10 +113,6 @@ pilot-data
             |-- sub-099_ses-002-eyetracking.asc
             `-- sub-099_ses-002-eyetracking.edf
 ```
-
-### Eyetrack data <a name="eyetrack-data"></a>
-
-Currently, eyetracking data is not covered by BIDS, but is added with the [BIDS extension proposal BEP020](https://docs.google.com/document/d/1eggzTCzSHG3AEKhtnEDbcdk-2avXN6I94X8aUPEBVsw/edit#heading=h.9tphvz6ot0j1).
 
 ## Experiment Management <a name="experiment-management"></a>
 
