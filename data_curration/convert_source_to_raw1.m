@@ -52,11 +52,13 @@
 %% Add util dir to path
 addpath('/project/3031004.01/meg-ahat/util')
 
-%% Setup Fieldtrip
-configure_ft
-
 %% Set pilot data directory
 data_dir = '/project/3031004.01/pilot-data';
+diaryfile = strcat(data_dir, '/source_to_raw1.log');
+diary (diaryfile)
+
+%% Setup Fieldtrip
+configure_ft
 
 % Sebject (defined as cell array for future compatibility)
 subj = {
@@ -65,7 +67,7 @@ subj = {
 
 % Tasks in the two runs
 tasks = {
-  'visual';
+  'visualattention';
   'workingmemory'
 };
 
@@ -112,15 +114,18 @@ for subindx=1:numel(subj)
     % HEAD POSITION (Polhemus)
     %
     % Specify source file path
-    head_pos_file = sprintf('sub-%s.pos', subj{subindx})
+    head_pos_file = sprintf('sub-%s.pos', subj{subindx});
     source_ses1_dir = sprintf('%s/source/sub-%s/ses-001/', data_dir, subj{subindx});
     head_pos_d = strcat(source_ses1_dir, head_pos_file);
     
     % Specify destination file path
-    head_pos_file_raw1 = sprintf('sub-%s_ses-001_headshape.pos', subj{subindx})
+    head_pos_file_raw1 = sprintf('sub-%s_ses-001_headshape.pos', subj{subindx});
     source_ses1_raw1_dir = sprintf('%s/sub-%s/ses-001/meg/', general_cfg.bidsroot, subj{subindx});
     head_pos_raw1_d = strcat(source_ses1_raw1_dir, head_pos_file_raw1);
     
+    % Check that destination folder exists
+    mkdir (source_ses1_raw1_dir)
+
     % Copy source to raw1 destination
     copyfile(head_pos_d, head_pos_raw1_d);
 
@@ -157,6 +162,11 @@ for subindx=1:numel(subj)
         cfg.dataset_description.BIDSVersion = 'v1.5.0';
         cfg.TaskDescription = 'The experiment consisted of visual flicker stimulation combined with a visual attention discrimination task and an arithmetic task.';
         cfg.task = 'flicker';
+        cfg.PowerLineFrequency  = 50;
+        cfg.DewarPosition       = 'upright';
+        cfg.SoftwareFilters     = 'n/a';
+        cfg.DigitizedLandmarks  = true;
+        cfg.DigitizedHeadPoints = false;
         
         % Convert to BIDS in raw1
         try
@@ -178,8 +188,8 @@ for subindx=1:numel(subj)
         cfg.dataset_description.BIDSVersion = 'unofficial extension';
         cfg.method    = 'convert'; % the eyelink-specific format is not supported, convert it to plain TSV
         cfg.dataset = fullfile(d.folder, d.name);
-        cfg.datatype  = 'eyetracker';
-        cfg.suffix = 'meg';
+        cfg.datatype  = 'eyetrack';
+        cfg.suffix = 'eyetrack';
         cfg.Manufacturer          = 'SR Research';
         cfg.ManufacturerModelName = 'Eyelink 1000';
         cfg.TaskDescription = 'The experiment consisted of visual flicker stimulation combined with a visual attention discrimination task and an arithmetic task.';
@@ -193,6 +203,12 @@ for subindx=1:numel(subj)
         %
         % Iterate over runs
         %
+        % First, create a /beh/ dir
+        beh_dir = sprintf('%s/sub-%s/ses-00%d/beh/', general_cfg.bidsroot, subj{subindx}, sesindx);
+        if not(isfolder(beh_dir))
+          mkdir(beh_dir)
+        end
+
         for runindx=1:2
             %  
             % BEHAVIOURAL DATA
@@ -205,11 +221,17 @@ for subindx=1:numel(subj)
             d = dir(strcat(behav_dir, filename));
             % Load the behavioural data as a table
             log = readtable(fullfile(d.folder, d.name));
+
+            % Add BIDS required columns
+            log_len = size(log, 1);
+            log.onset = repmat("n/a", log_len, 1);
+            log.duration = repmat("n/a", log_len, 1);
+            log = log(:, [end-1:end 1:end-3]);
             
             % Specify the output path in the raw1 directory
-            out_dir = sprintf('%s/sub-%s/ses-00%d/beh/', general_cfg.bidsroot, subj{subindx}, sesindx);
-            out_file = sprintf('sub-%s_ses-00%d_run-00%d_beh.tsv', subj{subindx}, sesindx, runindx);
-            out_d = fullfile(strcat(out_dir, out_file));
+            filename = sprintf('sub-%s_ses-00%d_run-00%d_task-%s_events', subj{subindx}, sesindx, runindx, tasks{runindx});
+            out_file = strcat(filename, '.tsv');
+            out_d = fullfile(strcat(beh_dir, out_file));
             % Write the behavioural data to destination
             writetable(log,out_d, 'filetype','text', 'delimiter','\t')
             
@@ -236,8 +258,8 @@ for subindx=1:numel(subj)
             json_txt = jsonencode(info, "PrettyPrint", true);
 
             % Specify the destination
-            out_json_file = sprintf('sub-%s_ses-00%d_run-00%d_beh.json', subj{subindx}, sesindx, runindx);
-            out_json_d = fullfile(strcat(out_dir, out_json_file));
+            out_json_file = strcat(filename, '.json');
+            out_json_d = fullfile(strcat(beh_dir, out_json_file));
             % Write the file
             fid = fopen(out_json_d,'w');
             fprintf(fid,'%s',json_txt);
@@ -246,3 +268,13 @@ for subindx=1:numel(subj)
         end % for each run      
     end % for each ses  
 end % for each subject
+
+% Write entries to the .bidsignore file
+bidsignore_text = ['*eyetrack.tsv' newline '*eyetrack.json' newline];
+% Specify the destination
+bidsignore_file = fullfile(strcat(general_cfg.bidsroot, '/.bidsignore'));
+% Write the file
+fid = fopen(bidsignore_file, 'w');
+fprintf(fid, '%s', bidsignore_text);
+
+diary off
