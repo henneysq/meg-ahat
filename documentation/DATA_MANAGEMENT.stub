@@ -28,14 +28,14 @@ include:
 ### Converting Data
 
 Converting data between versions is non-trivial and requires both commonly used public
-tools and custom scripts. This projects uses the FieldTrip tool (`data2bids`)[https://github.com/fieldtrip/fieldtrip/blob/master/data2bids.m]
+tools and custom scripts. This projects uses the FieldTrip tool [`data2bids`](https://github.com/fieldtrip/fieldtrip/blob/master/data2bids.m)
 and custom matlab scripts.
 
 Source data is converted to raw1 using the 
 [`/data_curration/convert_source_to_raw1.m`](https://github.com/henneysq/meg-ahat/blob/main/data_curration/convert_source_to_raw1.m) script.
 
 Raw1 data is converted to raw2 using the 
-[`/data_curration/convert_raw1_to_raw2.m`](data_curration/convert_raw1_to_raw2.m) script.
+[`/data_curration/convert_raw1_to_raw2.m`](https://github.com/henneysq/meg-ahat/blob/main/data_curration/convert_raw1_to_raw2.m) script.
 
 #### Eyetrack data
 
