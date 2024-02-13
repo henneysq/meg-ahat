@@ -23,10 +23,12 @@
 % |       |-- ses-001
 % |       |   |-- anat
 % |       |   |-- beh
+% |       |   |-- eyetrack
 % |       |   |-- meg
 % |       |   `-- sub-099_ses-001_scans.tsv
 % |       |-- ses-002
 % |       |   |-- beh
+% |       |   |-- eyetrack
 % |       |   |-- meg
 % |       |   `-- sub-099_ses-002_scans.tsv
 % |       `-- sub-099_sessions.tsv
