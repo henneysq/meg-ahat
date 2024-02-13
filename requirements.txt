@@ -7,3 +7,4 @@ git+https://optogit.optoceutics.com/optoceutics/software/libledcontroller.git@ma
 # (the only modification is avoiding coercion of numpy array to float
 # to get rid of endless deprecation warnings).
 git+https://github.com/henneysq/psychopy.git@dev#egg=psychopy
+https://optogit.optoceutics.com/optoceutics/research/megahatledcontroller.git

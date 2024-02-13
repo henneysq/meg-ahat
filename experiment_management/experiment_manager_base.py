@@ -6,7 +6,7 @@ import pandas as pd
 from numpy import random
 
 from .experiment_trigger import ExperimentTrigger
-from .dondersLEDController import DondersLEDController
+from megahatcontroller.dondersLEDController import DondersLEDController
 from util.util import get_git_sha
 
 class ExperimentManagerBase:
