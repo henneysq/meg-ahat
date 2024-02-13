@@ -23,6 +23,7 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 	1. [Philosophy](#philosophy)
 	2. [Data Versions](#data-versions)
 	3. [Converting Data](#converting-data)
+	4. [Eyetrack data](#eyetrack-data)
 3. [Experiment Management](#experiment-management)
 	1. [Dependencies](#dependencies)
 	2. [Quick-Start Guide](#quick-start-guide)
@@ -39,6 +40,8 @@ For the purpose of transparency, interpretability, and reproducibility,
 this project aims to conduct data analysis on BIDS-compliant data from the get-go. Thus,
 the source data is converted to BIDS prior to data analysis. However, the conversion
 takes place in two steps to incrementally enrich the data structure.
+
+Data analysis is conducted solely on the completely enriched data set (raw2 below).
 
 ### Data Versions <a name="data-versions"></a>
 
@@ -58,7 +61,7 @@ include:
 ### Converting Data <a name="converting-data"></a>
 
 Source data is converted to raw1 using the 
-[`/data_curration/convert_source_to_raw1.m`](data_curration/convert_source_to_raw1.m) script.
+[`/data_curration/convert_source_to_raw1.m`](https://github.com/henneysq/meg-ahat/blob/main/data_curration/convert_source_to_raw1.m) script.
 
 Raw1 data is converted to raw2 using the 
 [`/data_curration/convert_raw1_to_raw2.m`](data_curration/convert_raw1_to_raw2.m) script.
@@ -74,10 +77,12 @@ pilot-data
 |       |-- ses-001
 |       |   |-- anat
 |       |   |-- beh
+|       |   |-- eyetrack
 |       |   |-- meg
 |       |   `-- sub-099_ses-001_scans.tsv
 |       |-- ses-002
 |       |   |-- beh
+|       |   |-- eyetrack
 |       |   |-- meg
 |       |   `-- sub-099_ses-002_scans.tsv
 |       `-- sub-099_sessions.tsv
@@ -99,6 +104,9 @@ pilot-data
             `-- sub-099_ses-002-eyetracking.edf
 ```
 
+### Eyetrack data <a name="eyetrack-data"></a>
+
+Currently, eyetracking data is not covered by BIDS, but is added with the [BIDS extension proposal BEP020](https://docs.google.com/document/d/1eggzTCzSHG3AEKhtnEDbcdk-2avXN6I94X8aUPEBVsw/edit#heading=h.9tphvz6ot0j1).
 
 ## Experiment Management <a name="experiment-management"></a>
 
