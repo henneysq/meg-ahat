@@ -196,3 +196,32 @@ class TestVisualAttention(unittest.TestCase):
     #         return
         
     #     self.assertTrue(experiment_manager.end_of_experiment_flag)
+
+    def test_10_ten_trials(self):
+        experiment_manager = VisualAttentionExperimentManager(
+            sub=SUB, ses=SES, run=RUN, root=ROOT
+        )
+        experiment_manager.show_start_screen = MagicMock()
+        experiment_manager.show_pause_screen = MagicMock()
+        
+        experiment_manager = check_is_trigger_connected(experiment_manager)
+        experiment_manager = check_is_lc_connected(experiment_manager)
+
+        experiment_manager.load_experiment_data()
+        experiment_manager.prepare_psychopy()
+
+        for _ in range(10):
+            current_trial = experiment_manager.get_current_trial_data()
+            attention_side = current_trial.task
+            stimulus = current_trial.stimulus_condition
+            task_congruence = current_trial.task_congruence
+            
+            try:
+                _, _ = experiment_manager.execute_current_trial(
+                    grating_side=attention_side,
+                    grating_congruence=task_congruence,
+                    stimulus=stimulus,
+                )
+                experiment_manager.increment_trial_progress()
+            except SystemExit:
+                break

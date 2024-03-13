@@ -188,3 +188,43 @@ class TestWorkingMemory(unittest.TestCase):
         
     #     self.assertTrue(experiment_manager.end_of_experiment_flag)
 
+
+    def test_10_ten_trials(self):
+        experiment_manager = WorkingMemoryExperimentManager(
+            sub=SUB, ses=SES, run=RUN, root=ROOT
+        )
+
+        experiment_manager.show_start_screen = MagicMock()
+        experiment_manager.show_pause_screen = MagicMock()
+        
+        experiment_manager = check_is_trigger_connected(experiment_manager)
+        experiment_manager = check_is_lc_connected(experiment_manager)
+        
+        experiment_manager.load_experiment_data()
+        experiment_manager.prepare_psychopy()
+        
+        try:
+            experiment_manager.trigger.prepare_trigger()
+            import time; time.sleep(3)
+            experiment_manager.trigger.ser.reset_input_buffer()
+        except Exception as e:
+            logging.info("Caught exception while connecting serial port:\n" + str(e))
+            experiment_manager.trigger.ser = MagicMock()
+            experiment_manager.trigger.ser.write = MagicMock()
+            experiment_manager.trigger.ser.read = MagicMock(return_value=bytearray([0]))
+            experiment_manager.trigger.trigger_ready = True
+
+        for _ in range(3):
+            current_trial = experiment_manager.get_current_trial_data()
+            stimulus = current_trial.stimulus_condition
+            task_difficulty = current_trial.task_difficulty
+            presented_sum_correctness = current_trial.presented_sum_correctness
+            try:
+                _ = experiment_manager.execute_current_trial(
+                    presented_sum_correctness=presented_sum_correctness,
+                    stimulus=stimulus,
+                    task_difficulty=task_difficulty
+                )
+                experiment_manager.increment_trial_progress()
+            except SystemExit:
+                break
