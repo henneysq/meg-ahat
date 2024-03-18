@@ -47,7 +47,7 @@ class ExperimentTrigger():
     def __init__(
         self,
         pulse_dur: int = 30,
-        port: str = "/dev/tty.usbserial-AB0MKUNB",
+        port: str = "com1",
         baudrate: int = 115200,
         bytesize: int = serial.EIGHTBITS,
         parity: str = serial.PARITY_NONE,

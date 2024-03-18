@@ -19,7 +19,7 @@ class ExperimentManagerBase:
 
     """
     
-    SERIAL_DEVICES: Final[tuple[str]] = ("FT32TWG5", "FT51RDMI")
+    SERIAL_DEVICES: Final[tuple[str]] =  ("COM6", "COM7")#("TTL232RG-VIP", "TTL232RG-VSW5V0")#("FT32TWG5", "FT51RDMI")
 
     stimulation_map = {
         "con":3,
