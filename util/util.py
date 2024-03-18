@@ -1,3 +1,6 @@
+from tests.test_util import set_git_executable_path
+set_git_executable_path()
+
 import git
 
 def get_git_sha():
