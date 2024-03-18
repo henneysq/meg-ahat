@@ -525,7 +525,7 @@ class ExperimentManagerBase:
         self.core.wait(2)
         
     def show_start_screen(self, timeout: int = 60*10):
-        msg = self.text_stim(self.window, text="Press right index finger to continue", height=50)
+        msg = self.text_stim(self.window, text="PAUSE\n\nWait for experimenter", height=50)
         msg.draw()
         self.window.flip()
         
