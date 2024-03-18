@@ -40,8 +40,8 @@ def set_git_executable_path(path = None) -> bool:
 
     new_path_set = False
 
-    MEG_LAB_PC_NAME = "LAB-PRE120"
-    GIT_THUMBDRIVE_EXECUTABLE_PATH = "F:\dependencies\portable-git\cmd\git.exe"
+    MEG_LAB_PC_NAME = "DCCNLAB059"
+    GIT_THUMBDRIVE_EXECUTABLE_PATH = "E:\dependencies\portable-git\cmd\git.exe"
     if not "Windows" in platform.platform():
         return new_path_set
     
