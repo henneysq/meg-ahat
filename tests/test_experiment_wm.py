@@ -214,7 +214,7 @@ class TestWorkingMemory(unittest.TestCase):
             experiment_manager.trigger.ser.read = MagicMock(return_value=bytearray([0]))
             experiment_manager.trigger.trigger_ready = True
 
-        for _ in range(3):
+        for _ in range(4):
             current_trial = experiment_manager.get_current_trial_data()
             stimulus = current_trial.stimulus_condition
             task_difficulty = current_trial.task_difficulty
