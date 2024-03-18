@@ -434,6 +434,7 @@ class ExperimentManagerBase:
             elif len(key_response) > 0:
                 key_ = key_response[0]
                 if key_.value == "q":
+                    self.trigger.send_trigger(self.trigger_map["early-exit"])
                     window.close()
                     exit()
                 return key_.value, key_.rt

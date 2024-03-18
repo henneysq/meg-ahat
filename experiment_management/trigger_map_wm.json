@@ -6,5 +6,6 @@
     "fixation-wait":5,
     "result":6,
     "response":7,
-    "final-trigger":8
+    "final-trigger":8,
+    "early-exit": 11
 }

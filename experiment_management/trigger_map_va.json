@@ -8,5 +8,6 @@
     "response":7,
     "final-trigger":8,
     "quick-trial":9,
-    "catch-trial":10
+    "catch-trial":10,
+    "early-exit": 11
 }
