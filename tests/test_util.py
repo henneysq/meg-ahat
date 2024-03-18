@@ -5,10 +5,9 @@ from unittest.mock import MagicMock
 
 from serial import SerialException
 
-from experiment_management.experiment_manager_base import ExperimentManagerBase
-
 def check_is_trigger_connected(experiment_manager: ExperimentManagerBase):
-    
+    from experiment_management.experiment_manager_base import ExperimentManagerBase
+
     try:
         experiment_manager.trigger.prepare_trigger()
     except SerialException as e:
@@ -22,8 +21,10 @@ def check_is_trigger_connected(experiment_manager: ExperimentManagerBase):
     return experiment_manager
 
 def check_is_lc_connected(experiment_manager: ExperimentManagerBase):
+    from experiment_management.experiment_manager_base import ExperimentManagerBase
     try:
         experiment_manager.prepare_led_controllers()
+        print("Succesfully connected LED controllers")
     except ConnectionError as e:
         logging.info("Caught exception while connecting LED controllers:\n" + str(e))
         logging.info("Continuing with mock LED controllers")
