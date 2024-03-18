@@ -189,6 +189,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
 
         # Fixation point
         self.fixation_mark.draw()
+        self.window.mouseVisible = False
         self.window.flip()
         self.trigger.send_trigger(self.trigger_map["rest"])
         self.core.wait(wm_task_duration)
@@ -209,12 +210,14 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
             height=100,
         )
         msg.draw()
+        self.window.mouseVisible = False
         self.window.flip()
         self.trigger.send_trigger(self.trigger_map["sum"])
         self.core.wait(wm_task_duration)
 
         # Fixation point
         self.fixation_mark.draw()
+        self.window.mouseVisible = False
         self.window.flip()
         self.trigger.send_trigger(self.trigger_map["fixation-wait"])
         self.core.wait(random.uniform(*fixation_duration_range))
@@ -224,6 +227,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         msg = self.text_stim(self.window, text=f"{presented_sum}", height=100)
         msg.draw()
         self.trigger.send_trigger(self.trigger_map["result"])
+        self.window.mouseVisible = False
         self.window.flip()
 
         # Read the response and reaction time

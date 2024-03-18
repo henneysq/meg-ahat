@@ -172,6 +172,7 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         # Check that all dependencies are available
         # at runtime
         self._check_dependencies_ready()
+        self.window.mouseVisible = False
 
         # Check which input parameters where given,
         # and set None values to defaults
@@ -205,6 +206,7 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         
         # Display rest period fixation mark
         self.fixation_mark.draw()
+        self.window.mouseVisible = False
         self.window.flip()
         self.trigger.send_trigger(self.trigger_map["rest"])
         self.core.wait(rest_duration)
@@ -220,6 +222,7 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         # Give lateral attention cue
         msg = self.text_stim(self.window, text=ATT_SIDE_INSTRUCTION_MAP[grating_side], height=100)
         msg.draw()
+        self.window.mouseVisible = False
         self.window.flip()
         self.trigger.send_trigger(self.trigger_map["lateral-cue"])
         self.core.wait(instruction_duration)
@@ -227,6 +230,7 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
         # Show fixation grating
         self.fixation_grating.ori = evas.GRATING_ORIENTATION_MAP[grating_side]
         self.fixation_grating.draw()
+        self.window.mouseVisible = False
         self.window.flip()
         self.trigger.send_trigger(self.trigger_map["fixation-grating"])
         # Set the duration of the fixation; varys depending on
@@ -249,6 +253,7 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
             self.detection_grating.ori = detection_grating_orientation
             self.detection_grating.draw()
             self.fixation_grating.draw()
+            self.window.mouseVisible = False
             self.window.flip()
             self.trigger.send_trigger(self.trigger_map["driscrimination-grating"])
 
