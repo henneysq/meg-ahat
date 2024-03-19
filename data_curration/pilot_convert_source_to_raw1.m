@@ -187,20 +187,48 @@ for subindx=1:numel(subj)
 
         % Specify configuration
         cfg = general_cfg;
-        cfg.dataset_description.BIDSVersion = 'unofficial extension';
+        cfg.dataset_description.BIDSVersion = 'v1.10.0-dev';
         cfg.method    = 'convert'; % the eyelink-specific format is not supported, convert it to plain TSV
         cfg.dataset = fullfile(d.folder, d.name);
-        cfg.datatype  = 'eyetrack';
+        cfg.datatypedir  = 'beh';
         cfg.suffix = 'eyetrack';
         cfg.Manufacturer          = 'SR Research';
         cfg.ManufacturerModelName = 'Eyelink 1000';
         cfg.TaskDescription = 'The experiment consisted of visual flicker stimulation combined with a visual attention discrimination task and an arithmetic task.';
         cfg.task = 'flicker';
-        
+        cfg.EnvironmentCoordinates = 'top-left'; % verify
+        %cfg.SamplingFrequency = 1000;
+        cfg.SampleCoordinateUnit = 'pixel'; % verify
+        cfg.SampleCoordinateSystem = 'gaze-on-screen';
+        cfg.Columns = {"timestamp","eye1_x_coordinate", "eye1_y_coordinate", "eye1_pupil_size", "event_trigger"};
+        cfg.AdditionalColumns = struct('event_trigger', 'Event trigger codes from BITSI');
+
         % convert the data
         cfg.sub = subj{subindx};
         cfg.ses = sprintf('00%d', sesindx);
         data2bids(cfg);
+
+        % Add required columns to _events.tsv
+        eyetrack_coords_file = sprintf('/sub-%s/ses-00%d/beh/sub-%s_ses-00%d_task-flicker_eyetrack.tsv', subj{subindx}, sesindx, subj{subindx}, sesindx);
+        d = dir(strcat(cfg.bidsroot, eyetrack_coords_file));
+        % Load the eyetrack events data as a table
+        et_coords = readtable(fullfile(d.folder, d.name), 'filetype','text', 'delimiter','\t');
+        et_coords = renamevars(et_coords,["Var1","Var2", "Var3", "Var4", "Var5"], ["timestamp","eye1_x_coordinate", "eye1_y_coordinate", "eye1_pupil_size", "event_trigger"]);
+        %timepoints = 0:1/1000:(height(et_coords)-1)/1000;
+        %et_coords.onset = timepoints';
+        et_coords.timestamp = et_coords.timestamp - et_coords.timestamp(1) + 1;
+        %et_coords.duration = repmat("n/a", height(et_coords), 1);
+        %et_coords = et_coords(:, [end-1:end 1:end-3]);
+        writetable(et_coords, fullfile(d.folder, d.name), 'filetype', 'text', 'delimiter','\t')
+
+        % Update eyetrack.json
+        %fname = sprintf('/sub-%s/ses-00%d/beh/sub-%s_ses-00%d_task-flicker_eyetrack.json', subj{subindx}, sesindx, subj{subindx}, sesindx);
+        %d = dir(strcat(cfg.bidsroot, fname));
+        %fid = fopen(fullfile(d.folder, d.name));
+        %raw = fread(fid,inf);
+        %str = char(raw');
+        %fclose(fid);
+        %eyetrack_json = jsondecode(str);
 
         %
         % Iterate over runs
