@@ -1,6 +1,6 @@
 clear; clc;
 
-subs = [1:7 12];
+subs = [1:7 10 12];
 
 overwrite_cfg = [];
 overwrite_cfg.anat = false;
