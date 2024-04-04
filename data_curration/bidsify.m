@@ -1,13 +1,20 @@
 clear; clc;
 
-subs = [1:7 10 12];
+%% Setup and flagging behaviour
+% Specify which subjects to process and which curration
+% steps to complete
 
-overwrite_cfg = [];
-overwrite_cfg.anat = false;
-overwrite_cfg.polhemous = false;
-overwrite_cfg.meg = false;
-overwrite_cfg.eyetrack = false;
-overwrite_cfg.beh = false;
+subs = [1:7 10 12 14 16 19:20];
+
+conv_source_to_raw1_flag = true; % Whether or not to convert source to raw1
+conv_raw1_to_raw2_flag = false; % whether or not to convert raw1 to raw2
+
+overwrite_flags = [];
+overwrite_flags.anat = false; % Whether or not to overwrite MRI if it exists
+overwrite_flags.polhemous = false; % Whether or not to overwrite Polhemous
+overwrite_flags.meg = false; % Whether or not to overwrite MEG
+overwrite_flags.eyetrack = true; % Whether or not to overwrite eytrack
+overwrite_flags.beh = true; % Whether or not to overwrite behaviour
 
 %% setup
 project_dir = fullfile('/project', '3031004.01');
@@ -19,7 +26,7 @@ addpath(util_dir);
 
 % Set pilot data directory
 data_dir = fullfile(project_dir, 'data');
-diaryfile = fullfile(data_dir, 'source_to_raw1.log');
+diaryfile = fullfile(data_dir, 'data_curration.log');
 
 if (exist(diaryfile, 'file'))
     delete(diaryfile);
@@ -33,10 +40,12 @@ configure_ft
 
 %% BIDSify data
 
-% Specify some general information
+% Set directories
 source_dir = fullfile(data_dir, 'source');
 raw1_dir = fullfile(data_dir, 'raw1');
+raw2_dir = fullfile(data_dir, 'raw2');
 
+%% Specify some general information
 general_cfg = [];
 general_cfg.bidsroot = raw1_dir;
 general_cfg.InstitutionName             = 'Radboud University';
@@ -47,6 +56,7 @@ general_cfg.dataset_description.License             = 'RU-DI-HD-1.0';
 general_cfg.dataset_description.Authors             = 'Henney MA, Spaak E,Oostenveld R';
 general_cfg.dataset_description.EthicsApprovals     = 'DCCN 3031004.01';
 
+%% Make conversions
 
 for s = 1:numel(subs)
     sub = subs(s);
@@ -55,7 +65,15 @@ for s = 1:numel(subs)
     %details = sprintf('details_sub%03d', sub);
     %eval(details);
 
-    convert_source_to_raw1(sub, general_cfg, source_dir, overwrite_cfg)
+    % Convert source to raw 1
+    if conv_source_to_raw1_flag
+        convert_source_to_raw1(sub, general_cfg, source_dir, overwrite_flags)
+    end
+
+    if conv_raw1_to_raw2_flag
+        convert_raw1_to_raw2(sub, general_cfg, raw1_dir, raw2_dir, [])
+    end
+
 
 end
 

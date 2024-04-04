@@ -4,6 +4,14 @@ function convert_source_to_raw1(sub, general_cfg, source_dir, overwrite_cfg)
     ses_str = 'ses-001';
     sub_source_dir = fullfile(source_dir, sub_str);
     source_ses1_dir = fullfile(sub_source_dir, ses_str);
+
+    % Evaluate the missing data file
+    eval data_details
+    if isfield(data_details_cfg, sprintf('sub%03d', sub))
+        sub_data_details_cfg = data_details_cfg.(sprintf('sub%03d', sub));
+    else
+        sub_data_details_cfg = [];
+    end
     
     % Specify the missing sunject specific details
     general_cfg.sub = sprintf('%03d', sub);
@@ -116,48 +124,54 @@ function convert_source_to_raw1(sub, general_cfg, source_dir, overwrite_cfg)
 
     % ##########################################
     % ############## EYE TRACKING ##############
+    
+    % First check if the eyetrack data is missing
+    if isfield(sub_data_details_cfg, 'eyetrack_missing')
+        assert(sub_data_details_cfg.eyetrack_missing)
+    else % otherwise, proceed with conversion
 
-    % It's ambiguous where to send eyetracking data, as the BEP020
-    % has naming conflicts for the events files in the /meg dir.
-    % For now, we keep it in beh
-    datatypedir = 'beh';
-    
-    eyetrack_file = fullfile(general_cfg.bidsroot, sub_str,  ses_str, ...
-        datatypedir, sprintf('%s_%s_task-flicker_eyetrack.tsv', sub_str, ses_str));
-    
-    write_files_flag = check_n_prep_overwrite(eyetrack_file, ...
-        overwrite_cfg.eyetrack);
-    
-    if write_files_flag
-        % Specify source data path
-        sub_source_eyetrack_file = fullfile(source_ses1_dir, 'meg', ...
-            sprintf('%s.asc', sub_str));
+        % It's ambiguous where to send eyetracking data, as the BEP020
+        % has naming conflicts for the events files in the /meg dir.
+        % For now, we keep it in beh
+        datatypedir = 'beh';
         
-        % Specify configuration
-        cfg = general_cfg;
-        cfg.datatypedir  = datatypedir;
-        cfg.ses = '001';
-        cfg.dataset_description.BIDSVersion = 'v1.10.0-dev';
-        cfg.method    = 'convert'; % the eyelink-specific format is not 
-                                   % supported, convert it to plain TSV
-        cfg.dataset = sub_source_eyetrack_file;
-        cfg.suffix = 'eyetrack';
-        cfg.Manufacturer          = 'SR Research';
-        cfg.ManufacturerModelName = 'Eyelink 1000';
-        cfg.TaskDescription = ['The experiment consisted of visual flicker ' ...
-            'stimulation combined with a visual attention discrimination ' ...
-            'task and an arithmetic task.'];
-        cfg.task = 'flicker';
-        cfg.EnvironmentCoordinates = 'top-left'; % verify
-        %cfg.SamplingFrequency = 1000;
-        cfg.SampleCoordinateUnit = 'pixel'; % verify
-        cfg.SampleCoordinateSystem = 'gaze-on-screen';
-        cfg.Columns = {"timestamp","eye1_x_coordinate", "eye1_y_coordinate", ...
-            "eye1_pupil_size", "event_trigger"};
-        cfg.AdditionalColumns = struct('event_trigger', ...
-            'Event trigger codes from BITSI');
-    
-        data2bids(cfg);
+        eyetrack_file = fullfile(general_cfg.bidsroot, sub_str,  ses_str, ...
+            datatypedir, sprintf('%s_%s_task-flicker_eyetrack.tsv', sub_str, ses_str));
+        
+        write_files_flag = check_n_prep_overwrite(eyetrack_file, ...
+            overwrite_cfg.eyetrack);
+        
+        if write_files_flag
+            % Specify source data path
+            sub_source_eyetrack_file = fullfile(source_ses1_dir, 'meg', ...
+                sprintf('%s.asc', sub_str));
+            
+            % Specify configuration
+            cfg = general_cfg;
+            cfg.datatypedir  = datatypedir;
+            cfg.ses = '001';
+            cfg.dataset_description.BIDSVersion = 'v1.10.0-dev';
+            cfg.method    = 'convert'; % the eyelink-specific format is not 
+                                       % supported, convert it to plain TSV
+            cfg.dataset = sub_source_eyetrack_file;
+            cfg.suffix = 'eyetrack';
+            cfg.Manufacturer          = 'SR Research';
+            cfg.ManufacturerModelName = 'Eyelink 1000';
+            cfg.TaskDescription = ['The experiment consisted of visual flicker ' ...
+                'stimulation combined with a visual attention discrimination ' ...
+                'task and an arithmetic task.'];
+            cfg.task = 'flicker';
+            cfg.EnvironmentCoordinates = 'top-left'; % verify
+            %cfg.SamplingFrequency = 1000;
+            cfg.SampleCoordinateUnit = 'pixel'; % verify
+            cfg.SampleCoordinateSystem = 'gaze-on-screen';
+            cfg.Columns = {"timestamp","eye1_x_coordinate", "eye1_y_coordinate", ...
+                "eye1_pupil_size", "event_trigger"};
+            cfg.AdditionalColumns = struct('event_trigger', ...
+                'Event trigger codes from BITSI');
+        
+            data2bids(cfg);
+        end
     end
 
 
@@ -192,7 +206,15 @@ function convert_source_to_raw1(sub, general_cfg, source_dir, overwrite_cfg)
             % Specify source path
             beh_filename = sprintf('%s_%s_run-%03d_experimentdata_managerdump-*.csv', sub_str, ses_str, runindx);
             beh_file_path = fullfile(source_ses1_dir, 'beh', beh_filename);
-            beh_file_path = fullfile(source_ses1_dir, 'beh', dir(beh_file_path).name);
+
+            % If there are multiple dumps, check the data_datails_cfg
+            specific_filename = dir(beh_file_path);
+            if numel(specific_filename) == 1
+                beh_file_path = fullfile(source_ses1_dir, 'beh', specific_filename.name);
+            else
+                specific_filename = sub_data_details_cfg.(sprintf('beh_run%d_log_filename', runindx));
+                beh_file_path = fullfile(source_ses1_dir, 'beh', specific_filename);
+            end
 
             % Load the behavioural data as a table
             beh_log = readtable(beh_file_path);
