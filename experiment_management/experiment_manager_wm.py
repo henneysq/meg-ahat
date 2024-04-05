@@ -234,6 +234,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         reponse, rt = self._get_response_and_reaction_time(
             self.keyboard, self.window, response_timeout
         )
+        self.trigger.send_trigger(self.trigger_map["response"])
         
         self.lc_right.display_preset(self.stimulation_map["con"])
         self.lc_left.display_preset(self.stimulation_map["con"])
