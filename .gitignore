@@ -1,4 +1,4 @@
-*venv/
+*venv*/
 *__pycache__/
 *code-workspace
 *data/
@@ -10,3 +10,4 @@ experiment_management/dondersLEDController.py
 TODO.md
 *.asv
 NOTES.md
+img/
