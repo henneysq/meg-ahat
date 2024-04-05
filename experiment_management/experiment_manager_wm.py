@@ -292,6 +292,8 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
             self.increment_trial_progress()
             self.save_experiment_data()
 
+        self.trigger.send_trigger(self.trigger_map["final-trigger"])
+
     def _check_experiment_duration_args(
         self,
         pre_fixation_duration: float | None = None,
