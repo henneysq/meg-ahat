@@ -1,4 +1,4 @@
-subs = [1:7 10];
+subs = [1:7 10 12 14:17 19:20];
 
 % Configure fieldtrip
 addpath('/project/3031004.01/meg-ahat/util')

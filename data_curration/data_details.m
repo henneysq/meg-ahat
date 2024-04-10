@@ -2,7 +2,7 @@ data_details_cfg = [];
 
 data_details_cfg.sub001 = [];
 data_details_cfg.sub001.run1 = [];
-data_details_cfg.sub001.run1.suffix = 'a042d115';
+data_details_cfg.sub001.run1.suffix = 'a042d115'; % commit ID
 data_details_cfg.sub001.run2 = [];
 data_details_cfg.sub001.run2.suffix = 'a042d115';
 
@@ -98,9 +98,15 @@ data_details_cfg.sub016.run1.suffix = 'cc66c65b';
 data_details_cfg.sub016.run2 = [];
 data_details_cfg.sub016.run2.suffix = 'cc66c65b';
 
+data_details_cfg.sub017 = [];
+data_details_cfg.sub017.run1 = [];
+data_details_cfg.sub017.run1.suffix = 'fbd05d5a';
+data_details_cfg.sub017.run2 = [];
+data_details_cfg.sub017.run2.suffix = 'fbd05d5a';
+
 data_details_cfg.sub019 = [];
 data_details_cfg.sub019.run1 = [];
-data_details_cfg.sub019.run1.suffix = 'cc66c65b_00';
+data_details_cfg.sub019.run1.suffix = 'cc66c65b_00'; % commit ID + overwrite protection index
 data_details_cfg.sub019.run2 = [];
 data_details_cfg.sub019.run2.suffix = 'cc66c65b';
 
