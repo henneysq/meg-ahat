@@ -204,7 +204,9 @@ function convert_source_to_raw1(sub, general_cfg, source_dir, overwrite_cfg)
 
         if write_files_flag
             % Specify source path
-            beh_filename = sprintf('%s_%s_run-%03d_experimentdata_managerdump-*.csv', sub_str, ses_str, runindx);
+            beh_filename = sprintf('%s_%s_run-%03d_experimentdata_managerdump-%s.csv', ...
+                sub_str, ses_str, runindx, ...
+                sub_data_details_cfg.(sprintf('run%d', runindx)).suffix);
             beh_file_path = fullfile(source_ses1_dir, 'beh', beh_filename);
 
             % If there are multiple dumps, check the data_datails_cfg

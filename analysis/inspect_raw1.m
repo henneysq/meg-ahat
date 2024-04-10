@@ -91,6 +91,7 @@ for sub = subs
     if sub_inspection_bookkeping.meg
         % PASS
     else
+        % read the data from disk and segment it into 1-second pieces
         dataset_dir = fullfile(ses_dir, 'meg', ...
             sprintf('%s_%s_task-flicker_meg.ds', sub_str, ses_str));
         cfg = [];
@@ -100,20 +101,19 @@ for sub = subs
         cfg.trialdef.ntrials     = inf;                    % number of trials, inf results in as many as possible
         cfg                      = ft_definetrial(cfg);
         
-        % read the data from disk and segment it into 1-second pieces
         data_segmented           = ft_preprocessing(cfg);
 
         cfg = [];
-        cfg.channel = 'M****';
+        cfg.channel = 'M****'; % Only meg sensors
         cfg.method   = 'summary';
         %cfg.ylim     = [-1e-12 1e-12];
         dummy        = ft_rejectvisual(cfg, data_segmented);
         
-        
+        % Update book keeping
         sub_inspection_bookkeping.meg = true;
     end
 
-
+    % Update and save book keeping
     inspection_bookkeeping.(sprintf('sub%03d', sub)) = sub_inspection_bookkeping;
     save ('inspection_bookkeeping.mat', 'inspection_bookkeeping')
 end
