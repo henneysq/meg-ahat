@@ -331,6 +331,7 @@ class VisualAttentionExperimentManager(ExperimentManagerBase):
             self.increment_trial_progress()
             self.save_experiment_data()
 
+        self.core.wait(0.3)
         self.trigger.send_trigger(self.trigger_map["final-trigger"])
 
     def _check_experiment_duration_args(
