@@ -272,6 +272,7 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
         # Send a trigger for the start of the experiment
         self.show_start_screen()
         self.trigger.send_trigger(self.trigger_map["initial-trigger"])
+        self.core.wait(0.3)
 
         for _ in range(len(self) - self.trial_progress):
             current_trial = self.get_current_trial_data()
@@ -291,7 +292,8 @@ class WorkingMemoryExperimentManager(ExperimentManagerBase):
             )
             self.increment_trial_progress()
             self.save_experiment_data()
-
+        
+        self.core.wait(0.3)
         self.trigger.send_trigger(self.trigger_map["final-trigger"])
 
     def _check_experiment_duration_args(
