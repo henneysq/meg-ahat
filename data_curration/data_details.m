@@ -1,5 +1,7 @@
 data_details_cfg = [];
 
+data_details_cfg.old_trigger_subs = [1:7 10 12 14:17 19:20];
+
 data_details_cfg.sub001 = [];
 data_details_cfg.sub001.run1 = [];
 data_details_cfg.sub001.run1.suffix = 'a042d115'; % commit ID
@@ -45,9 +47,9 @@ data_details_cfg.sub007.run2.suffix = 'b2aef43d';
 
 data_details_cfg.sub008 = [];
 data_details_cfg.sub008.run1 = [];
-data_details_cfg.sub008.run1.suffix = '';
+data_details_cfg.sub008.run1.suffix = '00e480a9';
 data_details_cfg.sub008.run2 = [];
-data_details_cfg.sub008.run2.suffix = '';
+data_details_cfg.sub008.run2.suffix = '00e480a9';
 
 data_details_cfg.sub009 = [];
 data_details_cfg.sub009.run1 = [];
@@ -115,3 +117,9 @@ data_details_cfg.sub020.run1 = [];
 data_details_cfg.sub020.run1.suffix = 'cc66c65b';
 data_details_cfg.sub020.run2 = [];
 data_details_cfg.sub020.run2.suffix = 'cc66c65b';
+
+data_details_cfg.sub021 = [];
+data_details_cfg.sub021.run1 = [];
+data_details_cfg.sub021.run1.suffix = '00e480a9';
+data_details_cfg.sub021.run2 = [];
+data_details_cfg.sub021.run2.suffix = '00e480a9';
