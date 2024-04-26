@@ -535,7 +535,7 @@ class ExperimentManagerBase:
             response, _ = self._get_response_and_reaction_time(self.keyboard, self.window, timeout)
             if response == -1:
                 raise TimeoutError("Took too long to respond, exiting.")
-            if response == 97 or response == "left":
+            if response == "left":
                 break
 
         self.window.flip()
