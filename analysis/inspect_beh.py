@@ -7,6 +7,7 @@ Outputs figures to ./img/ for use in ./NOTES.md.
 
 from collections import defaultdict
 from copy import deepcopy
+from typing import Final
 from pathlib import Path
 
 from numpy import ndarray
@@ -20,8 +21,9 @@ from experiment_management import experiment_wm_settings as WM_SETTINGS
 IMG_DIR = Path(__file__).parent.parent / "img"  # Output local image dir
 DATA_DIR = Path("/Volumes/3031004.01/data/raw2")
 
-# First 15: 1 2 3 4 5 6 7 10 12 14 15 16 19 20]
-SUBJECTS = (8, 11, 13, 17, 18, 21, 22, 23, 25, 27, 29)
+FIRST_FIFTEEN: Final[tuple] = {1, 2, 3, 4, 5, 6, 7, 10, 12, 14, 15, 16, 19, 20}
+SUBJECTS = {8, 9, 11, 13, 17, 18, 21, 22, 23, 25, 27, 28, 29}
+assert len(SUBJECTS.intersection(FIRST_FIFTEEN)) == 0
 RUNS = (1, 2)
 
 # Define a map for translating
