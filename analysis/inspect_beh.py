@@ -184,6 +184,9 @@ def make_beh_plots(df_: pd.DataFrame, axes_: ndarray[ndarray[plt.Axes]], run: in
 sns.set_theme()
 sns.set_theme(rc={"figure.figsize": (11.7, 8.27)})
 
+# Make sure dirs exists
+IMG_DIR.mkdir(exist_ok=True)
+
 # Prepare empty lists for appending single subject dfs.
 # These are concatenated after plotting on an individual level
 run1_df_list = []
@@ -203,9 +206,9 @@ for sub in SUBJECTS:
 
     # Prepare some figures for plotting
     fig_va, axes_va = plt.subplots(2, 3)
-    fig_va.suptitle(f"Subject {sub} - visual attention")
+    #fig_va.suptitle(f"Subject {sub} - visual attention")
     fig_wm, axes_wm = plt.subplots(2, 3)
-    fig_wm.suptitle(f"Subject {sub} - working memory")
+    #fig_wm.suptitle(f"Subject {sub} - working memory")
     axes_tup = (axes_va, axes_wm)
 
     for run in RUNS:
@@ -251,9 +254,9 @@ merged_runs_df_map = {
 
 # Prepare figures for plotting accross subjects
 fig_va, axes_va = plt.subplots(2, 3)
-fig_va.suptitle(f"All subjects - visual attention")
+#fig_va.suptitle(f"All subjects - visual attention")
 fig_wm, axes_wm = plt.subplots(2, 3)
-fig_wm.suptitle(f"All subjects - working memory")
+#fig_wm.suptitle(f"All subjects - working memory")
 axes_tup = (axes_va, axes_wm)
 print(axes_wm, type(axes_wm), axes_wm[0][0], type(axes_wm[0][0]))
 
