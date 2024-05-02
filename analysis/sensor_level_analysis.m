@@ -93,91 +93,72 @@ for sub = subjects;%subjects %[1:7 10 12 14:17 19:20]
         cfg.trials = trials_right;
         data_right = ft_selectdata(cfg, data_va_cond);
         
+        proc = "splg";
+        for foilim = [1 2 3]
 
-        for proc = "splg"
-            for foilim = [1 2 3]
-            %
-            %
+            cfg                 = [];
+            cfg.feedback        = 'yes';
+            cfg.method          = 'template';
+            cfg.planarmethod    = 'sincos';
+            cfg.neighbours      = neighbours;
+            data_left_planar = ft_megplanar(cfg, data_left);
+            data_right_planar = ft_megplanar(cfg, data_right);
+
+            cfg              = [];
+            channels = 'MEG';
+            cfg.output       = 'pow';
+            cfg.channel      = channels;
+            cfg.method       = 'mtmfft';
+            cfg.taper        = 'boxcar';
+            cfg.foilim       = foilims(:, foilim)';
+            ERboxcar_ar_left_planar        = ft_freqanalysis(cfg, data_left_planar);
+            ERboxcar_ar_right_planar        = ft_freqanalysis(cfg, data_right_planar);
             
-                switch proc
-                    case "none"
+            cfg = [];
+            ERboxcar_ar_left = ft_combineplanar(cfg, ERboxcar_ar_left_planar);
+            ERboxcar_ar_right= ft_combineplanar(cfg, ERboxcar_ar_right_planar);
+    
             
-                        
-                        % Caclulate PSD
-                        cfg              = [];
-                        channels = 'MEG';
-                        cfg.output       = 'pow';
-                        cfg.channel      = channels;
-                        cfg.method       = 'mtmfft';
-                        cfg.taper        = 'boxcar';
-                        cfg.foilim       = foilims(:, foilim)';
-                        ERboxcar_ar_left        = ft_freqanalysis(cfg, data_left);
-                        ERboxcar_ar_right        = ft_freqanalysis(cfg, data_right);
-                    case "splg"
-    
-                        cfg                 = [];
-                        cfg.feedback        = 'yes';
-                        cfg.method          = 'template';
-                        cfg.planarmethod    = 'sincos';
-                        cfg.neighbours      = neighbours;
-                        data_left_planar = ft_megplanar(cfg, data_left);
-                        data_right_planar = ft_megplanar(cfg, data_right);
-    
-                        cfg              = [];
-                        channels = 'MEG';
-                        cfg.output       = 'pow';
-                        cfg.channel      = channels;
-                        cfg.method       = 'mtmfft';
-                        cfg.taper        = 'boxcar';
-                        cfg.foilim       = foilims(:, foilim)';
-                        ERboxcar_ar_left_planar        = ft_freqanalysis(cfg, data_left_planar);
-                        ERboxcar_ar_right_planar        = ft_freqanalysis(cfg, data_right_planar);
-                        
-                        cfg = [];
-                        ERboxcar_ar_left = ft_combineplanar(cfg, ERboxcar_ar_left_planar);
-                        ERboxcar_ar_right= ft_combineplanar(cfg, ERboxcar_ar_right_planar);
-                end
-                
-                cfg.parameter = 'powspctrm';
-                cfg.operation = 'log10(x1./x2)'; %'(x1-x2)/(x1+x2)';
-                ERboxcar_ar_lateral_dif = ft_math(cfg, ERboxcar_ar_left, ERboxcar_ar_right);
-                
-                
-                %
-                cfg = [];
-                cfg.xlim         = foilims(:, foilim)';
-                cfg.marker       = 'on';
-                cfg.colorbar     = 'yes';
-                cfg.layout       = 'CTF151_helmet.mat';
-                cfg.colormap = '*RdBu';
-                cfg.zlim = 'maxabs';
-                
-                figure;
-                ft_topoplotER(cfg, ERboxcar_ar_left);
-                title('Left attention');
-                saveas(gcf,fullfile(img_dir, sprintf('sub-%03d_%s-power_stim-%s_proc-%s_left-attention_topo.png', sub, foilim_bands(foilim), condition, proc)))
-    
-                
-                figure;
-                ft_topoplotER(cfg, ERboxcar_ar_right);
-                title('Right attention');
-                saveas(gcf,fullfile(img_dir, sprintf('sub-%03d_%s-power_stim-%s_proc-%s_right-attention.png', sub, foilim_bands(foilim), condition, proc)))
-                
-                figure;
-                ft_topoplotER(cfg, ERboxcar_ar_lateral_dif);
-                title('Left minus right attention (dB)');
-                saveas(gcf,fullfile(img_dir, sprintf('sub-%03d_%s-power_stim-%s_proc-%s_lateral-dif.png', sub, foilim_bands(foilim), condition, proc)))
-                
-                switch foilim
-                    case 1
-                        lateral_contrast_gamma.(sprintf('%s', condition)) = ERboxcar_ar_lateral_dif;
-                    case 2
-                        lateral_contrast_alpha.(sprintf('%s', condition)) = ERboxcar_ar_lateral_dif;
-                    case 3
-                        lateral_contrast_beta.(sprintf('%s', condition)) = ERboxcar_ar_lateral_dif;
-                end
+            cfg.parameter = 'powspctrm';
+            cfg.operation = 'log10(x1./x2)'; %'(x1-x2)/(x1+x2)';
+            ERboxcar_ar_lateral_dif = ft_math(cfg, ERboxcar_ar_left, ERboxcar_ar_right);
+            
+            
+            %
+            cfg = [];
+            cfg.xlim         = foilims(:, foilim)';
+            cfg.marker       = 'on';
+            cfg.colorbar     = 'yes';
+            cfg.layout       = 'CTF151_helmet.mat';
+            cfg.colormap = '*RdBu';
+            cfg.zlim = 'maxabs';
+            
+            figure;
+            ft_topoplotER(cfg, ERboxcar_ar_left);
+            title('Left attention');
+            saveas(gcf,fullfile(img_dir, sprintf('sub-%03d_%s-power_stim-%s_proc-%s_left-attention_topo.png', sub, foilim_bands(foilim), condition, proc)))
+
+            
+            figure;
+            ft_topoplotER(cfg, ERboxcar_ar_right);
+            title('Right attention');
+            saveas(gcf,fullfile(img_dir, sprintf('sub-%03d_%s-power_stim-%s_proc-%s_right-attention.png', sub, foilim_bands(foilim), condition, proc)))
+            
+            figure;
+            ft_topoplotER(cfg, ERboxcar_ar_lateral_dif);
+            title('Left minus right attention (dB)');
+            saveas(gcf,fullfile(img_dir, sprintf('sub-%03d_%s-power_stim-%s_proc-%s_lateral-dif.png', sub, foilim_bands(foilim), condition, proc)))
+            
+            switch foilim
+                case 1
+                    lateral_contrast_gamma.(sprintf('%s', condition)) = ERboxcar_ar_lateral_dif;
+                case 2
+                    lateral_contrast_alpha.(sprintf('%s', condition)) = ERboxcar_ar_lateral_dif;
+                case 3
+                    lateral_contrast_beta.(sprintf('%s', condition)) = ERboxcar_ar_lateral_dif;
             end
         end
+        
     end
     fname = 'lateral_contrast_gamma.mat';
     ar_out_dest = fullfile(deriv_meg_dir, fname);
