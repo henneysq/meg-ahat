@@ -18,70 +18,71 @@ diary (diaryfile)
 % Set up Fieldtrip
 configure_ft
 
+% Define subjects - should eventually be centralised
 subjects = [8 9 11 13 17 18 21:23 25 27:30];
+
+stim_map = dictionary(["con", "isf", "strobe"], [1, 2, 3]);
 
 %
 %% VISUAL ATTENTION EXPERIMENT
 %
 %
+task_map = dictionary(["left", "right"], [1, 2]);
 for sub = subjects;%subjects %[1:7 10 12 14:17 19:20]
     sub
     close all
 
+    % Define subject specific directories
     img_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/img/');
-
     deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
-    load (fullfile(deriv_meg_dir, 'data_pca_va.mat'))
 
-    if not(exist('neighbours', 'var') == 1)
-        cfg                 = [];
-        cfg.feedback        = 'yes';
-        cfg.method          = 'template';
-        cfg.planarmethod    = 'sincos';
-        neighbours      = ft_prepare_neighbours(cfg, data_pca_va);
-    end
+    % Load artefact-suppressed data
+    load (fullfile(deriv_meg_dir, 'data_pca_va.mat'))
     
+    % Redefine trials to 2-second segments
     cfg = [];
     cfg.toilim    = [0.5 2.5-1/1200];
     data        = ft_redefinetrial(cfg,data_pca_va);
     
-    stim_map = dictionary(["con", "isf", "strobe"], [1, 2, 3]);
+    % Prepare some variables
     foilims = [[39 41]', [7 15]', [13 30]'];
     foilim_bands = ["40-Hz", "7-15-Hz", "13-30-Hz"];
     lateral_contrast_gamma = [];
     lateral_contrast_alpha = [];
     lateral_contrast_beta = [];
+
+    % Iterate over the no-flicker and luminance-flicker
+    % conditions for now
     for condition = ["con", "strobe"]
         condition
 
-        task_map = dictionary(["left", "right"], [1, 2]);
-        
+        % Find and select trials that are from run 1
+        % and belong to the condition
         trials_va_cond = data.trialinfo(:,3) == stim_map(condition) & ...
             bitor(data.trialinfo(:,4) == task_map("left"), ...
                 data.trialinfo(:,4) == task_map("right"));
-       
         cfg = [];
         cfg.trials = trials_va_cond;
         data_va_cond = ft_selectdata(cfg, data);
 
-        % plot TFR
-        channels = 'M*O**';
+        % plot TFR for sanity check (clear 40 Hz artefact only in strobe)
+        channels         = 'M*O**';
         cfg              = [];
         cfg.output       = 'pow';
         cfg.channel      = channels;
         cfg.method       = 'mtmconvol';
         cfg.taper        = 'boxcar';
-        cfg.foi          = 10:1:50;                         % analysis 2 to 30 Hz in steps of 2 Hz
-        cfg.t_ftimwin    = ones(length(cfg.foi),1).*1;   % length of time window = 1 sec
-        cfg.toi          = 0:0.05:2;                  % time window "slides" from -0.5 to 1.5 sec in steps of 0.05 sec (50 ms)
-        TFRboxcar_ar_eft        = ft_freqanalysis(cfg, data_va_cond);
-        
+        cfg.foi          = 10:1:50;                         
+        cfg.t_ftimwin    = ones(length(cfg.foi),1).*1;   
+        cfg.toi          = 0:0.05:2;
+        TFRboxcar_ar_eft = ft_freqanalysis(cfg, data_va_cond);
+
         cfg = [];
         figure; ft_singleplotTFR(cfg, TFRboxcar_ar_eft);
         title('Left attention');
         saveas(gcf,fullfile(img_dir, sprintf('sub-%03d_power_stim-%s_left-attention_psd.png', sub, condition)))
 
-
+        % Find and select left and right attention trials independently
         trials_left = data_va_cond.trialinfo(:,4) == task_map("left");
         trials_right = data_va_cond.trialinfo(:,4) == task_map("right");
        
@@ -93,17 +94,27 @@ for sub = subjects;%subjects %[1:7 10 12 14:17 19:20]
         cfg.trials = trials_right;
         data_right = ft_selectdata(cfg, data_va_cond);
         
-        proc = "splg";
+        % Iterate over three bands defined by `foilims`
+        proc = "splg"; % Indicates synthetic planar gradients
         for foilim = [1 2 3]
+            
+            % Prepare neighbours for planar gradients (but re-use)
+            if not(exist('neighbours', 'var') == 1)
+                cfg                 = [];
+                cfg.feedback        = 'yes';
+                cfg.method          = 'template';
+                neighbours      = ft_prepare_neighbours(cfg, data_pca_va);
+            end
 
+            % Calculate planar gradients
             cfg                 = [];
             cfg.feedback        = 'yes';
-            cfg.method          = 'template';
             cfg.planarmethod    = 'sincos';
             cfg.neighbours      = neighbours;
             data_left_planar = ft_megplanar(cfg, data_left);
             data_right_planar = ft_megplanar(cfg, data_right);
 
+            % Calculate FFT
             cfg              = [];
             channels = 'MEG';
             cfg.output       = 'pow';
@@ -114,30 +125,29 @@ for sub = subjects;%subjects %[1:7 10 12 14:17 19:20]
             ERboxcar_ar_left_planar        = ft_freqanalysis(cfg, data_left_planar);
             ERboxcar_ar_right_planar        = ft_freqanalysis(cfg, data_right_planar);
             
+            % Combine
             cfg = [];
             ERboxcar_ar_left = ft_combineplanar(cfg, ERboxcar_ar_left_planar);
             ERboxcar_ar_right= ft_combineplanar(cfg, ERboxcar_ar_right_planar);
     
-            
+            % Calculate lateral contrast of the power in the foilim
             cfg.parameter = 'powspctrm';
             cfg.operation = 'log10(x1./x2)'; %'(x1-x2)/(x1+x2)';
             ERboxcar_ar_lateral_dif = ft_math(cfg, ERboxcar_ar_left, ERboxcar_ar_right);
             
-            
-            %
+            % Plot topography for each level and for contrast
             cfg = [];
             cfg.xlim         = foilims(:, foilim)';
             cfg.marker       = 'on';
             cfg.colorbar     = 'yes';
             cfg.layout       = 'CTF151_helmet.mat';
-            cfg.colormap = '*RdBu';
-            cfg.zlim = 'maxabs';
+            cfg.colormap     = '*RdBu';
+            cfg.zlim         = 'maxabs';
             
             figure;
             ft_topoplotER(cfg, ERboxcar_ar_left);
             title('Left attention');
             saveas(gcf,fullfile(img_dir, sprintf('sub-%03d_%s-power_stim-%s_proc-%s_left-attention_topo.png', sub, foilim_bands(foilim), condition, proc)))
-
             
             figure;
             ft_topoplotER(cfg, ERboxcar_ar_right);
@@ -149,6 +159,7 @@ for sub = subjects;%subjects %[1:7 10 12 14:17 19:20]
             title('Left minus right attention (dB)');
             saveas(gcf,fullfile(img_dir, sprintf('sub-%03d_%s-power_stim-%s_proc-%s_lateral-dif.png', sub, foilim_bands(foilim), condition, proc)))
             
+            % Save the contrast for later averaging
             switch foilim
                 case 1
                     lateral_contrast_gamma.(sprintf('%s', condition)) = ERboxcar_ar_lateral_dif;
@@ -160,6 +171,8 @@ for sub = subjects;%subjects %[1:7 10 12 14:17 19:20]
         end
         
     end
+
+    % Save contrasts to disk
     fname = 'lateral_contrast_gamma.mat';
     ar_out_dest = fullfile(deriv_meg_dir, fname);
     save (ar_out_dest, 'lateral_contrast_gamma', '-v7.3');
@@ -170,12 +183,16 @@ for sub = subjects;%subjects %[1:7 10 12 14:17 19:20]
     ar_out_dest = fullfile(deriv_meg_dir, fname);
     save (ar_out_dest, 'lateral_contrast_beta', '-v7.3');
 end
-%%
 
+
+%% Calculate contrast pr. band averaged over subjects
+
+close all
 sub_struct_gamma = [];
 sub_struct_alpha = [];
 sub_struct_beta = [];
 
+% Load contrasts from disk
 for sub = subjects    
     deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
     load (fullfile(deriv_meg_dir, 'lateral_contrast_gamma.mat'))
@@ -186,10 +203,8 @@ for sub = subjects
     sub_struct_beta.(sprintf('sub%03d', sub)) = lateral_contrast_beta;
 end
 
-%
-close all
+% Iterate over bands and conditions
 condition = ["con", "strobe"];
-avg_cond = [];
 for band = ["40", "alpha", "beta"]
     switch band
         case "40"
@@ -199,7 +214,9 @@ for band = ["40", "alpha", "beta"]
         case "beta"
             data = sub_struct_beta;
     end
+
     for cond = condition
+        % Average spectra over subjects
         cfg = [];
         cfg.parameter = 'powspctrm';
         cfg.operation = '(x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+x11+x12+x13+x14)/14';
@@ -218,14 +235,13 @@ for band = ["40", "alpha", "beta"]
             data.sub028.(cond), ...
             data.sub029.(cond), ...
             data.sub030.(cond));
-        
-        %avg_cond.(cond) = avg_ERboxcar_ar_lateral_dif;
     
+        % Plot the average topography
         cfg = [];
         cfg.marker       = 'on';
         cfg.colorbar     = 'yes';
         cfg.layout       = 'CTF151_helmet.mat';
-        cfg.colormap = '*RdBu';
+        cfg.colormap     = '*RdBu';
         figure;
         ft_topoplotER(cfg, avg_ERboxcar_ar_lateral_dif);
         title(sprintf('Average left - right attention (dB) ; %s', cond));
@@ -236,12 +252,11 @@ end
 
 %% WORKING MEMORY EXPERIMENT
 
-for sub = subjects %[1:7 10 12 14:17 19:20]
+for sub = subjects
     sub
     close all
 
     img_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/img/');
-
     deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
     load (fullfile(deriv_meg_dir, 'data_pca_wm.mat'))
 
@@ -254,7 +269,7 @@ for sub = subjects %[1:7 10 12 14:17 19:20]
     end
     
     cfg = [];
-    cfg.toilim    = [0.5 2.5-1/1200];
+    cfg.toilim    = [0.5 6.5-1/1200];
     data        = ft_redefinetrial(cfg,data_pca_wm);
     
     stim_map = dictionary(["con", "isf", "strobe"], [1, 2, 3]);
@@ -384,7 +399,7 @@ for sub = subjects %[1:7 10 12 14:17 19:20]
     save (ar_out_dest, 'difficulty_contrast_beta', '-v7.3');
 end
 
-%%
+%
 close all
 sub_struct_gamma = [];
 sub_struct_alpha = [];
