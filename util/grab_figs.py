@@ -2,7 +2,7 @@ from pathlib import Path
 import shutil
 
 SERVER_DERIV_DIR = Path("/Volumes/3031004.01/data/derivatives")
-LOCAL_IMG_DIR = Path(__file__).parent.parent / "img"
+LOCAL_IMG_DIR = Path(__file__).parent / "img"
 MAINTAINED_FIGS = (
     "sub-all_stim-con_band-40_lateral-dif.png",
     "sub-all_stim-con_band-alpha_lateral-dif.png",
@@ -10,12 +10,6 @@ MAINTAINED_FIGS = (
     "sub-all_stim-strobe_band-40_lateral-dif.png",
     "sub-all_stim-strobe_band-alpha_lateral-dif.png",
     "sub-all_stim-strobe_band-beta_lateral-dif.png",
-    "sub-all_stim-strobe_band-40_arithmetic-difficulty-dif.png",
-    "sub-all_stim-strobe_band-alpha_arithmetic-difficulty-dif.png",
-    "sub-all_stim-strobe_band-beta_arithmetic-difficulty-dif.png",
-    "sub-all_stim-con_band-40_arithmetic-difficulty-dif.png",
-    "sub-all_stim-con_band-alpha_arithmetic-difficulty-dif.png",
-    "sub-all_stim-con_band-beta_arithmetic-difficulty-dif.png",
 )
 
 
