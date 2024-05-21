@@ -80,7 +80,7 @@ for sub = subjects
         cfg = [];
         cfg.headmodel = mri_headmodel;
         cfg.xgrid = -148:8:148; % in mm
-        cfg.ygrid = -148:8:1148; % in mm, one hemisphere, offset to the midline
+        cfg.ygrid = -148:8:148; % in mm, one hemisphere, offset to the midline
         cfg.zgrid = -148:8:148; % in mm
         nonsym_sourcemodel = ft_prepare_sourcemodel(cfg);
         save (fullfile(deriv_meg_dir, 'nonsym_sourcemodel.mat'), 'nonsym_sourcemodel', '-v7.3')
