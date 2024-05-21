@@ -29,7 +29,7 @@ data_details_cfg = get_data_details();
 % Define subjects, tasks, and conditions
 subjects = data_details_cfg.new_trigger_subs; % Subjects correctly stimulated
 tasks = ["va"];
-conditions = ["strobe"];
+conditions = ["con" "strobe"];
 
 % Define mapping for easier indexing
 stim_map = dictionary(["con", "isf", "strobe"], [1, 2, 3]);
@@ -242,16 +242,19 @@ for sub = subjects
                     % 3-dimensional sourcemodel dims
                     hem_left = reshape(sources_va_left_hsplit.left.avg.pow, sourcemodel.dim);
                     hem_right = reshape(sources_va_left_hsplit.right.avg.pow, sourcemodel.dim);
+
                     % As the symmetric source model grid was define on the
                     % left hemisphere (positive y in CTF coordinates), we
                     % need to flip the right hemispheres around the y-axis
                     % before concatenating them
                     hem_right = flip(hem_right,2);
-                    both_hemispheres = [hem_left hem_right];
+                    both_hemispheres = [hem_right hem_left];
+
                     % Make sure this risky step happened as intended
                     assert (all((size(both_hemispheres) == size(hem_left)) == [1 0 1]))
+
                     % Grab the metadata from the non-symmetrical
-                    % sourcemodel and 
+                    % sourcemodel and add value(s)
                     s_va_left= nonsym_sourcemodel;
                     s_va_left.freq = 40;
                     % Reshape the 3-dimensional power estimates for the
@@ -263,7 +266,7 @@ for sub = subjects
                     hem_left = reshape(sources_va_right_hsplit.left.avg.pow, sourcemodel.dim);
                     hem_right = reshape(sources_va_right_hsplit.right.avg.pow, sourcemodel.dim);
                     hem_right = flip(hem_right,2);
-                    both_hemispheres = [hem_left hem_right];
+                    both_hemispheres = [hem_right hem_left];
                     assert (all((size(both_hemispheres) == size(hem_left)) == [1 0 1]))
                     s_va_right= nonsym_sourcemodel;
                     s_va_right.freq = 40;
@@ -272,11 +275,11 @@ for sub = subjects
                     % Contrast the lateral conditions, normalising to their
                     % combined power
                     cfg           = [];
-                    cfg.operation = '(x2-x1)/(x1+x2)';
+                    cfg.operation = '(x2-x1)/(x1+x2)'; % right minus left
                     cfg.parameter = 'avg.pow';
                     source_lateral_dif   = ft_math(cfg,s_va_left,s_va_right);                    
 
-                    % SAVE OUTPUT TO DERIVATIVES FOR LATER
+                    % Save output to derivatives
                     source_va_dif_file = fullfile(deriv_meg_dir, sprintf('source_task-%s_dif-lateral_cond-%s.mat', task, condition));
                     save (source_va_dif_file, 'source_lateral_dif', '-v7.3')
 
@@ -365,49 +368,79 @@ for sub = subjects
 
 end
 
-%%
+%% Average over lateral contrasts
 
 lateral_dif_sources = cell(1,numel(subjects));
 task = "va";
-condition = "strobe";
-for s = 1:numel(subjects)
-    sub = subjects(s)
+conditions = ["con" "strobe"];
+for condition = conditions
+    for s = 1:numel(subjects)
+        sub = subjects(s)
+        
+        deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
     
-    deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
-
-    source_va_dif_file = fullfile(deriv_meg_dir, sprintf('source_task-%s_dif-lateral_cond-%s.mat', task, condition));
-    load (source_va_dif_file) % source_lateral_dif
-
-    lateral_dif_sources{s} = source_lateral_dif;
-
+        source_va_dif_file = fullfile(deriv_meg_dir, sprintf('source_task-%s_dif-lateral_cond-%s.mat', task, condition));
+        load (source_va_dif_file) % source_lateral_dif
+    
+        lateral_dif_sources{s} = source_lateral_dif;
+    
+    end
+    
+    % grand average over subjects
+    cfg           = [];
+    cfg.parameter = 'pow';
+    gaall         = ft_sourcegrandaverage(cfg, lateral_dif_sources{1});
+    
+    % interpolate onto MRI
+    % load ('mri152.mat');
+    deriv_anat_dir = fullfile(derivatives_dir, 'sub-030', '/ses-001/anat/'); % Use sub 30 mri for now
+    mri_realigned_file = fullfile(deriv_anat_dir, 'mri_realigned.mat');
+    load (mri_realigned_file)
+    
+    cfg           = [];
+    cfg.parameter = 'pow';
+    source_lateral_dif_interp  = ft_sourceinterpolate(cfg, gaall, mri_realigned);
+    
+    % Plot the estimated sources
+    
+    % thresholded opacity map, anything <65% of maximum is fully transparent,
+    % anything >80% of maximum is fully opaque
+    
+    cfg = [];
+    cfg.method        = 'ortho';
+    cfg.funparameter  = 'pow';
+    cfg.funcolormap   = 'jet';
+    
+    figure;
+    ft_sourceplot(cfg, source_lateral_dif_interp);
+    
+    
+    cfg = [];
+    cfg.method        = 'slice';
+    cfg.funparameter  = 'pow';
+    cfg.funcolormap   = 'jet';
+    
+    figure;
+    ft_sourceplot(cfg, source_lateral_dif_interp);
+    % 
+    % 
+    % source_lateral_dif_interp.nicemask = make_mask(source_lateral_dif_interp.pow, [0.5 0.8]);
+    % cfg = [];
+    % cfg.method        = 'ortho';
+    % cfg.funparameter  = 'pow';
+    % cfg.maskparameter = 'nicemask';
+    % cfg.funcolormap   = 'jet';
+    % 
+    % figure;
+    % ft_sourceplot(cfg, source_lateral_dif_interp);
+    % 
+    % 
+    % cfg = [];
+    % cfg.method        = 'slice';
+    % cfg.funparameter  = 'pow';
+    % cfg.maskparameter = 'nicemask';
+    % cfg.funcolormap   = 'jet';
+    % 
+    % figure;
+    % ft_sourceplot(cfg, source_lateral_dif_interp);
 end
-
-% grand average over subjects
-cfg           = [];
-cfg.parameter = 'pow';
-gaall         = ft_sourcegrandaverage(cfg, lateral_dif_sources{1});
-
-% interpolate onto MRI
-% load ('mri152.mat');
-deriv_anat_dir = fullfile(derivatives_dir, 'sub-030', '/ses-001/anat/'); % Use sub 30 mri for now
-mri_realigned_file = fullfile(deriv_anat_dir, 'mri_realigned.mat');
-load (mri_realigned_file)
-
-cfg           = [];
-cfg.parameter = 'pow';
-source_lateral_dif_interp  = ft_sourceinterpolate(cfg, gaall, mri_realigned);
-
-%%
-
-% thresholded opacity map, anything <65% of maximum is fully transparent,
-% anything >80% of maximum is fully opaque
-source_lateral_dif_interp.nicemask = make_mask(source_lateral_dif_interp.pow, [0.5 0.8]);
-
-cfg = [];
-cfg.method        = 'ortho';
-cfg.funparameter  = 'pow';
-cfg.maskparameter = 'nicemask';
-cfg.funcolormap   = 'jet';
-
-figure;
-ft_sourceplot(cfg, source_lateral_dif_interp);
