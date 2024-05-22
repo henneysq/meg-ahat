@@ -100,32 +100,10 @@ for sub = subjects
     % slightly between the symmentric and non-symmetric definitions, so we
     % check the difference between the pos array coordinates in the two
     % models to look for extrema that were included in one but not the
-    % other
-    assert (size(nonsym_sourcemodel.pos, 1) >= 2*size(sourcemodel.pos, 1))
-    indices_to_remove = zeros(size(nonsym_sourcemodel.pos,1), 1);
-    dim_reduction_count = [0 0 0];
-    for d = 1:numel(['x' 'y' 'z'])
-        dif = setdiff( ...
-            unique(nonsym_sourcemodel.pos(:, d)), ...
-            unique(sourcemodel.pos(:, d)) ...
-        );
-        
-        if d == 2
-            dif = dif(dif>0);
-        end
-
-        dim_reduction_count(d) = numel(dif);
-        for v = 1:numel(dif)
-            indices_to_remove = bitor(...
-                indices_to_remove, ...
-                nonsym_sourcemodel.pos(:, d) == dif(v) ...
-            );
-        end
-    end
-    indices_to_keep = not(indices_to_remove);
-    nonsym_sourcemodel.pos = nonsym_sourcemodel.pos(indices_to_keep, :);
-    nonsym_sourcemodel.inside = nonsym_sourcemodel.inside(indices_to_keep, :);
-    nonsym_sourcemodel.dim = nonsym_sourcemodel.dim - dim_reduction_count;
+    % other.
+    % The 'intersect_sourcemodels' function is defined in the bottom of the
+    % script
+    [sourcemodel, nonsym_sourcemodel] = intersect_sourcemodels(sourcemodel, nonsym_sourcemodel);
 
     % Leadfield:
     % Estimate the leadfield using the symmetric sourcemodel
@@ -410,4 +388,59 @@ for task_no = 1:numel(tasks)
         saveas(gcf,fullfile(derivatives_dir, sprintf('sub-all_stim-%s_task-%s_source_contrast.png', condition, task)))
 
     end
+end
+
+function [sourcemodel, nonsym_sourcemodel] = intersect_sourcemodels(sourcemodel, nonsym_sourcemodel)
+
+% Prepare array for dimensionality reduction bookkeeping
+    ns_sm_dim_reduction_count = [0 0 0];
+    sm_dim_reduction_count = [0 0 0];
+    sourcemodel_pos_stacked = [sourcemodel.pos(:,1:3); sourcemodel.pos(:,4:6)];
+    
+    ns_sm_indices_to_keep = ones(size(nonsym_sourcemodel.pos, 1), 1);
+    sm_indices_to_keep = ones(size(sourcemodel_pos_stacked, 1), 1);
+
+    % Iterate over over dimensions
+    for d = 1:numel(['x' 'y' 'z'])
+        % Calculate the set difference between the pos coordinates for that
+        % dimension
+        [dif, i_ns_sm] = setdiff( ...
+            nonsym_sourcemodel.pos(:, d), ...
+            sourcemodel_pos_stacked(:, d) ...
+        );
+        
+        % Keep books on dimensionality reduction
+        n_dif = numel(dif);
+        ns_sm_dim_reduction_count(d) = n_dif;
+        
+        % Calculate the set difference between the pos coordinates for that
+        % dimension in the other direction as set differences are
+        % directional
+        [dif, i_sm] = setdiff( ...
+            sourcemodel_pos_stacked(:, d), ...
+            nonsym_sourcemodel.pos(:, d) ...
+        );
+
+        % Keep books on dimensionality reduction
+        n_dif = numel(dif);
+        sm_dim_reduction_count(d) = n_dif;
+        
+        ns_sm_indices_to_keep(i_ns_sm) = 0;
+        sm_indices_to_keep(i_sm) = 0;
+    end
+
+    nonsym_sourcemodel.pos = nonsym_sourcemodel.pos(ns_sm_indices_to_keep, :);
+    nonsym_sourcemodel.inside = nonsym_sourcemodel.inside(ns_sm_indices_to_keep, :);
+    nonsym_sourcemodel.dim = nonsym_sourcemodel.dim - ns_sm_dim_reduction_count;
+    
+    h_half_idx = height(sm_indices_to_keep)/2;
+    assert (all(sm_indices_to_keep(1:h_half_idx) == ...
+                sm_indices_to_keep(h_half_idx + 1:end)))
+    sm_indices_to_keep = sm_indices_to_keep(1:h_half_idx);
+    sourcemodel_pos_unstacked = ...
+        [sourcemodel_pos_stacked(1:h_half_idx,:) sourcemodel_pos_stacked(h_half_idx+1:end,:)];
+    assert (all(sourcemodel.pos == sourcemodel_pos_unstacked, 'all'))
+    sourcemodel.pos = sourcemodel.pos(sm_indices_to_keep, :);
+    sourcemodel.inside = sourcemodel.inside(sm_indices_to_keep, :);
+    sourcemodel.dim = sourcemodel.dim - sm_dim_reduction_count;
 end
