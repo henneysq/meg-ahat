@@ -181,6 +181,7 @@ for sub = subjects
                  
             % Calculate periodogram
             cfg              = [];
+            cfg.channel     = 'MEG';
             cfg.output       = 'powandcsd';
             cfg.method       = 'mtmfft';
             cfg.taper        = 'boxcar';
@@ -195,8 +196,8 @@ for sub = subjects
             cfg                   = []; 
             cfg.method            = 'dics';
             cfg.frequency         = 40;  
-            cfg.channel           = data_task_cond.label(:);
-            cfg.grid              = leadfield;
+            cfg.channel           = data_all.label(:);
+            cfg.sourcemodel       = leadfield;
             cfg.headmodel         = mri_headmodel;
             cfg.dics.keepfilter   = 'yes';
             cfg.dics.fixedori     = 'no';
