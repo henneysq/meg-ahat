@@ -29,6 +29,9 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
       - [Directory Layout](#directory-layout)
   - [Data Analysis](#data-analysis)
     - [40 Hz Artefact Removal](#40-hz-artefact-removal)
+    - [Sensor Level Analysis](#sensor-level-analysis)
+    - [Source Level Analysis](#source-level-analysis)
+    - [Behavioural Analysis](#behavioural-analysis)
   - [Experiment Management ](#experiment-management-)
     - [Dependencies ](#dependencies-)
       - [Portable-Git for DCCN MEG presentation PC](#portable-git-for-dccn-meg-presentation-pc)
@@ -41,7 +44,6 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
       - [Setting experiment progresss](#setting-experiment-progresss)
       - [Using a custom random seed](#using-a-custom-random-seed)
   - [Testing ](#testing-)
-
 
 ## Data Curration <a name="data-analysis-and--management"></a>
 
@@ -146,6 +148,12 @@ graph TD;
 ```
 
 ### 40 Hz Artefact Removal
+
+### Sensor Level Analysis
+
+### Source Level Analysis
+
+### Behavioural Analysis
 
 
 
