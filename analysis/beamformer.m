@@ -27,7 +27,7 @@ configure_ft
 data_details_cfg = get_data_details();
 
 % Define subjects, tasks, and conditions
-subjects = [21 18];%data_details_cfg.new_trigger_subs; % Subjects correctly stimulated
+subjects = data_details_cfg.new_trigger_subs; % Subjects correctly stimulated
 tasks = ["va" "wm"];
 conditions = ["con" "strobe"];
 
@@ -264,56 +264,29 @@ for sub = subjects
                 sources_task1_hsplit.(hemispheres(hn)) = ft_sourcedescriptives(cfg, source_task1);
                 sources_task2_hsplit.(hemispheres(hn)) = ft_sourcedescriptives(cfg, source_task2);
             end
-            
+
+            % Grab the metadata from the non-symmetrical
+            % sourcemodel and add value(s)
+            source_reassembled_task1 = nonsym_sourcemodel;
+            source_reassembled_task1.freq = 40;
+            source_reassembled_task2 = source_reassembled_task1;
+
             % As we are left with two objects representing
             % simulataneously both hemispheres and one hemisphere,
             % we need to massage the estimates back into a
             % structure that fieldtrip understands downstream.
-            % Reshape the 1-dimensional power estimates to the
-            % 3-dimensional sourcemodel dims
-            hem_left = reshape(sources_task1_hsplit.left.avg.pow, sourcemodel.dim);
-            hem_right = reshape(sources_task1_hsplit.right.avg.pow, sourcemodel.dim);
+            source_reassembled_task1.avg.pow = reassemble_hemispheres(...
+                sources_task1_hsplit.left, ...
+                sources_task1_hsplit.right, ... 
+                source_reassembled_task1, ...
+                'avg.pow');
 
-            % As the symmetric source model grid was define on the
-            % left hemisphere (positive y in CTF coordinates), we
-            % need to flip the right hemispheres around the y-axis
-            % before concatenating them
-            hem_right = flip(hem_right,2);
-            both_hemispheres = [hem_right hem_left]; % concatenates in y dim
-
-            % Grab the metadata from the non-symmetrical
-            % sourcemodel and add value(s)
-            source_reassembled_task1= nonsym_sourcemodel;
-            source_reassembled_task1.freq = 40;
-            % Reshape the 3-dimensional power estimates for the
-            % entire brain back into the 1-dimensional array
-            % expected by fieldtrip
-            source_reassembled_task1.avg.pow = reshape(both_hemispheres,[],1);
-
-            % Repeat for other lateral condition
-            hem_left = reshape(sources_task2_hsplit.left.avg.pow, sourcemodel.dim);
-            hem_right = reshape(sources_task2_hsplit.right.avg.pow, sourcemodel.dim);
-            hem_right = flip(hem_right,2);
-            both_hemispheres = [hem_right hem_left];
-            assert (all((size(both_hemispheres) == size(hem_left)) == [1 0 1]))
-            source_reassembled_task2= nonsym_sourcemodel;
-            source_reassembled_task2.freq = 40;
-            source_reassembled_task2.avg.pow = reshape(both_hemispheres,[],1);
-
-            % Make sure this risky step happened as intended:
-            % First, check that the hemispheres were indeed concatenated
-            % across the y-dimension
-            assert (all((size(both_hemispheres) == size(hem_left)) == [1 0 1]))
-            % Then, check that reshaping the y-position coordinates with
-            % the same algorithm as the sources were reshaped in fact
-            % results in position coordinates matching the source model's
-            hem_pos_left = reshape(sources_task1_hsplit.left.pos(:,2), sourcemodel.dim);
-            hem_pos_right = reshape(sources_task1_hsplit.right.pos(:,5), sourcemodel.dim);
-            hem_pos_right = flip(hem_pos_right,2);
-            both_pos_hemispheres = [hem_pos_right hem_pos_left];
-            reassembled_pos = reshape(both_pos_hemispheres,[],1);
-            assert (all(source_reassembled_task1.pos(:,2)==reassembled_pos))
-
+            source_reassembled_task2.avg.pow = reassemble_hemispheres(...
+                sources_task2_hsplit.left, ...
+                sources_task2_hsplit.right, ...
+                source_reassembled_task2, ...
+                'avg.pow');
+            
             % Contrast the lateral conditions, normalising to their
             % combined power
             cfg           = [];
@@ -390,3 +363,5 @@ for task_no = 1:numel(tasks)
 
     end
 end
+
+%%
