@@ -34,11 +34,41 @@ function reassembled_pos = reassemble_hemispheres(sources_left_h, sources_right_
                 reassembled_pos(idrd) = sources_right_h.pos(ids,d+3);
             end
             reassembled_pos(idld) = sources_left_h.pos(ids,d);
+            % figure;plot(reassembled_pos,'LineWidth',2);hold on; plot(reference.pos(:,d),'r--','LineWidth',2)
+
             assert (all(reassembled_pos == reference.pos(:,d)))
         end
-        
+    catch try
+        ids = [];
+        idrd = [];
+        idld = [];
 
-    catch % the above assertion - could be more specific
+        stride_s = dim(1)*dim(3);
+        stride_d = dim(1)*dim(2)*2;
+        consec = dim(1);
+        for z = 1:dim(3)
+            for y = 1:dim(2)
+                ids = [ids (1:consec)+(y-1)*stride_s+(z-1)*consec];
+                idrd = [idrd (1:consec)+(y-1)*consec+(z-1)*stride_d];
+                idld = [idld (1:consec)+(y-1)*consec+(z-.5)*stride_d];
+            end
+        end
+
+        for d = 1:3
+            reassembled_pos = zeros(prod(dim)*2,1);
+            if d == 2
+                flipped_right = flip(sources_right_h.pos);
+                reassembled_pos(idrd) = flipped_right(ids,d+3);
+            else
+                reassembled_pos(idrd) = sources_right_h.pos(ids,d+3);
+            end
+            reassembled_pos(idld) = sources_left_h.pos(ids,d);
+            figure;plot(reassembled_pos,'LineWidth',2);hold on; plot(reference.pos(:,d),'r--','LineWidth',2)
+
+            assert (all(reassembled_pos == reference.pos(:,d)))
+        end
+
+    catch % the above assertion - should be more specific
         ids = [];
         idrd = [];
         idld = [];
@@ -65,7 +95,7 @@ function reassembled_pos = reassemble_hemispheres(sources_left_h, sources_right_
         end
     end
 
-    % figure;plot(reassembled_pos,'LineWidth',2);hold on; plot(ref_vals,'r--','LineWidth',2)
+    % figure;plot(reassembled_pos,'LineWidth',2);hold on; plot(reference.pos(:,d),'r--','LineWidth',2)
 
     par_fields = strsplit(parameter, '.');
     for n = 1:numel(par_fields)
