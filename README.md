@@ -4,7 +4,7 @@ Author: Mark Alexander Henney
 
 Principle Investigator: Robert Oostenveld
 
-Collaborators: Gustavo Feijoo, Henrik Hansen, Marcus Carstensen, Kristoffer Madsen, Eelke Spaak
+Collaborators: Henrik Hansen, Marcus Carstensen, Kristoffer Madsen, Eelke Spaak
 
 This repository contains the files required to run the experiment, currate the data, and run the analyses.
 
@@ -19,7 +19,7 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 # Table of contents
 
 1. [About the Project](#about-the-project)
-2. [Data Analysis and -Management](#data-analysis-and--management)
+2. [Data Curration](#data-curration)
 	1. [Philosophy](#philosophy)
 	2. [Data Versions](#data-versions)
 	3. [Converting Data](#converting-data)
@@ -31,7 +31,7 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 4. [Testing](#testing)
 
 
-## Data Analysis and -Management <a name="data-analysis-and--management"></a>
+## Data Curration <a name="data-curration"></a>
 
 ### Philosophy <a name="philosophy"></a>
 
@@ -113,6 +113,8 @@ pilot-data
             |-- sub-099_ses-002-eyetracking.asc
             `-- sub-099_ses-002-eyetracking.edf
 ```
+
+{DATA_ANALYSIS}
 
 ## Experiment Management <a name="experiment-management"></a>
 
