@@ -52,12 +52,17 @@ graph TD;
 
     G[raw2/beh]-->e(inspect_beh.py)-->H[Behavioural results]
     
-    
-    style a fill:#f9f,stroke:#333,stroke-width:4px
-    style b fill:#f9f,stroke:#333,stroke-width:4px
-    style c fill:#f9f,stroke:#333,stroke-width:4px
-    style d fill:#f9f,stroke:#333,stroke-width:4px
-    style e fill:#f9f,stroke:#333,stroke-width:4px
+    style a fill:#414b65,stroke:#f66,stroke-width:2px,color:#01579b,stroke-dasharray: 5 5
+    style b fill:#414b65,stroke:#f66,stroke-width:2px,color:#01579b,stroke-dasharray: 5 5
+    style c fill:#414b65,stroke:#f66,stroke-width:2px,color:#01579b,stroke-dasharray: 5 5
+    style d fill:#414b65,stroke:#f66,stroke-width:2px,color:#01579b,stroke-dasharray: 5 5
+    style e fill:#414b65,stroke:#f66,stroke-width:2px,color:#01579b,stroke-dasharray: 5 5
+    style A fill:#e2bf70,stroke:#333,stroke-width:4px
+    style B fill:#e2bf70,stroke:#333,stroke-width:4px
+    style C fill:#e2bf70,stroke:#333,stroke-width:4px
+    style D fill:#e2bf70,stroke:#333,stroke-width:4px
+    style E fill:#e2bf70,stroke:#333,stroke-width:4px
+    style F fill:#e2bf70,stroke:#333,stroke-width:4px
 ```
 
 ### 40 Hz Artefact Removal <a name="40-hz-artefact-removal"></a>
