@@ -2,7 +2,7 @@
 clear;
 
 % Flag to indicate whether we update source and leadfield models
-update_models = false;
+update_models = true;
 
 % Add util and template dirs to path
 addpath('/project/3031004.01/meg-ahat/util')
@@ -303,13 +303,13 @@ for sub = subjects
 end
 
 %% Average over lateral contrasts
-close all
+
 lateral_dif_sources = cell(1,numel(subjects));
-conditions = ["con" "strobe"];
-title_contrast = ["Left minus right attention" "High minus low arithmetic difficulty"];
 deriv_anat_dir = fullfile(derivatives_dir, 'sub-030', '/ses-001/anat/'); % Use sub 30 mri for now
 mri_realigned_file = fullfile(deriv_anat_dir, 'mri_realigned.mat');
 load (mri_realigned_file)
+title_contrast = ["Left minus right attention" "High minus low arithmetic difficulty"];
+
 for task_no = 1:numel(tasks)
     task = tasks(task_no)
     for condition = conditions
