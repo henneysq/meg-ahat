@@ -63,6 +63,8 @@ graph TD;
     style D fill:#e2bf70,stroke:#333,stroke-width:4px
     style E fill:#e2bf70,stroke:#333,stroke-width:4px
     style F fill:#e2bf70,stroke:#333,stroke-width:4px
+    style G fill:#e2bf70,stroke:#333,stroke-width:4px
+    style H fill:#e2bf70,stroke:#333,stroke-width:4px
 ```
 
 ### 40 Hz Artefact Removal <a name="40-hz-artefact-removal"></a>
