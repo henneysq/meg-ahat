@@ -154,7 +154,7 @@ graph TD;
 
 ### 40 Hz Artefact Removal <a name="40-hz-artefact-removal"></a>
 
-The 40 Hz cable noise is removed using [`artefact_rejection.m`](analysis/artefact_rejection.m).
+The 40 Hz cable noise is removed using [`artifact_rejection.m`](analysis/artefict_rejection.m).
 
 ### Sensor Level Analysis <a name="sensor-level-analysis"></a>
 
