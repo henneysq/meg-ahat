@@ -16,11 +16,11 @@ graph TD;
 
     G[raw2/beh]-->e(inspect_beh.py)-->H[Behavioural results]
     
-    style a fill:#414b65,stroke:#f66,stroke-width:2px,color:#01579b,stroke-dasharray: 5 5
-    style b fill:#414b65,stroke:#f66,stroke-width:2px,color:#01579b,stroke-dasharray: 5 5
-    style c fill:#414b65,stroke:#f66,stroke-width:2px,color:#01579b,stroke-dasharray: 5 5
-    style d fill:#414b65,stroke:#f66,stroke-width:2px,color:#01579b,stroke-dasharray: 5 5
-    style e fill:#414b65,stroke:#f66,stroke-width:2px,color:#01579b,stroke-dasharray: 5 5
+    style a fill:#414b65,stroke:#01579b,stroke-width:2px,color:#FFFFFF,stroke-dasharray: 5 5
+    style b fill:#414b65,stroke:#01579b,stroke-width:2px,color:#FFFFFF,stroke-dasharray: 5 5
+    style c fill:#414b65,stroke:#01579b,stroke-width:2px,color:#FFFFFF,stroke-dasharray: 5 5
+    style d fill:#414b65,stroke:#01579b,stroke-width:2px,color:#FFFFFF,stroke-dasharray: 5 5
+    style e fill:#414b65,stroke:#01579b,stroke-width:2px,color:#FFFFFF,stroke-dasharray: 5 5
     style A fill:#e2bf70,stroke:#333,stroke-width:4px
     style B fill:#e2bf70,stroke:#333,stroke-width:4px
     style C fill:#e2bf70,stroke:#333,stroke-width:4px
