@@ -4,7 +4,7 @@ permissions:                    # Global permissions configuration starts here
 
 name: update-readme
 
-on:
+off:
   push:
     branches: [ "main" ]
 
