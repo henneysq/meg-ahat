@@ -19,10 +19,11 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 # Table of contents
 
 1. [About the Project](#about-the-project)
-2. [Data Curration](#data-curration)
-	1. [Philosophy](#philosophy)
-	2. [Data Versions](#data-versions)
-	3. [Converting Data](#converting-data)
+2. [Data Analysis](#data-analysis)
+	1. [40 Hz Artefact Removal](#40-hz-artefact-removal)
+	2. [Sensor Level Analysis](#sensor-level-analysis)
+	3. [Source Level Analysis](#source-level-analysis)
+	4. [Behavioural Analysis](#behavioural-analysis)
 3. [Experiment Management](#experiment-management)
 	1. [Dependencies](#dependencies)
 	2. [Quick-Start Guide](#quick-start-guide)
@@ -31,90 +32,36 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 4. [Testing](#testing)
 
 
-## Data Curration <a name="data-curration"></a>
+{DATA_MANAGEMENT}
 
-### Philosophy <a name="philosophy"></a>
+## Data Analysis <a name="data-analysis"></a>
 
-For the purpose of transparency, interpretability, and reproducibility,
-this project aims to conduct data analysis on BIDS-compliant data from the get-go. Thus,
-the source data is converted to BIDS prior to data analysis. However, the conversion
-takes place in two steps to incrementally enrich the data structure.
+The overall data analysis pipeline is defined by the flowchart, in which `.m` and `.py` files are found in the `/analysis/` directory:
 
-Data analysis is conducted solely on the completely enriched data set (raw2 below).
+```mermaid
+graph TD;
+    A[raw2/meg]-->a(artefact_rejection.m)-->B[derivatives/meg];
+    
+    B-->b(sensor_level_analysis.m)-->D[Sensor level results]
+    
+    C[raw2/anat]-->c( make_headmodel.m)-->E[derivatives/anat]
+    
+    d(beamformer.m)
+    B-->d-->F[Source level results]
+    E-->d
 
-### Data Versions <a name="data-versions"></a>
-
-The project pilot-data exists in several versions that can all be accessed in the MEG-AHAT
-project directory on the DCCN cluster under `/project/3031004.01/pilot-data`. These versions
-include:
-
-1. Source data (`/source/`) contains the data files as they were obtained from their
-    respective recording devices and includes MEG scans, simultaneous eye-tracking
-    and presentation log-files, polhemous positional data, and MRI scans.
-2. First iteration raw data (`/raw1/`) contains a BIDS-compliant version with minimal
-    changes. One implication of this is that events are not yet alligned, as the recorded
-    behavioural data is not set on a time axis at the point of recording.
-2. Second iteration raw data (`/raw2/`) contains a BIDS-compliant version of the data
-    in which the behevioural data recorded along with MEG has been moved to the /meg
-    directory, and MEG, eyetrack, and behavioural events are enriched and aligned in time.
-
-### Converting Data <a name="converting-data"></a>
-
-Converting data between versions is non-trivial and requires both commonly used public
-tools and custom scripts. This projects uses the FieldTrip tool [`data2bids`](https://github.com/fieldtrip/fieldtrip/blob/master/data2bids.m)
-and custom matlab scripts.
-
-Source data is converted to raw1 using the 
-[`/data_curration/convert_source_to_raw1.m`](https://github.com/henneysq/meg-ahat/blob/main/data_curration/convert_source_to_raw1.m) script.
-
-Raw1 data is converted to raw2 using the 
-[`/data_curration/convert_raw1_to_raw2.m`](https://github.com/henneysq/meg-ahat/blob/main/data_curration/convert_raw1_to_raw2.m) script.
-
-#### Eyetrack data
-
-Currently, eyetracking data is not covered by BIDS, but is added with the [BIDS extension proposal BEP020](https://docs.google.com/document/d/1eggzTCzSHG3AEKhtnEDbcdk-2avXN6I94X8aUPEBVsw/edit#heading=h.9tphvz6ot0j1).
-
-With this change, eyetracker data is allocated to the `eyetrack/` scans directory and has the `_eyetrack` suffix.
-
-#### Directory Layout
-
-```
-pilot-data
-|-- raw1
-|   |-- dataset_description.json
-|   |-- participants.tsv
-|   `-- sub-099
-|       |-- ses-001
-|       |   |-- anat
-|       |   |-- beh
-|       |   |-- eyetrack
-|       |   |-- meg
-|       |   `-- sub-099_ses-001_scans.tsv
-|       |-- ses-002
-|       |   |-- beh
-|       |   |-- eyetrack
-|       |   |-- meg
-|       |   `-- sub-099_ses-002_scans.tsv
-|       `-- sub-099_sessions.tsv
-`-- source
-    `-- sub-099
-        |-- ses-001
-        |   |-- 099_1.ds
-        |   |-- behaviour
-        |   |-- pilot001_3031000.01_20231212_01.ds
-        |   |-- sub-099.pos
-        |   |-- sub-099_ses-001-eyetracking.asc
-        |   |-- sub-099_ses-001-eyetracking.edf
-        |   `-- sub-20231212T163000
-        `-- ses-002
-            |-- 099_2.ds
-            |-- behaviour
-            |-- pilot002_3031000.01_20231214_01.ds
-            |-- sub-099_ses-002-eyetracking.asc
-            `-- sub-099_ses-002-eyetracking.edf
+    G[raw2/beh]-->e(inspect_beh.py)-->H[Behavioural results]
 ```
 
-{DATA_ANALYSIS}
+### 40 Hz Artefact Removal <a name="40-hz-artefact-removal"></a>
+
+### Sensor Level Analysis <a name="sensor-level-analysis"></a>
+
+### Source Level Analysis <a name="source-level-analysis"></a>
+
+### Behavioural Analysis <a name="behavioural-analysis"></a>
+
+
 
 ## Experiment Management <a name="experiment-management"></a>
 
