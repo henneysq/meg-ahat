@@ -77,6 +77,9 @@ if __name__ == "__main__":
     # code that builds the data curration str entry
     with open('documentation/DATA_MANAGEMENT.stub') as f:
         data_curation_str = f.read()
+
+    with open('documentation/DATA_ANALYSIS.stub') as f:
+        data_analysis_str = f.read()
         
     with open('documentation/EXPERIMENT_MANAGEMENT.stub') as f:
         experiment_management_str = f.read()
@@ -90,6 +93,7 @@ if __name__ == "__main__":
 
     # simple replacement, use whatever stand-in value is useful for you.
     readme = readme_stub.replace('{DATA_MANAGEMENT}', data_curation_str)
+    readme = readme_stub.replace('{DATA_ANALYSIS}', data_analysis_str)
     readme = readme.replace('{EXPERIMENT_MANAGEMENT}', experiment_management_str)
     readme = readme.replace('{TESTING}', testing_str)
     readme = _update_readme(readme)
