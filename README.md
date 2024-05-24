@@ -43,7 +43,7 @@ graph TD;
     A[raw2/meg]-->a(artefact_rejection.m)-->B[derivatives/meg];
     
     B-->b(sensor_level_analysis.m)-->D[Sensor level results]
-    
+
     C[raw2/anat]-->c( make_headmodel.m)-->E[derivatives/anat]
     
     d(beamformer.m)
@@ -51,6 +51,13 @@ graph TD;
     E-->d
 
     G[raw2/beh]-->e(inspect_beh.py)-->H[Behavioural results]
+    
+    
+    style a fill:#f9f,stroke:#333,stroke-width:4px
+    style b fill:#f9f,stroke:#333,stroke-width:4px
+    style c fill:#f9f,stroke:#333,stroke-width:4px
+    style d fill:#f9f,stroke:#333,stroke-width:4px
+    style e fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ### 40 Hz Artefact Removal <a name="40-hz-artefact-removal"></a>
