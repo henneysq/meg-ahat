@@ -1,0 +1,27 @@
+## Data Analysis
+
+The overall data analysis pipeline is defined by the flowchart, in which `.m` and `.py` files are found in the `/analysis/` directory:
+
+```mermaid
+graph TD;
+    A[raw2/meg]-->a(artefact_rejection.m)-->B[derivatives/meg];
+    
+    B-->b(sensor_level_analysis.m)-->D[Sensor level results]
+    
+    C[raw2/anat]-->c( make_headmodel.m)-->E[derivatives/anat]
+    
+    d(beamformer.m)
+    B-->d-->F[Source level results]
+    E-->d
+
+    G[raw2/beh]-->e(inspect_beh.py)-->H[Behavioural results]
+```
+
+### 40 Hz Artefact Removal
+
+### Sensor Level Analysis
+
+### Source Level Analysis
+
+### Behavioural Analysis
+

@@ -4,7 +4,7 @@ Author: Mark Alexander Henney
 
 Principle Investigator: Robert Oostenveld
 
-Collaborators: Gustavo Feijoo, Henrik Hansen, Marcus Carstensen, Kristoffer Madsen, Eelke Spaak
+Collaborators: Henrik Hansen, Marcus Carstensen, Kristoffer Madsen, Eelke Spaak
 
 This repository contains the files required to run the experiment, currate the data, and run the analyses.
 
@@ -18,6 +18,8 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 {TOC}
 
 {DATA_MANAGEMENT}
+
+{DATA_ANALYSIS}
 
 {EXPERIMENT_MANAGEMENT}
 
