@@ -183,7 +183,9 @@ Git is not installed on the DCCN MEG presentation PC, which is why the path to a
 
 ### Quick-Start Guide <a name="quick-start-guide"></a>
 
-Two scripts are provided in the root directory to prepare, run, and save outputs for the experiments. Update the `SUB`, `SES`, and `RUN` constants appropriately before executing the script.
+Two scripts are provided in the root directory to prepare, run, and save outputs for the experiments: 
+(run_experiment_visual_attention.py)[run_experiment_visual_attention.py] and (run_experiment_working_memory.py)[run_experiment_working_memory.py]. 
+Update the `SUB`, `SES`, and `RUN` constants appropriately before executing the script.
 
 ### Code Structure <a name="code-structure"></a>
 
