@@ -18,8 +18,11 @@ diary (diaryfile)
 % Set up Fieldtrip
 configure_ft
 
+% Load data details
+data_details_cfg = get_data_details();
+
 % Define subjects - should eventually be centralised
-subjects = [8 9 11 13 17 18 21:23 25 27:30];
+subjects = data_details_cfg.new_trigger_subs;
 
 stim_map = dictionary(["con", "isf", "strobe"], [1, 2, 3]);
 
@@ -28,13 +31,13 @@ stim_map = dictionary(["con", "isf", "strobe"], [1, 2, 3]);
 %
 %
 task_map = dictionary(["left", "right"], [1, 2]);
-for sub = subjects;%subjects %[1:7 10 12 14:17 19:20]
-    sub
+for sub = subjects
+    sub_str = sprintf('sub-%03d', sub)
     close all
 
     % Define subject specific directories
-    img_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/img/');
-    deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
+    img_dir = fullfile(derivatives_dir, sub_str, '/ses-001/img/');
+    deriv_meg_dir = fullfile(derivatives_dir, sub_str, '/ses-001/meg/');
 
     % Load artefact-suppressed data
     load (fullfile(deriv_meg_dir, 'data_pca_va.mat'))
@@ -54,7 +57,7 @@ for sub = subjects;%subjects %[1:7 10 12 14:17 19:20]
     % Iterate over the no-flicker and luminance-flicker
     % conditions for now
     for condition = ["con", "strobe"]
-        condition
+        sprintf('Condition: %s', condition)
 
         % Find and select trials that are from run 1
         % and belong to the condition
@@ -193,8 +196,9 @@ sub_struct_alpha = [];
 sub_struct_beta = [];
 
 % Load contrasts from disk
-for sub = subjects    
-    deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
+for sub = subjects
+    sub_str = sprintf('sub-%03d', sub)
+    deriv_meg_dir = fullfile(derivatives_dir, sub_str, '/ses-001/meg/');
     load (fullfile(deriv_meg_dir, 'lateral_contrast_gamma.mat'))
     sub_struct_gamma.(sprintf('sub%03d', sub)) = lateral_contrast_gamma;
     load (fullfile(deriv_meg_dir, 'lateral_contrast_alpha.mat'))
@@ -203,7 +207,7 @@ for sub = subjects
     sub_struct_beta.(sprintf('sub%03d', sub)) = lateral_contrast_beta;
 end
 
-% Iterate over bands and conditions
+%% Iterate over bands and conditions
 condition = ["con", "strobe"];
 for band = ["40", "alpha", "beta"]
     switch band
@@ -219,22 +223,28 @@ for band = ["40", "alpha", "beta"]
         % Average spectra over subjects
         cfg = [];
         cfg.parameter = 'powspctrm';
-        cfg.operation = '(x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+x11+x12+x13+x14)/14';
-        avg_ERboxcar_ar_lateral_dif = ft_math(cfg, ...
-            data.sub008.(cond), ...
-            data.sub009.(cond), ...
-            data.sub011.(cond), ...
-            data.sub013.(cond), ...
-            data.sub017.(cond), ...
-            data.sub018.(cond), ...
-            data.sub021.(cond), ...
-            data.sub022.(cond), ...
-            data.sub023.(cond), ...
-            data.sub025.(cond), ...
-            data.sub027.(cond), ...
-            data.sub028.(cond), ...
-            data.sub029.(cond), ...
-            data.sub030.(cond));
+        cfg.operation = '(x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+x11+x12+x13+x14+x15)/15';
+        
+        data_args = {};
+        for sub = subjects
+            data_args = [data_args data.(sprintf('sub%03d', sub)).(cond)];
+        end
+
+        avg_ERboxcar_ar_lateral_dif = ft_math(cfg, data_args{:});
+        % avg_ERboxcar_ar_lateral_dif = ft_math(cfg, ...
+        %     data.sub008.(cond), ...
+        %     data.sub009.(cond), ...
+        %     data.sub011.(cond), ...
+        %     data.sub013.(cond), ...
+        %     data.sub018.(cond), ...
+        %     data.sub021.(cond), ...
+        %     data.sub022.(cond), ...
+        %     data.sub023.(cond), ...
+        %     data.sub025.(cond), ...
+        %     data.sub027.(cond), ...
+        %     data.sub028.(cond), ...
+        %     data.sub029.(cond), ...
+        %     data.sub030.(cond));
     
         % Plot the average topography
         cfg = [];
@@ -253,11 +263,11 @@ end
 %% WORKING MEMORY EXPERIMENT
 
 for sub = subjects
-    sub
+    sub_str = sprintf('sub-%03d', sub)
     close all
 
-    img_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/img/');
-    deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
+    img_dir = fullfile(derivatives_dir, sub_str, '/ses-001/img/');
+    deriv_meg_dir = fullfile(derivatives_dir, sub_str, '/ses-001/meg/');
     load (fullfile(deriv_meg_dir, 'data_pca_wm.mat'))
 
     if not(exist('neighbours', 'var') == 1)
@@ -406,7 +416,7 @@ sub_struct_alpha = [];
 sub_struct_beta = [];
 
 for sub = subjects    
-    deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
+    deriv_meg_dir = fullfile(derivatives_dir, sub_str, '/ses-001/meg/');
     load (fullfile(deriv_meg_dir, 'difficulty_contrast_gamma.mat'))
     sub_struct_gamma.(sprintf('sub%03d', sub)) = difficulty_contrast_gamma;
     load (fullfile(deriv_meg_dir, 'difficulty_contrast_alpha.mat'))
@@ -415,7 +425,7 @@ for sub = subjects
     sub_struct_beta.(sprintf('sub%03d', sub)) = difficulty_contrast_beta;
 end
 
-
+%
 close all
 condition = ["con", "strobe"];
 avg_cond = [];
@@ -431,22 +441,30 @@ for band = ["40", "alpha", "beta"]
     for cond = condition
         cfg = [];
         cfg.parameter = 'powspctrm';
-        cfg.operation = '(x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+x11+x12+x13+x14)/14';
-        avg_ERboxcar_ar_lateral_dif = ft_math(cfg, ...
-            data.sub008.(cond), ...
-            data.sub009.(cond), ...
-            data.sub011.(cond), ...
-            data.sub013.(cond), ...
-            data.sub017.(cond), ...
-            data.sub018.(cond), ...
-            data.sub021.(cond), ...
-            data.sub022.(cond), ...
-            data.sub023.(cond), ...
-            data.sub025.(cond), ...
-            data.sub027.(cond), ...
-            data.sub028.(cond), ...
-            data.sub029.(cond), ...
-            data.sub030.(cond));
+        cfg.operation = '(x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+x11+x12+x13+x14+x15)/15';
+        
+        data_args = {};
+        for sub = subjects
+            data_args = [data_args data.(sprintf('sub%03d', sub)).(cond)];
+        end
+
+        avg_ERboxcar_ar_lateral_dif = ft_math(cfg, data_args{:});
+
+        % avg_ERboxcar_ar_lateral_dif = ft_math(cfg, ...
+        %     data.sub008.(cond), ...
+        %     data.sub009.(cond), ...
+        %     data.sub011.(cond), ...
+        %     data.sub013.(cond), ...
+        %     data.sub017.(cond), ...
+        %     data.sub018.(cond), ...
+        %     data.sub021.(cond), ...
+        %     data.sub022.(cond), ...
+        %     data.sub023.(cond), ...
+        %     data.sub025.(cond), ...
+        %     data.sub027.(cond), ...
+        %     data.sub028.(cond), ...
+        %     data.sub029.(cond), ...
+        %     data.sub030.(cond));
         
         %avg_cond.(cond) = avg_ERboxcar_ar_lateral_dif;
     
