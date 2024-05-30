@@ -265,7 +265,9 @@ function convert_source_to_raw1(sub, general_cfg, raw1_dir, raw2_dir, overwrite_
         meg_iterator = 1;
         beh_iterator = 1;
 
-        while beh_iterator <= height(beh_log)
+        while beh_iterator <= height(beh_log) & meg_iterator <= height(event)
+            %beh_iterator
+            %meg_iterator
             beh_sample = beh_log.sample(beh_iterator);
             meg_sample = event.sample(meg_iterator);
 
@@ -290,9 +292,9 @@ function convert_source_to_raw1(sub, general_cfg, raw1_dir, raw2_dir, overwrite_
 
                 beh_iterator = beh_iterator + 1;
             end
-
+            
             meg_iterator = meg_iterator + 1;
-    
+        
         end
     end
 

@@ -5,13 +5,15 @@ function convert_source_to_raw1(sub, general_cfg, source_dir, overwrite_cfg)
     sub_source_dir = fullfile(source_dir, sub_str);
     source_ses1_dir = fullfile(sub_source_dir, ses_str);
 
-    % Evaluate the missing data file
-    eval data_details
-    if isfield(data_details_cfg, sprintf('sub%03d', sub))
-        sub_data_details_cfg = data_details_cfg.(sprintf('sub%03d', sub));
-    else
-        sub_data_details_cfg = [];
-    end
+    
+    % Load data details
+    data_details_cfg = get_data_details();
+
+    % if isfield(data_details_cfg, sprintf('sub%03d', sub))
+    sub_data_details_cfg = data_details_cfg.(sprintf('sub%03d', sub));
+    % else
+        % sub_data_details_cfg = [];
+    % end
     
     % Specify the missing sunject specific details
     general_cfg.sub = sprintf('%03d', sub);
