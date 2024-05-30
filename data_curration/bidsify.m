@@ -4,17 +4,17 @@ clear; clc;
 % Specify which subjects to process and which curration
 % steps to complete
 
-subs = [1:7 10 12 14 16 19:20];
+subs = 1:30;
 
 conv_source_to_raw1_flag = true; % Whether or not to convert source to raw1
-conv_raw1_to_raw2_flag = false; % whether or not to convert raw1 to raw2
+conv_raw1_to_raw2_flag = true; % whether or not to convert raw1 to raw2
 
 overwrite_flags = [];
 overwrite_flags.anat = false; % Whether or not to overwrite MRI if it exists
 overwrite_flags.polhemous = false; % Whether or not to overwrite Polhemous
 overwrite_flags.meg = false; % Whether or not to overwrite MEG
-overwrite_flags.eyetrack = true; % Whether or not to overwrite eytrack
-overwrite_flags.beh = true; % Whether or not to overwrite behaviour
+overwrite_flags.eyetrack = false; % Whether or not to overwrite eytrack
+overwrite_flags.beh = false; % Whether or not to overwrite behaviour
 
 %% setup
 project_dir = fullfile('/project', '3031004.01');
@@ -60,10 +60,6 @@ general_cfg.dataset_description.EthicsApprovals     = 'DCCN 3031004.01';
 
 for s = 1:numel(subs)
     sub = subs(s);
-    
-    % Evaluate subject specific details script
-    %details = sprintf('details_sub%03d', sub);
-    %eval(details);
 
     % Convert source to raw 1
     if conv_source_to_raw1_flag
