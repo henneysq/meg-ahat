@@ -305,6 +305,7 @@ for sub = subjects
     end
 end
 
+
 %% Gather contrasts over tasks and conditions
 
 deriv_anat_dir = fullfile(derivatives_dir, 'sub-030', '/ses-001/anat/'); % Use sub 30 mri for now
@@ -327,6 +328,9 @@ for task_no = 1:numel(tasks)
         sources = cell(1,numel(subjects));
         source_int_volnorm = sources;
         for s = 1:numel(subjects)
+            deriv_anat_dir = fullfile(derivatives_dir, 'sub-030', '/ses-001/anat/'); % Use sub 30 mri for now
+            mri_realigned_file = fullfile(deriv_anat_dir, 'mri_realigned.mat');
+            load (mri_realigned_file)
             sub = subjects(s)
             
             deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
@@ -336,12 +340,12 @@ for task_no = 1:numel(tasks)
             
             
 
-            % cfg           = [];
-            % cfg.parameter = 'pow';
-            % source_contrast_int_volnorm = ft_sourceinterpolate(cfg, source_contrast, mri_realigned);
-            % cfg = [];
-            % cfg.nonlinear     = 'no'; % yes?
-            % source_contrast_int_volnorm = ft_volumenormalise(cfg, source_contrast_int_volnorm);
+            cfg           = [];
+            cfg.parameter = 'pow';
+            source_contrast_int_volnorm = ft_sourceinterpolate(cfg, source_contrast, mri_realigned);
+            cfg = [];
+            cfg.nonlinear     = 'no'; % yes?
+            source_contrast_int_volnorm = ft_volumenormalise(cfg, source_contrast_int_volnorm);
             
 
             % source_contrast.inside = template_grid.inside;
@@ -355,12 +359,12 @@ for task_no = 1:numel(tasks)
             % cfg.parameter = 'pow';
             % lateral_dif_sources{s} = ft_sourceinterpolate(cfg, source_contrast, mri_realigned);
             sources{s} = source_contrast;
-            % sources_int_volnorm{s} = source_contrast_int_volnorm;
+            sources_int_volnorm{s} = source_contrast_int_volnorm;
         
         end
         
         allsources.(task).(condition)   = sources;
-        % allsources_int_volnorm.(task).(condition)   = sources_int_volnorm;
+        allsources_int_volnorm.(task).(condition)   = sources_int_volnorm;
     end
 end
 
@@ -417,20 +421,20 @@ for task=tasks
     allsources_ga.(task) = [];
     for condition = conditions
          % title_str = sprintf('%s - Stim: %s', title_contrast(task_no), condition)
-         source_int_volnorms = {};
-        for s=1:15
-            cfg           = [];
-            cfg.parameter = 'pow';
-            source_contrast_int_volnorm = ft_sourceinterpolate(cfg, allsources.(task).(condition){s}, mri_realigned);
-            cfg = [];
-            cfg.nonlinear     = 'no'; % yes?
-            source_int_volnorms{s} = ft_volumenormalise(cfg, source_contrast_int_volnorm);
-
-        end
+        %  source_int_volnorms = {};
+        % for s=1:15
+        %     cfg           = [];
+        %     cfg.parameter = 'pow';
+        %     source_contrast_int_volnorm = ft_sourceinterpolate(cfg, allsources.(task).(condition){s}, mri_realigned);
+        %     cfg = [];
+        %     cfg.nonlinear     = 'no'; % yes?
+        %     source_int_volnorms{s} = ft_volumenormalise(cfg, source_contrast_int_volnorm);
+        % 
+        % end
         % grand average over subjects
         cfg           = [];
         cfg.parameter = 'pow';
-        allsources_ga.(task).(condition) = ft_sourcegrandaverage(cfg, source_int_volnorms{:});
+        allsources_ga.(task).(condition) = ft_sourcegrandaverage(cfg, allsources_int_volnorm.(task).(condition){:});
     end
 end
 %%
