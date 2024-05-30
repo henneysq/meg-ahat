@@ -1,4 +1,4 @@
-function [trl, event] = definetrial_va(cfg);
+function [trl, event] = definetrial_wm(cfg);
     
     % read the header information and the events from the data
     hdr   = ft_read_header(cfg.dataset);
@@ -6,7 +6,7 @@ function [trl, event] = definetrial_va(cfg);
     run = cfg.run;
     ses = cfg.ses;
     sub = cfg.sub;
-    task = 'visualattention';
+    task = 'workingmemory';
 
     beh_dir = fullfile(cfg.dataset, '..', '..', 'beh');
     event = readtable(fullfile(beh_dir, ...
@@ -15,7 +15,7 @@ function [trl, event] = definetrial_va(cfg);
         "FileType","text",'Delimiter', '\t');
 
     % OBS: Remove entries that have -1 to indicate quick/catch trials
-    event = event(event.sample ~= -1, :);
+    % event = event(event.sample ~= -1, :);
     
     % determine the number of samples before and after the trigger
     pretrig  = -round(cfg.trialdef.pre  * hdr.Fs);
@@ -23,10 +23,9 @@ function [trl, event] = definetrial_va(cfg);
 
     % Make map from string-represented condition to integer
     stim_map = dictionary(["con", "isf", "strobe"], [1, 2, 3]);
-    task_map = dictionary(["left", "right"], [1, 2]);
+    task_map = dictionary(["high", "low"], [1, 2]);
     
-    % look for the combination of a trigger "5" followed by a trigger "6"
-    % for each trigger except the last one
+    event = event(not(isnan(table2array(event(:,9)))),:);
     trl = [];
     for j = 1:height(event)
 
@@ -39,13 +38,13 @@ function [trl, event] = definetrial_va(cfg);
         python_trial_number = event.trial_number(j);
         block_number = event.block_number(j);
         condition = stim_map(event.stimulus_condition(j));
-        task = task_map(event.task(j));
-        task_congruence = event.task_congruence(j);
+        task_difficulty = task_map(event.task_difficulty(j));
+        presented_sum_correctness = event.presented_sum_correctness(j);
         response  = event.response(j);
         rt  = event.reaction_time(j);
         rt_meg  = event.rt_meg(j);
         newtrl   = [trlbegin trlend, offset, python_trial_number, ...
-                block_number, condition, task, task_congruence, ...
+                block_number, condition, task_difficulty, presented_sum_correctness, ...
                 response, rt, rt_meg];
         
         trl      = [trl; newtrl];
