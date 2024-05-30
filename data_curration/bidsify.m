@@ -72,6 +72,13 @@ for s = 1:numel(subs)
 
     if conv_raw1_to_raw2_flag
         convert_raw1_to_raw2(sub, general_cfg, raw1_dir, raw2_dir, [])
+
+        % Update project-wide sidecars
+        copyfile(fullfile(raw1_dir, 'dataset_description.json'), ...
+            fullfile(raw2_dir, 'dataset_description.json'))
+        copyfile(fullfile(raw1_dir, 'participants.tsv'), ...
+            fullfile(raw2_dir, 'participants.tsv'))
+
     end
 
 
