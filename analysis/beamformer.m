@@ -2,7 +2,7 @@
 clear;
 
 % Flag to indicate whether we update source and leadfield models
-update_models = true;
+update_models = false;
 
 % Add util and template dirs to path
 addpath('/project/3031004.01/meg-ahat/util')
@@ -28,6 +28,8 @@ data_details_cfg = get_data_details();
 
 % Define subjects, tasks, and conditions
 subjects = data_details_cfg.new_trigger_subs; % Subjects correctly stimulated
+baddies = [9 13 18 21 22 23 25 27 28];
+
 tasks = ["va" "wm"];
 conditions = ["con" "strobe"];
 
@@ -47,6 +49,7 @@ task_maps = dictionary( ...
 % Iterate over subjects to perform beamforming of the 40 Hz signal
 % and contrast condtions given task(s) and condition(s).
 % Each contrast is saved to disk for a given subject.
+close all
 for sub = subjects
     sub_str = sprintf('sub-%03d', sub)
     
@@ -302,18 +305,27 @@ for sub = subjects
     end
 end
 
-%% Average over lateral contrasts
+%% Gather contrasts over tasks and conditions
 
-lateral_dif_sources = cell(1,numel(subjects));
 deriv_anat_dir = fullfile(derivatives_dir, 'sub-030', '/ses-001/anat/'); % Use sub 30 mri for now
 mri_realigned_file = fullfile(deriv_anat_dir, 'mri_realigned.mat');
 load (mri_realigned_file)
 title_contrast = ["Left minus right attention" "High minus low arithmetic difficulty"];
 
+[~,ftpath] = ft_version();
+load(fullfile(ftpath, 'template', 'sourcemodel', 'standard_sourcemodel3d8mm.mat'), 'sourcemodel');
+template_grid = sourcemodel;
+clear sourcemodel;
+
+allsources = [];
+allsources_int_volnorm = [];
 for task_no = 1:numel(tasks)
     task = tasks(task_no)
+    allsources.(task) = [];
     for condition = conditions
         title_str = sprintf('%s - Stim: %s', title_contrast(task_no), condition)
+        sources = cell(1,numel(subjects));
+        source_int_volnorm = sources;
         for s = 1:numel(subjects)
             sub = subjects(s)
             
@@ -321,47 +333,203 @@ for task_no = 1:numel(tasks)
         
             source_constrast_file = fullfile(deriv_meg_dir, sprintf('source_task-%s_cond-%s_contrast.mat', task, condition));
             load (source_constrast_file) % source_lateral_dif
+            
+            
+
+            % cfg           = [];
+            % cfg.parameter = 'pow';
+            % source_contrast_int_volnorm = ft_sourceinterpolate(cfg, source_contrast, mri_realigned);
+            % cfg = [];
+            % cfg.nonlinear     = 'no'; % yes?
+            % source_contrast_int_volnorm = ft_volumenormalise(cfg, source_contrast_int_volnorm);
+            
+
+            % source_contrast.inside = template_grid.inside;
+            % source_contrast.pos = template_grid.pos;
+            % source_contrast.dim = template_grid.dim;
+            % tmp = source_contrast.pow;
+            % source_contrast.pow = nan(size(template_grid.pos,1), size(tmp, 2), size(tmp, 3));
+            % source_contrast.pow(template_grid.inside,:,:) = tmp;
         
-            lateral_dif_sources{s} = source_contrast;
+            % cfg           = [];
+            % cfg.parameter = 'pow';
+            % lateral_dif_sources{s} = ft_sourceinterpolate(cfg, source_contrast, mri_realigned);
+            sources{s} = source_contrast;
+            % sources_int_volnorm{s} = source_contrast_int_volnorm;
         
         end
         
-        % grand average over subjects
-        cfg           = [];
-        cfg.parameter = 'pow';
-        gaall         = ft_sourcegrandaverage(cfg, lateral_dif_sources{1});
-        
-        % interpolate onto MRI
-        % load ('mri152.mat');
-        cfg           = [];
-        cfg.parameter = 'pow';
-        source_lateral_dif_interp  = ft_sourceinterpolate(cfg, gaall, mri_realigned);
-        
-        % Plot the estimated sources
-        
-        % thresholded opacity map, anything <65% of maximum is fully transparent,
-        % anything >80% of maximum is fully opaque
-        
-        % cfg = [];
-        % cfg.method        = 'ortho';
-        % cfg.funparameter  = 'pow';
-        % cfg.funcolormap   = 'jet';
-        % 
-        % figure;
-        % ft_sourceplot(cfg, source_lateral_dif_interp);
-        
-        
-        cfg = [];
-        cfg.method        = 'slice';
-        cfg.funparameter  = 'pow';
-        cfg.funcolormap   = 'jet';
-        
-        figure;
-        ft_sourceplot(cfg, source_lateral_dif_interp);
-        title(title_str)
-        saveas(gcf,fullfile(derivatives_dir, sprintf('sub-all_stim-%s_task-%s_source_contrast.png', condition, task)))
+        allsources.(task).(condition)   = sources;
+        % allsources_int_volnorm.(task).(condition)   = sources_int_volnorm;
+    end
+end
 
+allsources_filename = fullfile(deriv_meg_dir, 'allsources_contrast_proc-interp-volnorm.mat');
+% save (allsources_filename, 'allsources', '-v7.3')
+
+%%
+close all
+
+baddies = [];
+
+cfg = [];
+cfg.method        = 'slice';
+cfg.funparameter="pow"
+for task_no = 1:numel(tasks)
+    task = tasks(task_no)
+    for condition = conditions
+        for s = 1:numel(subjects)
+            sub = subjects(s)
+            substr = sprintf('sub%d', sub)
+            tit_str = sprintf('sub-%d task-%s cond-%s', sub, task, condition);
+            try
+                figure;
+                ft_sourceplot(cfg, allsources.(task).(condition){s})
+                title(tit_str)
+            catch
+                close gcf
+                if not(isfield(baddies, task))
+                    baddies.(task) = [];
+                end
+                if not(isfield(baddies.(task), condition))
+                    baddies.(task).(condition) = [];
+                end
+                if not(isfield(baddies.(task).(condition), substr))
+                    baddies.(task).(condition).(substr) = true;
+                    sprintf('Badde: %s', tit_str)
+                end
+            end
+        end
     end
 end
 
 %%
+
+[~,ftpath] = ft_version();
+load(fullfile(ftpath, 'template', 'sourcemodel', 'standard_sourcemodel3d8mm.mat'), 'sourcemodel');
+template_grid = sourcemodel;
+clear sourcemodel;
+
+
+
+allsources_ga = [];
+for task=tasks
+    allsources_ga.(task) = [];
+    for condition = conditions
+         % title_str = sprintf('%s - Stim: %s', title_contrast(task_no), condition)
+         source_int_volnorms = {};
+        for s=1:15
+            cfg           = [];
+            cfg.parameter = 'pow';
+            source_contrast_int_volnorm = ft_sourceinterpolate(cfg, allsources.(task).(condition){s}, mri_realigned);
+            cfg = [];
+            cfg.nonlinear     = 'no'; % yes?
+            source_int_volnorms{s} = ft_volumenormalise(cfg, source_contrast_int_volnorm);
+
+        end
+        % grand average over subjects
+        cfg           = [];
+        cfg.parameter = 'pow';
+        allsources_ga.(task).(condition) = ft_sourcegrandaverage(cfg, source_int_volnorms{:});
+    end
+end
+%%
+
+% %%
+% close all
+% for task_no = 1:numel(tasks)
+%     for condition = conditions
+%         % interpolate onto MRI
+%         % load ('mri152.mat');
+%         cfg           = [];
+%         cfg.parameter = 'pow';
+%         source_lateral_dif_interp  = ft_sourceinterpolate(cfg, gaall.(task).(condition), mri_realigned);
+% 
+%         % Plot the estimated sources
+% 
+%         % thresholded opacity map, anything <65% of maximum is fully transparent,
+%         % anything >80% of maximum is fully opaque
+% 
+%         % cfg = [];
+%         % cfg.method        = 'ortho';
+%         % cfg.funparameter  = 'pow';
+%         % cfg.funcolormap   = 'jet';
+%         % 
+%         % figure;
+%         % ft_sourceplot(cfg, source_lateral_dif_interp);
+% 
+% 
+%         cfg = [];
+%         cfg.method        = 'slice';
+%         cfg.funparameter  = 'pow';
+%         cfg.funcolormap   = 'jet';
+% 
+%         figure;
+%         ft_sourceplot(cfg, source_lateral_dif_interp);
+%         title(title_str)
+%         saveas(gcf,fullfile(derivatives_dir, sprintf('sub-all_stim-%s_task-%s_source_contrast.png', condition, task)))
+% 
+%     end
+% end
+
+%%
+% Source statistics
+% 
+% cfg = [];
+% cfg.parameter = 'pow';
+% cfg.method = 'montecarlo';
+% cfg.correctm = 'no';
+% cfg.statistic = 'ft_statfun_depsamplesT';
+% cfg.tail = 0;
+% cfg.numrandomization = 'all';
+% 
+% nobs = numel(subjects);
+% cfg.design = [
+%   ones(1,nobs)*1 ones(1,nobs)*2
+%   1:nobs 1:nobs
+% ];
+% 
+% cfg.ivar = 1;
+% cfg.uvar = 2;
+% 
+% stat = ft_sourcestatistics(cfg, gaall.va.con, gaall.va.strobe);
+
+%%
+% run statistics over subjects %
+stats = [];
+cfg=[];
+cfg.dim         = allsources_int_volnorm.va.con{1}.dim;
+cfg.method      = 'montecarlo';
+cfg.statistic   = 'ft_statfun_depsamplesT';
+cfg.parameter   = 'pow';
+% cfg.correctm    = 'cluster';
+cfg.numrandomization = 10;
+cfg.alpha       = 0.05; % note that this only implies single-sided testing
+cfg.tail        = 0;
+
+nsubj=numel(subjects);
+cfg.design(1,:) = [1:nsubj 1:nsubj];
+cfg.design(2,:) = [ones(1,nsubj)*1 ones(1,nsubj)*2];
+cfg.uvar        = 1; % row of design matrix that contains unit variable (in this case: subjects)
+cfg.ivar        = 2; % row of design matrix that contains independent variable (the conditions)
+for task = tasks
+    stats.(task) = ft_sourcestatistics(cfg, allsources_int_volnorm.(task).(conditions(1)){:}, allsources_int_volnorm.(task).(conditions(2)){:});
+    
+end
+
+
+cfg = [];
+cfg.method        = 'slice';
+cfg.funparameter  = 'stat';
+cfg.maskparameter = 'mask';
+
+stat = stats.va;
+figure
+ft_sourceplot(cfg, stat,mri_realigned);
+
+stat = stats.wm;
+figure
+ft_sourceplot(cfg, stat,mri_realigned);
+% saveas(gcf,fullfile(derivatives_dir, sprintf('sub-all_stim-%s_task-%s_source_contrast_stat.png', condition, task)))
+
+% ft_sourceplot(cfg, stat,mri_realigned);
