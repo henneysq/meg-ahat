@@ -1,4 +1,4 @@
-subs = [8 21];%[1:7 10 12 14:17 19:20];
+subs = 1:30;
 
 % Configure fieldtrip
 addpath('/project/3031004.01/meg-ahat/util')
@@ -13,13 +13,14 @@ addpath(util_dir);
 
 % Set pilot data directory
 data_dir = fullfile(project_dir, 'data');
-raw1_dir = fullfile(data_dir, 'raw1');
+raw1_dir = fullfile(data_dir, 'raw2');
 
 % Prepare book keeping to avoid repeated inspection
-if not(isfile('inspection_bookkeeping.mat'))
+ibk_file = fullfile(repo_dir, 'analysis', 'inspection_bookkeeping.mat');
+if not(isfile(ibk_file))
     inspection_bookkeeping = [];
 else
-    load inspection_bookkeeping.mat
+    load(ibk_file)
 end
 
 % Iterate over subjects
@@ -35,6 +36,11 @@ for sub = subs
     sub_str = sprintf('sub-%03d', sub);
     ses_str = 'ses-001';
     sub_dir = fullfile(raw1_dir, sub_str);
+    
+    if not(isfolder(sub_dir))
+        continue
+    end
+
     ses_dir = fullfile(sub_dir, ses_str);
 
     % Check MRI
