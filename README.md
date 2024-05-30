@@ -154,6 +154,27 @@ graph TD;
 
 ### 40 Hz Artefact Removal <a name="40-hz-artefact-removal"></a>
 
+The physical experimental setup has current running through cables and LEDs in the magnetically shielded room which introduces a 40 Hz artifact, confounded with the 40 Hz brain signal.
+
+
+```mermaid
+graph LR
+    subgraph Magnetically shielded room
+        led1
+        led2
+        meg(MEG scanner)
+        subject(Subject brain)
+    end
+
+    driver1[40 Hz LED Driver]-- ~700 mA AC -->led1[Visual stimulator 1]
+    driver2[40 Hz LED Driver]-- ~700 mA AC -->led2[Visual stimulator 2]
+    led1-. 40 Hz visual stimulation .-> subject
+    led2-. 40 Hz visual stimulation .-> subject
+    led1-. 40 Hz magnetic field oscillation .-> meg
+    led2-. 40 Hz magnetic field oscillation .-> meg
+    subject-. 40 Hz magnetic field oscillation .-> meg
+```
+
 The 40 Hz cable noise is removed using [`artifact_rejection.m`](analysis/artifact_rejection.m).
 
 ### Sensor Level Analysis <a name="sensor-level-analysis"></a>
