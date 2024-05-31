@@ -23,6 +23,7 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 	1. [Philosophy](#philosophy)
 	2. [Data Versions](#data-versions)
 	3. [Converting Data](#converting-data)
+	4. [Trial rejection](#trial-rejection)
 3. [Data Analysis](#data-analysis)
 	1. [40 Hz Artefact Removal](#40-hz-artefact-removal)
 	2. [Sensor Level Analysis](#sensor-level-analysis)
@@ -118,6 +119,13 @@ pilot-data
             |-- sub-099_ses-002-eyetracking.asc
             `-- sub-099_ses-002-eyetracking.edf
 ```
+
+### Trial rejection <a name="trial-rejection"></a>
+
+Manual trial rejection takes place at the point of [40 Hz Artefact Removal <a name="40-hz-artefact-removal"></a>](#40-hz-artefact-removal).
+Trials are rejected based on excessive variance using [ft_rejectvisual](https://www.fieldtriptoolbox.org/tutorial/visual_artifact_rejection/#manual-artifact-rejection---display-a-summary).
+The handling of trial rejection is done by [/analysis/grab_trial_rej_history.m](/analysis/grab_trial_rej_history.m), 
+and books are kept in `data/derivatives/trial_rejections.json`.
 
 ## Data Analysis <a name="data-analysis"></a>
 
