@@ -80,3 +80,10 @@ pilot-data
             |-- sub-099_ses-002-eyetracking.asc
             `-- sub-099_ses-002-eyetracking.edf
 ```
+
+### Trial rejection
+
+Manual trial rejection takes place at the point of [40 Hz Artefact Removal](#40-hz-artefact-removal).
+Trials are rejected based on excessive variance using [ft_rejectvisual](https://www.fieldtriptoolbox.org/tutorial/visual_artifact_rejection/#manual-artifact-rejection---display-a-summary).
+The handling of trial rejection is done by [/analysis/grab_trial_rej_history.m](/analysis/grab_trial_rej_history.m), 
+and books are kept in `data/derivatives/trial_rejections.json`.
