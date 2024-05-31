@@ -12,6 +12,8 @@ Collaborators: Henrik Hansen, Marcus Carstensen, Kristoffer Madsen, Eelke Spaak
 
 This repository contains the files required to run the experiment, currate the data, and run the analyses.
 
+DCCN PPM ethical committee code: 3031001.04.
+
 ## About the Project <a name="about-the-project"></a>
 
 MEG-AHAT is run at the Donders Center for Cognitive Neuroimaing (DCCN) in collaboration with the Technical University of Denmark and OptoCeutics ApS (OC).
