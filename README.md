@@ -1,7 +1,3 @@
-
-THIS PROJECT IS IN PROGRESS
--
-
 # MEG-AHAT: Propagation of spectral flicker during visual- and non-visual cognitive tasks
 
 Author: Mark Alexander Henney
@@ -11,8 +7,6 @@ Principle Investigator: Robert Oostenveld
 Collaborators: Henrik Hansen, Marcus Carstensen, Kristoffer Madsen, Eelke Spaak
 
 This repository contains the files required to run the experiment, currate the data, and run the analyses.
-
-DCCN PPM ethical committee code: 3031001.04.
 
 ## About the Project <a name="about-the-project"></a>
 
