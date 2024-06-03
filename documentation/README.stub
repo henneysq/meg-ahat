@@ -1,3 +1,6 @@
+THIS PROJECT IS IN PROGRESS
+-
+
 # MEG-AHAT: Propagation of spectral flicker during visual- and non-visual cognitive tasks
 
 Author: Mark Alexander Henney
@@ -10,7 +13,7 @@ This repository contains the files required to run the experiment, currate the d
 
 ## About the Project
 
-MEG-AHAT is run at the Donders Center for Cognitive Neuroimaing (DCCN) in collaboration with the Technical University of Denmark and OptoCeutics ApS (OC).
+MEG-AHAT is run at the Donders Center for Cognitive Neuroimaing (DCCN: PPM ethical committee code: 3031001.04) in collaboration with the Technical University of Denmark and OptoCeutics ApS (OC).
 It investigates the effects of 40 Hz visible and *invisible spectral flicker* (see [Carstensen et. al. 2020](https://doi.org/10.1117/12.2544338)) on the brain during a visual attention (VA) task and a non-visual working memory (WM) task with simultaneous megnetoencephalography (MEG).
 
 See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG-AHAT_project_PPM.pptx).
