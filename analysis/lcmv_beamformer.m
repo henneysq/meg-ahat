@@ -2,7 +2,7 @@
 clear;
 
 % Flag to indicate whether we update source and leadfield models
-update_models = true;
+update_forward_models = false;
 
 % Add util and template dirs to path
 addpath('/project/3031004.01/meg-ahat/util')
@@ -70,27 +70,27 @@ for sub = subjects
     % As the grid is defined in 'CTF' coordinates, positive y-values
     % indicate the left side hemisphere:
     % https://www.fieldtriptoolbox.org/faq/coordsys/#details-of-the-ctf-coordinate-system
-    % if not(isfile(fullfile(deriv_meg_dir, 'sourcemodel.mat'))) || update_models
-    %     cfg = [];
-    %     cfg.headmodel = mri_headmodel;
-    %     cfg.symmetry = 'y';
-    %     cfg.xgrid = -148:8:148; % in mm
-    %     cfg.ygrid =    4:8:148; % in mm, left hemisphere, offset to the midline
-    %     cfg.zgrid = -148:8:148; % in mm
-    %     %cfg.tight = 'no';
-    %     cfg.tight        = 'yes';
-    %     cfg.inwardshift  = -1.5;
-    %     sourcemodel = ft_prepare_sourcemodel(cfg);
-    %     save (fullfile(deriv_meg_dir, 'sourcemodel.mat'), 'sourcemodel', '-v7.3')
-    % else
-    %     load (fullfile(deriv_meg_dir, 'sourcemodel.mat'))
-    % end
+    if not(isfile(fullfile(deriv_meg_dir, 'sourcemodel.mat'))) || update_forward_models
+        cfg = [];
+        cfg.headmodel = mri_headmodel;
+        cfg.symmetry = 'y';
+        cfg.xgrid = -148:8:148; % in mm
+        cfg.ygrid =    4:8:148; % in mm, left hemisphere, offset to the midline
+        cfg.zgrid = -148:8:148; % in mm
+        %cfg.tight = 'no';
+        cfg.tight        = 'yes';
+        cfg.inwardshift  = -1.5;
+        sourcemodel = ft_prepare_sourcemodel(cfg);
+        save (fullfile(deriv_meg_dir, 'sourcemodel.mat'), 'sourcemodel', '-v7.3')
+    else
+        load (fullfile(deriv_meg_dir, 'sourcemodel.mat'))
+    end
 
     % Non-symmetrical source model:
     % Create a headmodel without the symmetry constraint.
     % This is needed to interpret the results of the symmetric dipole
     % beamforming results after untangling the hemispheres.
-    if not(isfile(fullfile(deriv_meg_dir, 'nonsym_sourcemodel.mat'))) || update_models
+    if not(isfile(fullfile(deriv_meg_dir, 'nonsym_sourcemodel.mat'))) || update_forward_models
         cfg = [];
         cfg.headmodel = mri_headmodel;
         cfg.xgrid = -148:8:148; % in mm
@@ -112,22 +112,23 @@ for sub = subjects
     % other.
     % The 'intersect_sourcemodels' function is defined in the bottom of the
     % script
-    % [sourcemodel, nonsym_sourcemodel] = intersect_sourcemodels(sourcemodel, nonsym_sourcemodel);
+    [sourcemodel, nonsym_sourcemodel] = intersect_sourcemodels(sourcemodel, nonsym_sourcemodel);
+
+
+    % Load grad from raw2 version of meg data
+    grad = ft_read_sens( ...
+        fullfile(raw2_meg_dir, ...
+            sprintf('sub-%03d_ses-001_task-flicker_meg.ds', sub)), ...
+        'senstype', 'meg');
 
     % Leadfield:
     % Estimate the leadfield using the symmetric sourcemodel
-    if not(isfile(fullfile(deriv_meg_dir, 'leadfield.mat'))) || update_models
-        % Load grad from raw2 version of meg data
-        grad = ft_read_sens( ...
-            fullfile(raw2_meg_dir, ...
-                sprintf('sub-%03d_ses-001_task-flicker_meg.ds', sub)), ...
-            'senstype', 'meg');
-
+    if not(isfile(fullfile(deriv_meg_dir, 'leadfield.mat'))) || update_forward_models
         cfg = [];
         cfg.grad = grad;
         cfg.channel = {'MEGGRAD'};
         cfg.headmodel = mri_headmodel;
-        cfg.sourcemodel = nonsym_sourcemodel;
+        cfg.sourcemodel = sourcemodel;
         leadfield = ft_prepare_leadfield(cfg);
         save (fullfile(deriv_meg_dir, 'leadfield.mat'), 'leadfield', '-v7.3')  
     else
@@ -143,6 +144,11 @@ for sub = subjects
         ar_source = fullfile(deriv_meg_dir, fname);
         data_all = load (ar_source, var_name);
         data_all = data_all.(var_name);
+
+        % bandpass
+        cfg = [];
+        cfg.preproc.bpfilter = [38 42]; % check ft_preprocessing
+        data_all = ft_preprocessing(cfg, data_all);
         
         switch task
             case "va"
@@ -180,6 +186,7 @@ for sub = subjects
             data_task_cond = ft_selectdata(cfg, data_task);
     
             % Find and select left and right attention trials independently
+            % or for the high/low arithmetic difficulty
             trials_task1 = data_task_cond.trialinfo(:,4) == 1;
             trials_task2 = data_task_cond.trialinfo(:,4) == 2;
             cfg = [];
@@ -217,9 +224,18 @@ for sub = subjects
 
             cfg = [];
             cfg.covariance = 'yes';
+            cfg.keeptrials = 'yes';
             timelock_task1 = ft_timelockanalysis(cfg, data_task1);
             timelock_task2 = ft_timelockanalysis(cfg, data_task2);
             timelock_task_cond = ft_timelockanalysis(cfg, data_task_cond);
+            % with .keeptrials = 'yes' to look in ft_databrowser for edge
+            % artefacts or plot sqrt(variance) over time
+            % if condition == "strobe"
+            %     cfg = [];
+            %     cfg.channel ='M*O**';
+            %     ft_databrowser(cfg, timelock_task_cond)
+            %     cfg
+            % end
 
             % do the beamformer source reconstuction on a 1 cm grid
             cfg = [];
@@ -227,9 +243,10 @@ for sub = subjects
             cfg.sourcemodel       = leadfield;
             cfg.grad = grad;
             cfg.method = 'lcmv';
-            cfg.frequency         = 40;  
+            % cfg.frequency         = 40;  
             % cfg.lcmv.projectnoise = 'yes'; % needed for neural activity index
             % cfg.lcmv.keepcsd      = 'yes';
+            cfg.lcmv.keepcov = 'yes';
             cfg.lcmv.keepfilter   = 'yes';
             source = ft_sourceanalysis(cfg, timelock_task_cond);
             
@@ -257,68 +274,88 @@ for sub = subjects
             % hemisphere dipole CSD, and the lower right 3x3 block
             % represents the right hemisphere dipole
             % hemispheres = ["left", "right"];
-            % sources_task1_hsplit = [];
-            % sources_task2_hsplit = [];
+            sources_task1_hsplit = [];
+            sources_task1_hsplit.left = source_task1;
+            sources_task1_hsplit.left.avg.pow = nan(prod(sourcemodel.dim),1);
+            sources_task1_hsplit.right = sources_task1_hsplit.left;
+            sources_task2_hsplit = [];
+            sources_task2_hsplit.left = source_task2;
+            sources_task2_hsplit.left.avg.pow = nan(prod(sourcemodel.dim),1);
+            sources_task2_hsplit.right = sources_task1_hsplit.left;
             % for hn = 1:2
-            %     for k = 1:size(source_task1.pos,1)
-            %         if ~isempty(source_task1.avg.csdlabel{k})
-            %             % Define 3x3 block indices for the CSD of
-            %             % interest
-            %             indices = (1:3) + 3 * (hn - 1);
-            %             % Set the CSD label to 'scandip' to
-            %             % indicate the it is a scanner dipole
-            %             source_task1.avg.csdlabel{k}(indices) = {'scandip'};
-            %             source_task2.avg.csdlabel{k}(indices) = {'scandip'};
-            %             % Define 3x3 block indices for the CSD of
-            %             % no-interest
-            %             indices = (4:6) - 3 * (hn - 1);
-            %             % Set the CSD label to 'scandip' to
-            %             % indicate the it is a suppression dipole
-            %             source_task1.avg.csdlabel{k}(indices) = {'supdip'};
-            %             source_task2.avg.csdlabel{k}(indices) = {'supdip'};
-            % 
-            %         end
-            %     end
-            %     % Estimate the power from the CSD using the first
-            %     % singular value
-            %     cfg = [];
-            %     cfg.keepcsd = 'no';
-            %     cfg.powmethod = 'lambda1';
-            %     % ft_sourcedescriptives indexes the 6x6 CSD matric
-            %     % based on the CSD labels and implements the power
-            %     % estimate based on Gross et.al. eq (8) https://doi.org/10.1073/pnas.98.2.694
-            %     sources_task1_hsplit.(hemispheres(hn)) = ft_sourcedescriptives(cfg, source_task1);
-            %     sources_task2_hsplit.(hemispheres(hn)) = ft_sourcedescriptives(cfg, source_task2);
+            for k = 1:size(source_task1.pos,1)
+                if ~isempty(source_task1.avg.cov{k})
+                    % Define 3x3 block indices for the CSD of
+                    % interest
+                    % indices = (1:3) + 3 * (hn - 1);
+                    % % Set the CSD label to 'scandip' to
+                    % % indicate the it is a scanner dipole
+                    % source_task1.avg.csdlabel{k}(indices) = {'scandip'};
+                    % source_task2.avg.csdlabel{k}(indices) = {'scandip'};
+                    % % Define 3x3 block indices for the CSD of
+                    % % no-interest
+                    % indices = (4:6) - 3 * (hn - 1);
+                    % % Set the CSD label to 'scandip' to
+                    % % indicate the it is a suppression dipole
+                    % source_task1.avg.csdlabel{k}(indices) = {'supdip'};
+                    % source_task2.avg.csdlabel{k}(indices) = {'supdip'};
+
+                    covL = source_task1.avg.cov{k}(1:3,1:3);
+                    covR = source_task1.avg.cov{k}(4:6,4:6);
+                    powL = svd(covL); powL = powL(1); % use the lambda1 method
+                    powR = svd(covR); powR = powR(1);
+                    sources_task1_hsplit.left.avg.pow(k) = powL;
+                    sources_task1_hsplit.right.avg.pow(k) = powR;
+
+                    covL = source_task2.avg.cov{k}(1:3,1:3);
+                    covR = source_task2.avg.cov{k}(4:6,4:6);
+                    powL = svd(covL); powL = powL(1); % use the lambda1 method
+                    powR = svd(covR); powR = powR(1);
+                    sources_task2_hsplit.left.avg.pow(k) = powL;
+                    sources_task2_hsplit.right.avg.pow(k) = powR;
+
+                end
+            end
+                % Estimate the power from the CSD using the first
+                % singular value
+                % cfg = [];
+                % cfg.keepcsd = 'no';
+                % cfg.powmethod = 'lambda1';
+                % ft_sourcedescriptives indexes the 6x6 CSD matric
+                % based on the CSD labels and implements the power
+                % estimate based on Gross et.al. eq (8) https://doi.org/10.1073/pnas.98.2.694
+                % sources_task1_hsplit.(hemispheres(hn)) = ft_sourcedescriptives(cfg, source_task1);
+                % sources_task2_hsplit.(hemispheres(hn)) = ft_sourcedescriptives(cfg, source_task2);
             % end
-            % 
-            % % Grab the metadata from the non-symmetrical
-            % % sourcemodel and add value(s)
-            % source_reassembled_task1 = nonsym_sourcemodel;
-            % source_reassembled_task1.freq = 40;
-            % source_reassembled_task2 = source_reassembled_task1;
-            % 
-            % % As we are left with two objects representing
-            % % simulataneously both hemispheres and one hemisphere,
-            % % we need to massage the estimates back into a
-            % % structure that fieldtrip understands downstream.
-            % source_reassembled_task1.avg.pow = reassemble_hemispheres(...
-            %     sources_task1_hsplit.left, ...
-            %     sources_task1_hsplit.right, ... 
-            %     source_reassembled_task1, ...
-            %     'avg.pow');
-            % 
-            % source_reassembled_task2.avg.pow = reassemble_hemispheres(...
-            %     sources_task2_hsplit.left, ...
-            %     sources_task2_hsplit.right, ...
-            %     source_reassembled_task2, ...
-            %     'avg.pow');
+
+            % Grab the metadata from the non-symmetrical
+            % sourcemodel and add value(s)
+            source_reassembled_task1 = nonsym_sourcemodel;
+            source_reassembled_task1.freq = 40;
+            source_reassembled_task2 = source_reassembled_task1;
+
+            % As we are left with two objects representing
+            % simulataneously both hemispheres and one hemisphere,
+            % we need to massage the estimates back into a
+            % structure that fieldtrip understands downstream.
+            source_reassembled_task1.avg.pow = reassemble_hemispheres(...
+                sources_task1_hsplit.left, ...
+                sources_task1_hsplit.right, ... 
+                source_reassembled_task1, ...
+                'avg.pow');
+
+            source_reassembled_task2.avg.pow = reassemble_hemispheres(...
+                sources_task2_hsplit.left, ...
+                sources_task2_hsplit.right, ...
+                source_reassembled_task2, ...
+                'avg.pow');
             
             % Contrast the lateral conditions, normalising to their
             % combined power
             cfg           = [];
-            cfg.operation = '(x2-x1)/(x1+x2)'; % right minus left
+            cfg.operation = '(x2-x1)/(x2+x1)'; % right minus left
             cfg.parameter = 'avg.pow';
-            source_contrast   = ft_math(cfg,source_task1,source_task2);                    
+            source_contrast   = ft_math(cfg,source_reassembled_task1,source_reassembled_task2);                   
 
             % Save output to derivatives
             source_constrast_file = fullfile(deriv_meg_dir, sprintf('source-lcmv_task-%s_cond-%s_contrast.mat', task, condition));
@@ -331,27 +368,17 @@ end
 
 %% Gather contrasts over tasks and conditions
 
-deriv_anat_dir = fullfile(derivatives_dir, 'sub-030', '/ses-001/anat/'); % Use sub 30 mri for now
-mri_realigned_file = fullfile(deriv_anat_dir, 'mri_realigned.mat');
-load (mri_realigned_file)
-title_contrast = ["Left minus right attention" "High minus low arithmetic difficulty"];
-
-[~,ftpath] = ft_version();
-load(fullfile(ftpath, 'template', 'sourcemodel', 'standard_sourcemodel3d8mm.mat'), 'sourcemodel');
-template_grid = sourcemodel;
-clear sourcemodel;
-
 allsources = [];
 allsources_int_volnorm = [];
 for task_no = 1:numel(tasks)
     task = tasks(task_no)
     allsources.(task) = [];
     for condition = conditions
-        title_str = sprintf('%s - Stim: %s', title_contrast(task_no), condition)
+        % title_str = sprintf('%s - Stim: %s', title_contrast(task_no), condition)
         sources = cell(1,numel(subjects));
         source_int_volnorm = sources;
         for s = 1:numel(subjects)
-            deriv_anat_dir = fullfile(derivatives_dir, 'sub-030', '/ses-001/anat/'); % Use sub 30 mri for now
+            deriv_anat_dir = fullfile(derivatives_dir, sprintf('sub-%03d',subjects(s)), '/ses-001/anat/'); % Use sub 30 mri for now
             mri_realigned_file = fullfile(deriv_anat_dir, 'mri_realigned.mat');
             load (mri_realigned_file)
             sub = subjects(s)
@@ -391,191 +418,7 @@ for task_no = 1:numel(tasks)
     end
 end
 
-allsources_filename = fullfile(deriv_meg_dir, 'allsources-lcmv_contrast.mat');
-allsources_int_volnorm_filename = fullfile(deriv_meg_dir, 'allsources-lcmv_contrast_proc-interp-volnorm.mat');
+allsources_filename = fullfile(derivatives_dir, 'allsources-lcmv_contrast.mat');
+allsources_int_volnorm_filename = fullfile(derivatives_dir, 'allsources-lcmv_contrast_proc-interp-volnorm.mat');
 save (allsources_filename, 'allsources', '-v7.3')
 save (allsources_int_volnorm_filename, 'allsources_int_volnorm', '-v7.3')
-
-%%
-close all
-
-baddies = [];
-
-cfg = [];
-cfg.method        = 'slice';
-cfg.funparameter="pow"
-for task_no = 1:numel(tasks)
-    task = tasks(task_no)
-    for condition = conditions
-        for s = 1:numel(subjects)
-            sub = subjects(s)
-            substr = sprintf('sub%d', sub)
-            tit_str = sprintf('sub-%d task-%s cond-%s', sub, task, condition);
-            try
-                figure;
-                ft_sourceplot(cfg, allsources_int_volnorm.(task).(condition){s})
-                title(tit_str)
-            catch
-                close gcf
-                if not(isfield(baddies, task))
-                    baddies.(task) = [];
-                end
-                if not(isfield(baddies.(task), condition))
-                    baddies.(task).(condition) = [];
-                end
-                if not(isfield(baddies.(task).(condition), substr))
-                    baddies.(task).(condition).(substr) = true;
-                    sprintf('Badde: %s', tit_str)
-                end
-            end
-        end
-    end
-end
-
-%%
-
-[~,ftpath] = ft_version();
-load(fullfile(ftpath, 'template', 'sourcemodel', 'standard_sourcemodel3d8mm.mat'), 'sourcemodel');
-template_grid = sourcemodel;
-clear sourcemodel;
-
-
-
-allsources_ga = [];
-for task=tasks
-    allsources_ga.(task) = [];
-    for condition = conditions
-         % title_str = sprintf('%s - Stim: %s', title_contrast(task_no), condition)
-        %  source_int_volnorms = {};
-        % for s=1:15
-        %     cfg           = [];
-        %     cfg.parameter = 'pow';
-        %     source_contrast_int_volnorm = ft_sourceinterpolate(cfg, allsources.(task).(condition){s}, mri_realigned);
-        %     cfg = [];
-        %     cfg.nonlinear     = 'no'; % yes?
-        %     source_int_volnorms{s} = ft_volumenormalise(cfg, source_contrast_int_volnorm);
-        % 
-        % end
-        % grand average over subjects
-        cfg           = [];
-        cfg.parameter = 'pow';
-        allsources_ga.(task).(condition) = ft_sourcegrandaverage(cfg, allsources_int_volnorm.(task).(condition){:});
-    end
-end
-%%
-allsources_ga_filename = fullfile(deriv_meg_dir, 'allsources_contrast_grandaverage.mat');
-save (allsources_filename, 'allsources_ga', '-v7.3')
-%%
-
-cfg = [];
-cfg.method        = 'slice';
-cfg.funparameter = "pow";
-for task_no = 1:numel(tasks)
-    task = tasks(task_no);
-    for condition = conditions
-        tit_str = sprintf('grand average task-%s cond-%s', task, condition)
-        figure;
-        ft_sourceplot(cfg, allsources_ga.(task).(condition), mri_realigned)
-        title(tit_str)
-    end
-end
-%%
-
-% %%
-% close all
-% for task_no = 1:numel(tasks)
-%     for condition = conditions
-%         % interpolate onto MRI
-%         % load ('mri152.mat');
-%         cfg           = [];
-%         cfg.parameter = 'pow';
-%         source_lateral_dif_interp  = ft_sourceinterpolate(cfg, gaall.(task).(condition), mri_realigned);
-% 
-%         % Plot the estimated sources
-% 
-%         % thresholded opacity map, anything <65% of maximum is fully transparent,
-%         % anything >80% of maximum is fully opaque
-% 
-%         % cfg = [];
-%         % cfg.method        = 'ortho';
-%         % cfg.funparameter  = 'pow';
-%         % cfg.funcolormap   = 'jet';
-%         % 
-%         % figure;
-%         % ft_sourceplot(cfg, source_lateral_dif_interp);
-% 
-% 
-%         cfg = [];
-%         cfg.method        = 'slice';
-%         cfg.funparameter  = 'pow';
-%         cfg.funcolormap   = 'jet';
-% 
-%         figure;
-%         ft_sourceplot(cfg, source_lateral_dif_interp);
-%         title(title_str)
-%         saveas(gcf,fullfile(derivatives_dir, sprintf('sub-all_stim-%s_task-%s_source_contrast.png', condition, task)))
-% 
-%     end
-% end
-
-%%
-% Source statistics
-% 
-% cfg = [];
-% cfg.parameter = 'pow';
-% cfg.method = 'montecarlo';
-% cfg.correctm = 'no';
-% cfg.statistic = 'ft_statfun_depsamplesT';
-% cfg.tail = 0;
-% cfg.numrandomization = 'all';
-% 
-% nobs = numel(subjects);
-% cfg.design = [
-%   ones(1,nobs)*1 ones(1,nobs)*2
-%   1:nobs 1:nobs
-% ];
-% 
-% cfg.ivar = 1;
-% cfg.uvar = 2;
-% 
-% stat = ft_sourcestatistics(cfg, gaall.va.con, gaall.va.strobe);
-
-%%
-% run statistics over subjects %
-stats = [];
-cfg=[];
-cfg.dim         = allsources_int_volnorm.va.con{1}.dim;
-cfg.method      = 'montecarlo';
-cfg.statistic   = 'ft_statfun_depsamplesT';
-cfg.parameter   = 'pow';
-% cfg.correctm    = 'cluster';
-cfg.numrandomization = 10;
-cfg.alpha       = 0.05; % note that this only implies single-sided testing
-cfg.tail        = 0;
-
-nsubj=numel(subjects);
-cfg.design(1,:) = [1:nsubj 1:nsubj];
-cfg.design(2,:) = [ones(1,nsubj)*1 ones(1,nsubj)*2];
-cfg.uvar        = 1; % row of design matrix that contains unit variable (in this case: subjects)
-cfg.ivar        = 2; % row of design matrix that contains independent variable (the conditions)
-for task = tasks
-    stats.(task) = ft_sourcestatistics(cfg, allsources_int_volnorm.(task).(conditions(1)){:}, allsources_int_volnorm.(task).(conditions(2)){:});
-    
-end
-
-
-cfg = [];
-cfg.method        = 'slice';
-cfg.funparameter  = 'stat';
-cfg.maskparameter = 'mask';
-
-stat = stats.va;
-figure
-ft_sourceplot(cfg, stat,mri_realigned);
-
-stat = stats.wm;
-figure
-ft_sourceplot(cfg, stat,mri_realigned);
-% saveas(gcf,fullfile(derivatives_dir, sprintf('sub-all_stim-%s_task-%s_source_contrast_stat.png', condition, task)))
-
-% ft_sourceplot(cfg, stat,mri_realigned);
