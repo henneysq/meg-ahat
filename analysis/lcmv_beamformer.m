@@ -194,48 +194,18 @@ for sub = subjects
             data_task1 = ft_selectdata(cfg, data_task_cond);
             cfg.trials = trials_task2;
             data_task2 = ft_selectdata(cfg, data_task_cond);
-                 
-            % Calculate periodogram
-            % cfg              = [];
-            % cfg.channel     = 'MEG';
-            % cfg.output       = 'powandcsd';
-            % cfg.method       = 'mtmfft';
-            % cfg.taper        = 'boxcar';
-            % cfg.foilim       = [40 40];
-            % ERboxcar_ar_task1        = ft_freqanalysis(cfg, data_task1);
-            % ERboxcar_ar_task2        = ft_freqanalysis(cfg, data_task2);
-            % % We also need the combined data for calculating the
-            % % common spatial filter
-            % ERboxcar_Ar        = ft_freqanalysis(cfg, data_task_cond);
-            % 
-            % % Source Analysis of lateral contrast
-            % cfg                   = []; 
-            % cfg.method            = 'dics';
-            % cfg.frequency         = 40;  
-            % cfg.channel           = data_all.label(:);
-            % cfg.sourcemodel       = leadfield;
-            % cfg.headmodel         = mri_headmodel;
-            % cfg.dics.fixedori     = 'no';
-            % cfg.dics.projectnoise = 'yes';
-            % cfg.dics.lambda       = '5%';
-            % cfg.dics.realfilter   = 'yes';
-            % cfg.dics.keepcsd      = 'yes';
-            % source = ft_sourceanalysis(cfg, ERboxcar_Ar);
 
+            % OBS: The ft_timelockanalysis estimates the covariance on the
+            % timeseries and thus does not take into account any spectral
+            % details. Thus, the variance is expected to be dominated by
+            % the 40 Hz contribution and as such should be bp-filtered at
+            % this point
             cfg = [];
             cfg.covariance = 'yes';
-            cfg.keeptrials = 'yes';
+            % cfg.keeptrials = 'yes';
             timelock_task1 = ft_timelockanalysis(cfg, data_task1);
             timelock_task2 = ft_timelockanalysis(cfg, data_task2);
             timelock_task_cond = ft_timelockanalysis(cfg, data_task_cond);
-            % with .keeptrials = 'yes' to look in ft_databrowser for edge
-            % artefacts or plot sqrt(variance) over time
-            % if condition == "strobe"
-            %     cfg = [];
-            %     cfg.channel ='M*O**';
-            %     ft_databrowser(cfg, timelock_task_cond)
-            %     cfg
-            % end
 
             % do the beamformer source reconstuction on a 1 cm grid
             cfg = [];
@@ -243,9 +213,6 @@ for sub = subjects
             cfg.sourcemodel       = leadfield;
             cfg.grad = grad;
             cfg.method = 'lcmv';
-            % cfg.frequency         = 40;  
-            % cfg.lcmv.projectnoise = 'yes'; % needed for neural activity index
-            % cfg.lcmv.keepcsd      = 'yes';
             cfg.lcmv.keepcov = 'yes';
             cfg.lcmv.keepfilter   = 'yes';
             source = ft_sourceanalysis(cfg, timelock_task_cond);
@@ -253,17 +220,11 @@ for sub = subjects
             % Extract the common spatial filter and use in the
             % individual source estimates
             cfg.sourcemodel.filter = source.avg.filter;
-            % We need to use the 'pcc' method with keepdcsd = 'yes'
-            % and then manually calculate the power on each
-            % hemisphere, decoupling the symmetric dipoles
-            % cfg.method   = 'pcc';
-            % cfg.keepcsd = 'yes';
-            % cfg          = rmfield(cfg, 'dics');
             source_task1 = ft_sourceanalysis(cfg, timelock_task1);
             source_task2 = ft_sourceanalysis(cfg, timelock_task2);
 
             % From the symmetric dipole constraint, we get a
-            % 6x6 CSD matrix, defined by the 6-dimensional position
+            % 6x6 covaraince matrix, defined by the 6-dimensional position
             % vector 'pos' , of which the first three elements are
             % the xyz coordinates of the left hemisphere diploe
             % (positive y), and the last three elements are the xyz
@@ -397,17 +358,6 @@ for task_no = 1:numel(tasks)
             cfg.nonlinear     = 'no'; % yes?
             source_contrast_int_volnorm = ft_volumenormalise(cfg, source_contrast_int_volnorm);
             
-
-            % source_contrast.inside = template_grid.inside;
-            % source_contrast.pos = template_grid.pos;
-            % source_contrast.dim = template_grid.dim;
-            % tmp = source_contrast.pow;
-            % source_contrast.pow = nan(size(template_grid.pos,1), size(tmp, 2), size(tmp, 3));
-            % source_contrast.pow(template_grid.inside,:,:) = tmp;
-        
-            % cfg           = [];
-            % cfg.parameter = 'pow';
-            % lateral_dif_sources{s} = ft_sourceinterpolate(cfg, source_contrast, mri_realigned);
             sources{s} = source_contrast;
             sources_int_volnorm{s} = source_contrast_int_volnorm;
         
