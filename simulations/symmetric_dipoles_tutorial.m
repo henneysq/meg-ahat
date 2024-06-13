@@ -312,15 +312,4 @@ cfg = [];
 cfg.method = 'slice';
 cfg.funparameter = 'pow';
 figure; ft_sourceplot(cfg, contrastLR_attL_attR);
-
-% Compute contrast
-cfg           = [];
-cfg.operation = '(x2-x1)/(x1+x2)'; % right minus left
-cfg.parameter = 'pow';
-contrastLR_attL_attR = ft_math(cfg, singleLR_attL, singleLR_attR);
-
-% Plot source contrasts
-cfg = [];
-cfg.method = 'slice';
-cfg.funparameter = 'pow';
-figure; ft_sourceplot(cfg, contrastLR_attL_attR);
+saveas(gcf,fullfile(img_dir, 'contrastLR_attL_attR_sym_uncor.png'))
