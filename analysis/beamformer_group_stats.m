@@ -12,6 +12,7 @@ addpath('/project/3031004.01/meg-ahat/templates')
 data_dir = '/project/3031004.01/data/';
 raw2_dir = fullfile(data_dir, 'raw2');
 derivatives_dir = fullfile(data_dir, 'derivatives');
+derivatives_group_dir = fullfile(derivatives_dir, 'group');
 
 % Start logging
 diaryfile = fullfile(data_dir, 'beamformer_group_stats.log');
@@ -34,7 +35,7 @@ conditions = ["con" "strobe"];
 
 %%
 
-allsources_int_volnorm_filename = fullfile(derivatives_dir, 'allsources-lcmv_contrast_proc-interp-volnorm.mat');
+allsources_int_volnorm_filename = fullfile(derivatives_group_dir, 'allsources-lcmv_contrast_proc-interp-volnorm.mat');
 load (allsources_int_volnorm_filename)
 
 %%
@@ -68,14 +69,14 @@ for task = tasks
 end
 
 %%
-stats_filename = fullfile(derivatives_dir, 'stats.mat');
+stats_filename = fullfile(derivatives_group_dir, 'stats.mat');
 save (stats_filename, 'stats', '-v7.3')
 
 %%
 
-stats_filename = fullfile(derivatives_dir, 'stats.mat');
-% load (stats_filename)
-allsources_ga_filename = fullfile(derivatives_dir, 'allsources_contrast_grandaverage.mat');
+stats_filename = fullfile(derivatives_group_dir, 'stats.mat');
+load (stats_filename)
+allsources_ga_filename = fullfile(derivatives_group_dir, 'allsources_contrast_grandaverage.mat');
 load (allsources_ga_filename)
 anatomy = allsources_int_volnorm_ga.va.con.anatomy;
 

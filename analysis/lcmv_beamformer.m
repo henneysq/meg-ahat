@@ -12,6 +12,7 @@ addpath('/project/3031004.01/meg-ahat/templates')
 data_dir = '/project/3031004.01/data/';
 raw2_dir = fullfile(data_dir, 'raw2');
 derivatives_dir = fullfile(data_dir, 'derivatives');
+derivatives_group_dir = fullfile(derivatives_dir, 'group');
 
 % Start logging
 diaryfile = fullfile(data_dir, 'lcmv_beamformer.log');
@@ -319,7 +320,7 @@ for sub = subjects
             source_contrast   = ft_math(cfg,source_reassembled_task1,source_reassembled_task2);                   
 
             % Save output to derivatives
-            source_constrast_file = fullfile(deriv_meg_dir, sprintf('source-lcmv_task-%s_cond-%s_contrast.mat', task, condition));
+            source_constrast_file = fullfile(deriv_meg_dir, sprintf('source-lcmv_task-%s_cond-%s_contrast.mat', task, stim_condition));
             save (source_constrast_file, 'source_contrast', '-v7.3')
 
         end
@@ -331,22 +332,24 @@ end
 
 allsources = [];
 allsources_int_volnorm = [];
+
 for task_no = 1:numel(tasks)
     task = tasks(task_no)
     allsources.(task) = [];
-    for condition = conditions
-        % title_str = sprintf('%s - Stim: %s', title_contrast(task_no), condition)
+
+    for stim_condition = stim_conditions
         sources = cell(1,numel(subjects));
         source_int_volnorm = sources;
+
         for s = 1:numel(subjects)
-            deriv_anat_dir = fullfile(derivatives_dir, sprintf('sub-%03d',subjects(s)), '/ses-001/anat/'); % Use sub 30 mri for now
-            mri_realigned_file = fullfile(deriv_anat_dir, 'mri_realigned.mat');
-            load (mri_realigned_file)
             sub = subjects(s)
             
-            deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
-        
-            source_constrast_file = fullfile(deriv_meg_dir, sprintf('source-lcmv_task-%s_cond-%s_contrast.mat', task, condition));
+            deriv_anat_dir = fullfile(derivatives_dir, sprintf('sub-%03d',subjects(s)), 'ses-001', 'anat');
+            mri_realigned_file = fullfile(deriv_anat_dir, 'mri_realigned.mat');
+            load (mri_realigned_file)
+
+            deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), 'ses-001', 'meg');
+            source_constrast_file = fullfile(deriv_meg_dir, sprintf('source-lcmv_task-%s_cond-%s_contrast.mat', task, stim_condition));
             load (source_constrast_file) % source_lateral_dif
             
             
@@ -363,12 +366,12 @@ for task_no = 1:numel(tasks)
         
         end
         
-        allsources.(task).(condition)   = sources;
-        allsources_int_volnorm.(task).(condition)   = sources_int_volnorm;
+        allsources.(task).(stim_condition) = sources;
+        allsources_int_volnorm.(task).(stim_condition) = sources_int_volnorm;
     end
 end
 
-allsources_filename = fullfile(derivatives_dir, 'allsources-lcmv_contrast.mat');
-allsources_int_volnorm_filename = fullfile(derivatives_dir, 'allsources-lcmv_contrast_proc-interp-volnorm.mat');
+allsources_filename = fullfile(derivatives_group_dir, 'allsources-lcmv_contrast.mat');
+allsources_int_volnorm_filename = fullfile(derivatives_group_dir, 'allsources-lcmv_contrast_proc-interp-volnorm.mat');
 save (allsources_filename, 'allsources', '-v7.3')
 save (allsources_int_volnorm_filename, 'allsources_int_volnorm', '-v7.3')

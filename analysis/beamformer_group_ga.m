@@ -12,6 +12,7 @@ addpath('/project/3031004.01/meg-ahat/templates')
 data_dir = '/project/3031004.01/data/';
 raw2_dir = fullfile(data_dir, 'raw2');
 derivatives_dir = fullfile(data_dir, 'derivatives');
+derivatives_group_dir = fullfile(derivatives_dir, 'group');
 
 % Start logging
 diaryfile = fullfile(data_dir, 'beamformer_group_ga.log');
@@ -31,6 +32,10 @@ subjects = data_details_cfg.new_trigger_subs; % Subjects correctly stimulated
 
 tasks = ["va" "wm"];
 conditions = ["con" "strobe"];
+
+
+allsources_int_volnorm_filename = fullfile(derivatives_group_dir, 'allsources-lcmv_contrast_proc-interp-volnorm.mat');
+load (allsources_int_volnorm_filename)
 
 %%
 
@@ -69,10 +74,6 @@ end
 
 %%
 
-
-allsources_int_volnorm_filename = fullfile(deriv_meg_dir, 'allsources-lcmv_contrast_proc-interp-volnorm.mat');
-load (allsources_int_volnorm_filename)
-
 allsources_int_volnorm_ga = [];
 for task=tasks
     allsources_int_volnorm_ga.(task) = [];
@@ -90,11 +91,11 @@ for task=tasks
     end
 end
 %
-allsources_ga_filename = fullfile(derivatives_dir, 'allsources_contrast_grandaverage.mat');
+allsources_ga_filename = fullfile(derivatives_group_dir, 'allsources_contrast_grandaverage.mat');
 save (allsources_ga_filename, 'allsources_int_volnorm_ga', '-v7.3')
 
 %%
-allsources_ga_filename = fullfile(derivatives_dir, 'allsources_contrast_grandaverage.mat');
+allsources_ga_filename = fullfile(derivatives_group_dir, 'allsources_contrast_grandaverage.mat');
 load (allsources_ga_filename)
 
 %%

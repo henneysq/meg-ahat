@@ -22,16 +22,15 @@ configure_ft
 % Load data details
 data_details_cfg = get_data_details();
 
-% Define subjects - should eventually be centralised
-% subjects = data_details_cfg.new_trigger_subs; %[8 9 11 13 17 18 21:23 25 27:30];
-subjects = [24 26]
+% Define subjects
+subjects = data_details_cfg.new_trigger_subs;
 
 for sub = subjects
     close all
     sub_str = sprintf('sub-%03d', sub)
 
-    deriv_anat_dir = fullfile(derivatives_dir, sub_str, '/ses-001/anat/');
-    raw2_meg_dir = fullfile(raw2_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
+    deriv_anat_dir = fullfile(derivatives_dir, sub_str, 'ses-001', 'anat');
+    raw2_meg_dir = fullfile(raw2_dir, sprintf('sub-%03d', sub), 'ses-001', 'meg');
     
     if not(exist(deriv_anat_dir, 'dir'))
       mkdir(deriv_anat_dir);

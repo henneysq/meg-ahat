@@ -368,8 +368,10 @@ for task_no = 1:numel(tasks)
     end
 end
 
-allsources_filename = fullfile(deriv_meg_dir, 'allsources_contrast_proc-interp-volnorm.mat');
-% save (allsources_filename, 'allsources', '-v7.3')
+allsources_filename = fullfile(deriv_meg_dir, 'allsources_contrast.mat');
+allsources_int_volnorm_filename = fullfile(deriv_meg_dir, 'allsources_contrast_proc-interp-volnorm.mat');
+save (allsources_filename, 'allsources', '-v7.3')
+save (allsources_int_volnorm_filename, 'allsources_int_volnorm', '-v7.3')
 
 %%
 close all

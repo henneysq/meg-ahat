@@ -11,6 +11,7 @@ addpath('/project/3031004.01/meg-ahat/analysis')
 data_dir = '/project/3031004.01/data/';
 raw2_dir = fullfile(data_dir, 'raw2');
 derivatives_dir = fullfile(data_dir, 'derivatives');
+derivatives_group_dir = fullfile(derivatives_dir, 'group');
 
 % Start logging
 diaryfile = fullfile(data_dir, 'artefact_rejection.log');
@@ -33,8 +34,8 @@ for sub = subjects
     ses = 1;
     
     % Speciffy subject specific dirs
-    deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
-    img_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/img/');
+    deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), 'ses-001', 'meg');
+    img_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), 'ses-001', 'img');
     
     if not(exist(deriv_meg_dir, 'dir'))
       mkdir(deriv_meg_dir);

@@ -23,7 +23,7 @@ for sub = subjects
     trl_mgmt.(sub_str).wm = [];
 
     % Speciffy subject specific dirs
-    deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), '/ses-001/meg/');
+    deriv_meg_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), 'ses-001', 'meg');
     
     tasks = ["va", "wm"];
     
