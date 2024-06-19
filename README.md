@@ -28,10 +28,11 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 	3. [Converting Data](#converting-data)
 	4. [Trial rejection](#trial-rejection)
 3. [Data Analysis](#data-analysis)
-	1. [40 Hz Artefact Removal](#40-hz-artefact-removal)
-	2. [Sensor Level Analysis](#sensor-level-analysis)
-	3. [Source Level Analysis](#source-level-analysis)
-	4. [Behavioural Analysis](#behavioural-analysis)
+	1. [Dependencies](#dependencies)
+	2. [40 Hz Artefact Removal](#40-hz-artefact-removal)
+	3. [Sensor Level Analysis](#sensor-level-analysis)
+	4. [Source Level Analysis](#source-level-analysis)
+	5. [Behavioural Analysis](#behavioural-analysis)
 4. [Experiment Management](#experiment-management)
 	1. [Dependencies](#dependencies)
 	2. [Quick-Start Guide](#quick-start-guide)
@@ -132,6 +133,11 @@ and books are kept in `data/derivatives/trial_rejections.json`.
 
 ## Data Analysis <a name="data-analysis"></a>
 
+### Dependencies <a name="dependencies"></a> <a name="dependencies"></a>
+
+Data analysis is done in Matlab2023b using a fork of FieldTrip with modifications to accomodate handling of eyetracking data: https://github.com/henneysq/fieldtrip/tree/bep020.
+
+### Pipeline
 The overall data analysis pipeline is defined by the flowchart, in which `.m` and `.py` files are found in the `/analysis/` directory:
 
 ```mermaid
@@ -198,7 +204,7 @@ The 40 Hz cable noise is removed using [`artifact_rejection.m`](analysis/artifac
 
 ## Experiment Management <a name="experiment-management"></a>
 
-### Dependencies <a name="dependencies"></a>
+### Dependencies <a name="dependencies"></a> <a name="dependencies"></a>
 
 The experiments require visual presentations and participant feedback is implemented in Python with `psychopy`, and light stimulation with custom and proprietary equipment and drivers are provided by OC. The required software can be installed by:
 
