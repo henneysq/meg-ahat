@@ -25,8 +25,8 @@ configure_ft
 
 % Load data details
 data_details_cfg = get_data_details();
+subjects = data_details_cfg.new_trigger_subs;
 
-subjects = [24 26];
 tasks = ["va", "wm"];
 
 for sub = subjects

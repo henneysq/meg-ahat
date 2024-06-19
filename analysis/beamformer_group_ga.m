@@ -65,7 +65,7 @@ for task_no = 1:numel(tasks)
                 end
                 if not(isfield(baddies.(task).(condition), substr))
                     baddies.(task).(condition).(substr) = true;
-                    sprintf('Badde: %s', tit_str)
+                    sprintf('Baddie: %s', tit_str)
                 end
             end
         end

@@ -7,6 +7,9 @@ update_forward_models = false;
 % Add util and template dirs to path
 addpath('/project/3031004.01/meg-ahat/util')
 addpath('/project/3031004.01/meg-ahat/templates')
+if isfile('cd_to_proj.m')
+    cd_to_proj
+end
 
 % Define directories
 data_dir = '/project/3031004.01/data/';
@@ -28,11 +31,10 @@ configure_ft
 data_details_cfg = get_data_details();
 
 % Define subjects, tasks, and conditions
-subjects = data_details_cfg.new_trigger_subs; % Subjects correctly stimulated
-baddies = [9 13 18 21 22 23 25 27 28];
+subjects = data_details_cfg.new_trigger_subs;
 
 tasks = ["va" "wm"];
-conditions = ["con" "strobe"];
+stim_conditions = ["con" "strobe"];
 
 % Define mapping for easier indexing
 stim_map = dictionary(["con", "isf", "strobe"], [1, 2, 3]);
@@ -136,6 +138,8 @@ for sub = subjects
         load (fullfile(deriv_meg_dir, 'leadfield.mat'))
     end
 
+    clear mri_headmodel
+
     % Iterate over tasks (i.e. runs 1 and 2: visual attention ('va') and 
     % working memory('wm') )
     for task = tasks
@@ -170,8 +174,8 @@ for sub = subjects
 
         % Iterate over the no-flicker and luminance-flicker
         % conditions for now (con & strobe)
-        for condition = conditions
-            sprintf('Stimulation condtition: %s', condition)
+        for stim_condition = stim_conditions
+            sprintf('Stimulation condtition: %s', stim_condition)
     
             % Find and select trials that correspond to the 
             % stimulus condition and the appropriate tasks:
@@ -179,7 +183,7 @@ for sub = subjects
             % task 2 corresponds to right attention.
             % In run 2, task 1 corresponds to high difficulty
             % and task 2 corresponds to low difficulty
-            trials_cond = data_task.trialinfo(:,3) == stim_map(condition) & ...
+            trials_cond = data_task.trialinfo(:,3) == stim_map(stim_condition) & ...
                 bitor(data_task.trialinfo(:,4) == 1, ...
                     data_task.trialinfo(:,4) == 2);
             cfg = [];
@@ -203,14 +207,15 @@ for sub = subjects
             % this point
             cfg = [];
             cfg.covariance = 'yes';
-            % cfg.keeptrials = 'yes';
+            cfg.keeptrials = 'yes';
             timelock_task1 = ft_timelockanalysis(cfg, data_task1);
             timelock_task2 = ft_timelockanalysis(cfg, data_task2);
             timelock_task_cond = ft_timelockanalysis(cfg, data_task_cond);
+            clear data_task_cond data_task1 data_task2
 
             % do the beamformer source reconstuction on a 1 cm grid
             cfg = [];
-            cfg.headmodel = mri_headmodel;
+            cfg.headmodel = leadfield;
             cfg.sourcemodel       = leadfield;
             cfg.grad = grad;
             cfg.method = 'lcmv';
@@ -218,11 +223,35 @@ for sub = subjects
             cfg.lcmv.keepfilter   = 'yes';
             source = ft_sourceanalysis(cfg, timelock_task_cond);
             
+            
             % Extract the common spatial filter and use in the
             % individual source estimates
             cfg.sourcemodel.filter = source.avg.filter;
+            clear source
+            cfg.rawtrial = 'yes';
+            cfg.keeptrials = 'yes';
+
+            % We want to first estimate the source power on a
+            % trial-by-trial basis to estimate the correlation between it
+            % reaction time.
             source_task1 = ft_sourceanalysis(cfg, timelock_task1);
             source_task2 = ft_sourceanalysis(cfg, timelock_task2);
+            
+            % Calculate the beta statistic
+            [s1, ~] = statfun_rt_power_cor([],source_task1);
+            [s2, ~] = statfun_rt_power_cor([],source_task2);
+
+            % Then use the concatenated covariance to get the average
+            % estimaes for the source power over trials
+            cfg = rmfield(cfg, 'rawtrial');
+            cfg = rmfield(cfg, 'keeptrials');
+            source_task1 = ft_sourceanalysis(cfg, timelock_task1);
+            source_task2 = ft_sourceanalysis(cfg, timelock_task2);
+            
+            % Add that beta stat images to the source objects
+            source_task1.stat = s1.stat;
+            source_task2.stat = s2.stat;
+            clear timelock_task1 timelock_task2 s1 st2
 
             % From the symmetric dipole constraint, we get a
             % 6x6 covaraince matrix, defined by the 6-dimensional position
@@ -235,7 +264,6 @@ for sub = subjects
             % Thus, the upper left 3x3 block represents the left
             % hemisphere dipole CSD, and the lower right 3x3 block
             % represents the right hemisphere dipole
-            % hemispheres = ["left", "right"];
             sources_task1_hsplit = [];
             sources_task1_hsplit.left = source_task1;
             sources_task1_hsplit.left.avg.pow = nan(prod(sourcemodel.dim),1);
@@ -244,31 +272,22 @@ for sub = subjects
             sources_task2_hsplit.left = source_task2;
             sources_task2_hsplit.left.avg.pow = nan(prod(sourcemodel.dim),1);
             sources_task2_hsplit.right = sources_task1_hsplit.left;
-            % for hn = 1:2
+
+            % Iterate over dipole (pairs)
             for k = 1:size(source_task1.pos,1)
                 if ~isempty(source_task1.avg.cov{k})
-                    % Define 3x3 block indices for the CSD of
-                    % interest
-                    % indices = (1:3) + 3 * (hn - 1);
-                    % % Set the CSD label to 'scandip' to
-                    % % indicate the it is a scanner dipole
-                    % source_task1.avg.csdlabel{k}(indices) = {'scandip'};
-                    % source_task2.avg.csdlabel{k}(indices) = {'scandip'};
-                    % % Define 3x3 block indices for the CSD of
-                    % % no-interest
-                    % indices = (4:6) - 3 * (hn - 1);
-                    % % Set the CSD label to 'scandip' to
-                    % % indicate the it is a suppression dipole
-                    % source_task1.avg.csdlabel{k}(indices) = {'supdip'};
-                    % source_task2.avg.csdlabel{k}(indices) = {'supdip'};
-
+                    % Exrtract the top left and lower right blocks from the
+                    % covariance matrix
                     covL = source_task1.avg.cov{k}(1:3,1:3);
                     covR = source_task1.avg.cov{k}(4:6,4:6);
-                    powL = svd(covL); powL = powL(1); % use the lambda1 method
+
+                    % Estimate the power as the first singular value
+                    powL = svd(covL); powL = powL(1);
                     powR = svd(covR); powR = powR(1);
                     sources_task1_hsplit.left.avg.pow(k) = powL;
                     sources_task1_hsplit.right.avg.pow(k) = powR;
 
+                    % repeat for task 2
                     covL = source_task2.avg.cov{k}(1:3,1:3);
                     covR = source_task2.avg.cov{k}(4:6,4:6);
                     powL = svd(covL); powL = powL(1); % use the lambda1 method
@@ -278,17 +297,6 @@ for sub = subjects
 
                 end
             end
-                % Estimate the power from the CSD using the first
-                % singular value
-                % cfg = [];
-                % cfg.keepcsd = 'no';
-                % cfg.powmethod = 'lambda1';
-                % ft_sourcedescriptives indexes the 6x6 CSD matric
-                % based on the CSD labels and implements the power
-                % estimate based on Gross et.al. eq (8) https://doi.org/10.1073/pnas.98.2.694
-                % sources_task1_hsplit.(hemispheres(hn)) = ft_sourcedescriptives(cfg, source_task1);
-                % sources_task2_hsplit.(hemispheres(hn)) = ft_sourcedescriptives(cfg, source_task2);
-            % end
 
             % Grab the metadata from the non-symmetrical
             % sourcemodel and add value(s)
@@ -305,24 +313,57 @@ for sub = subjects
                 sources_task1_hsplit.right, ... 
                 source_reassembled_task1, ...
                 'avg.pow');
+            clear sources_task1_hsplit
 
             source_reassembled_task2.avg.pow = reassemble_hemispheres(...
                 sources_task2_hsplit.left, ...
                 sources_task2_hsplit.right, ...
                 source_reassembled_task2, ...
                 'avg.pow');
+            clear sources_task2_hsplit
             
-            % Contrast the lateral conditions, normalising to their
+            % Contrast the task conditions, normalising to their
             % combined power
             cfg           = [];
-            cfg.operation = '(x2-x1)/(x2+x1)'; % right minus left
+            cfg.operation = '(x2-x1)/(x2+x1)';
             cfg.parameter = 'avg.pow';
-            source_contrast   = ft_math(cfg,source_reassembled_task1,source_reassembled_task2);                   
+            source_contrast   = ft_math(cfg,source_reassembled_task1,source_reassembled_task2);
+            clear source_reassembled_task1 source_reassembled_task2
 
             % Save output to derivatives
             source_constrast_file = fullfile(deriv_meg_dir, sprintf('source-lcmv_task-%s_cond-%s_contrast.mat', task, stim_condition));
             save (source_constrast_file, 'source_contrast', '-v7.3')
 
+            % Repeat the same process for the beta estimates
+            source_reassembled_beta1 = nonsym_sourcemodel;
+            source_reassembled_beta1.freq = 40;
+            source_reassembled_beta1.stat = reassemble_hemispheres(...
+                source_task1, ...
+                source_task1, ... 
+                source_reassembled_beta1, ...
+                'stat');
+            source_reassembled_beta2 = nonsym_sourcemodel;
+            source_reassembled_beta2.freq = 40;
+            source_reassembled_beta2.stat = reassemble_hemispheres(...
+                source_task2, ...
+                source_task2, ... 
+                source_reassembled_beta2, ...
+                'stat');
+
+            % Contrast the conditions, normalising to their
+            % combined power
+            cfg           = [];
+            cfg.operation = '(x2-x1)/(x2+x1)';
+            cfg.parameter = 'stat';
+            source_beta_contrast   = ft_math(cfg,source_reassembled_beta1,source_reassembled_beta2);
+            clear source_reassembled_beta1 source_reassembled_beta2
+
+            % cfg = [];
+            % cfg.funparameter = 'stat';
+            % ft_sourceplot(cfg, source_beta_contrast)
+            source_beta_file = fullfile(deriv_meg_dir, sprintf('source-lcmv_task-%s_cond-%s_beta.mat', task, stim_condition));
+            save (source_beta_file, 'source_beta_contrast', '-v7.3')
+            clear source_beta_contrast source_task1 source_task2
         end
     end
 end

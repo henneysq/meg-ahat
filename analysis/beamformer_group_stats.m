@@ -47,7 +47,7 @@ cfg.method      = 'montecarlo';
 cfg.statistic   = 'ft_statfun_depsamplesT';
 cfg.parameter   = 'pow';
 cfg.correctm    = 'cluster';
-cfg.numrandomization = 2000;
+cfg.numrandomization = 1500;
 cfg.alpha       = 0.05; % note that this only implies single-sided testing
 cfg.tail        = 0;
 
