@@ -26,7 +26,7 @@ end
 
 % if data contains negatives, ensure strongly negative values are given as
 % much opacity as strongly positive ones
-dat_sign = sign(dat); % Save the sign for later
+% dat_sign = sign(dat); % Save the sign for later
 dat = abs(dat);
 
 mask = zeros(size(dat));
@@ -50,6 +50,6 @@ x = 1 ./ (1 + (x./(1-x)).^-beta);
 mask(inds) = x;
 
 % Reinstate sign
-mask = mask .* dat_sign;
+% mask = mask .* dat_sign;
 
 end
