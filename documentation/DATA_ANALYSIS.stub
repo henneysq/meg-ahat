@@ -1,5 +1,10 @@
 ## Data Analysis
 
+### Dependencies
+
+Data analysis is done in Matlab2023b using a fork of FieldTrip with modifications to accomodate handling of eyetracking data: https://github.com/henneysq/fieldtrip/tree/bep020.
+
+### Pipeline
 The overall data analysis pipeline is defined by the flowchart, in which `.m` and `.py` files are found in the `/analysis/` directory:
 
 ```mermaid
