@@ -13,6 +13,7 @@ data_dir = '/project/3031004.01/data/';
 raw2_dir = fullfile(data_dir, 'raw2');
 derivatives_dir = fullfile(data_dir, 'derivatives');
 derivatives_group_dir = fullfile(derivatives_dir, 'group');
+derivatives_img_dir = fullfile(derivatives_dir, 'img');
 
 % Start logging
 diaryfile = fullfile(data_dir, 'beamformer_group_ga.log');
@@ -55,6 +56,7 @@ for task_no = 1:numel(tasks)
                 figure;
                 ft_sourceplot(cfg, allsources_int_volnorm.(task).(condition){s})
                 title(tit_str)
+                saveas(gcf, fullfile(derivatives_img_dir,sprintf('sub-%d_task-%s_cond-%s', sub, task, condition)))
             catch
                 close gcf
                 if not(isfield(baddies, task))
@@ -111,5 +113,6 @@ for task_no = 1:numel(tasks)
         figure;
         ft_sourceplot(cfg, allsources_int_volnorm_ga.(task).(condition))
         title(tit_str)
+        saveas(gcf,fullfile(derivatives_img_dir, sprintf('sub-all_task-%s_cond-%s.png', task, condition)))
     end
 end
