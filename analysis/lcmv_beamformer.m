@@ -371,16 +371,16 @@ end
 
 %% Gather contrasts over tasks and conditions
 
-allsources = [];
+allsources_beta = [];
 allsources_int_volnorm = [];
 
 for task_no = 1:numel(tasks)
     task = tasks(task_no)
-    allsources.(task) = [];
+    allsources_beta.(task) = [];
 
     for stim_condition = stim_conditions
-        sources = cell(1,numel(subjects));
-        source_int_volnorm = sources;
+        sources_beta_int_volnorm = cell(1,numel(subjects));
+        source_int_volnorm = sources_beta_int_volnorm;
 
         for s = 1:numel(subjects)
             sub = subjects(s)
@@ -393,7 +393,8 @@ for task_no = 1:numel(tasks)
             source_constrast_file = fullfile(deriv_meg_dir, sprintf('source-lcmv_task-%s_cond-%s_contrast.mat', task, stim_condition));
             load (source_constrast_file) % source_lateral_dif
             
-            
+            source_beta_file = fullfile(deriv_meg_dir, sprintf('source-lcmv_task-%s_cond-%s_beta.mat', task, stim_condition));
+            load (source_beta_file)
 
             cfg           = [];
             cfg.parameter = 'pow';
@@ -401,18 +402,27 @@ for task_no = 1:numel(tasks)
             cfg = [];
             cfg.nonlinear     = 'no'; % yes?
             source_contrast_int_volnorm = ft_volumenormalise(cfg, source_contrast_int_volnorm);
+
+            cfg           = [];
+            cfg.parameter = 'stat';
+            source_beta_contrast_int_volnorm = ft_sourceinterpolate(cfg, source_beta_contrast, mri_realigned);
+            cfg = [];
+            cfg.nonlinear     = 'no'; % yes?
+            source_beta_contrast_int_volnorm = ft_volumenormalise(cfg, source_beta_contrast_int_volnorm);
             
-            sources{s} = source_contrast;
+
+
+            sources_beta_int_volnorm{s} = source_beta_contrast_int_volnorm;
             sources_int_volnorm{s} = source_contrast_int_volnorm;
         
         end
         
-        allsources.(task).(stim_condition) = sources;
+        allsources_beta_int_volnorm.(task).(stim_condition) = sources_beta_int_volnorm;
         allsources_int_volnorm.(task).(stim_condition) = sources_int_volnorm;
     end
 end
 
-allsources_filename = fullfile(derivatives_group_dir, 'allsources-lcmv_contrast.mat');
+allsources_beta_int_volnorm_filename = fullfile(derivatives_group_dir, 'allsources-lcmv_beta-contrast_proc-interp-volnorm.mat');
 allsources_int_volnorm_filename = fullfile(derivatives_group_dir, 'allsources-lcmv_contrast_proc-interp-volnorm.mat');
-save (allsources_filename, 'allsources', '-v7.3')
+save (allsources_beta_int_volnorm_filename, 'allsources_beta_int_volnorm', '-v7.3')
 save (allsources_int_volnorm_filename, 'allsources_int_volnorm', '-v7.3')
