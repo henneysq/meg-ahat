@@ -18,7 +18,7 @@ derivatives_dir = fullfile(data_dir, 'derivatives');
 derivatives_group_dir = fullfile(derivatives_dir, 'group');
 
 % Start logging
-diaryfile = fullfile(data_dir, 'lcmv_beamformer.log');
+diaryfile = fullfile(data_dir, 'logs', 'lcmv_beamformer.log');
 if (exist(diaryfile, 'file'))
   delete(diaryfile);
 end

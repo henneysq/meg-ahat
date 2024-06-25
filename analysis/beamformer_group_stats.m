@@ -13,7 +13,7 @@ derivatives_group_dir = fullfile(derivatives_dir, 'group');
 derivatives_img_dir = fullfile(derivatives_dir, 'img');
     
 % Start logging
-diaryfile = fullfile(data_dir, 'beamformer_group_stats.log');
+diaryfile = fullfile(data_dir, 'logs', 'beamformer_group_stats.log');
 if (exist(diaryfile, 'file'))
   delete(diaryfile);
 end
