@@ -88,15 +88,21 @@ load (allsources_ga_filename)
 anatomy = allsources_int_volnorm_ga.va.con.anatomy;
 
 %%
-% stats.va.nicemask = make_mask(stats.va.stat, [0.3 0.8]);
-% stats.wm.nicemask = make_mask(stats.wm.stat, [0.3 0.8]);
+close all
+
+mask = stats.va.mask;
+mask(isnan(mask)) = 0;
+stats.va.nicemask = make_mask(stats.va.stat, [0.3 0.8]) .* mask;
+mask = stats.wm.mask;
+mask(isnan(mask)) = 0;
+% lb = min(stats.wm.stat .* mask)/max(stats.wm.stat .* mask);
+stats.wm.nicemask = make_mask(stats.wm.stat, [0.1 0.8]) .* mask;
+% stats.wm.nicemask ;
 
 cfg = [];
 cfg.method        = 'slice';
 cfg.funparameter  = 'stat';
-cfg.maskparameter = 'mask';
-cfg.opacitylim    = [0 1];
-
+% 
 stat = stats.va;
 stat.anatomy = anatomy;
 figure
@@ -113,22 +119,50 @@ stat.anatomy = anatomy;
 figure
 ft_sourceplot(cfg, stat);
 title('Working memory arithmetic difficulty contrast')
-saveas(gcf,fullfile(derivatives_img_dir, sprintf('sub-all_task-wm_source_contrast_stat.png_numrandomization-%d_correctm-%s_slice.png', numrandomization, correctm)))
+saveas(gcf,fullfile(derivatives_img_dir, sprintf('sub-all_task-wm_source_contrast_stat_numrandomization-%d_correctm-%s_slice.png', numrandomization, correctm)))
 
 
-cfg.method        = 'ortho';
+cfg.maskparameter = 'nicemask';
+
 stat = stats.va;
 stat.anatomy = anatomy;
 figure
 ft_sourceplot(cfg, stat);
 title('Visual attention lateral contrast')
-saveas(gcf,fullfile(derivatives_img_dir, sprintf('sub-all_task-va_source_contrast_stat_numrandomization-%d_correctm-%s_ortho.png', numrandomization, correctm)))
+dest = fullfile(derivatives_img_dir, ...
+    sprintf('sub-all_task-va_source_contrast_stat_numrandomization-%d_correctm-%s_slice_nicemask.png', ...
+    numrandomization, correctm));
+% ax = gca;
+% exportgraphics(ax,dest,'Resolution',300) 
+saveas(gcf,dest)
 
 stat = stats.wm;
 stat.anatomy = anatomy;
 figure
 ft_sourceplot(cfg, stat);
 title('Working memory arithmetic difficulty contrast')
-saveas(gcf,fullfile(derivatives_img_dir, sprintf('sub-all_task-wm_source_contrast_stat.png_numrandomization-%d_correctm-%s_ortho.png', numrandomization, correctm)))
+saveas(gcf,fullfile(derivatives_img_dir, sprintf('sub-all_task-wm_source_contrast_stat_numrandomization-%d_correctm-%s_slice_nicemask.png', numrandomization, correctm)))
+
+cfg.maskparameter = 'mask';
+cfg.opacitylim    = [0 1];
+
+stat = stats.va;
+stat.anatomy = anatomy;
+figure
+ft_sourceplot(cfg, stat);
+title('Visual attention lateral contrast')
+dest = fullfile(derivatives_img_dir, ...
+    sprintf('sub-all_task-va_source_contrast_stat_numrandomization-%d_correctm-%s_slice_mask.png', ...
+    numrandomization, correctm));
+% ax = gca;
+% exportgraphics(ax,dest,'Resolution',300) 
+saveas(gcf,dest)
+
+stat = stats.wm;
+stat.anatomy = anatomy;
+figure
+ft_sourceplot(cfg, stat);
+title('Working memory arithmetic difficulty contrast')
+saveas(gcf,fullfile(derivatives_img_dir, sprintf('sub-all_task-wm_source_contrast_stat_numrandomization-%d_correctm-%s_slice_mask.png', numrandomization, correctm)))
 
 diary off
