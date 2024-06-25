@@ -109,7 +109,7 @@ end
 
 allsources_ga_filename = fullfile(derivatives_group_dir, 'allsources_contrast_grandaverage.mat');
 save (allsources_ga_filename, 'allsources_int_volnorm_ga', '-v7.3')
-allsources_beta_ga_filename = fullfile(derivatives_group_dir, 'allsources_contrast_grandaverage.mat');
+allsources_beta_ga_filename = fullfile(derivatives_group_dir, 'allsources_beta_contrast_grandaverage.mat');
 save (allsources_beta_ga_filename, 'allsources_beta_int_volnorm_ga', '-v7.3')
 
 %%
