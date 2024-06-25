@@ -16,7 +16,7 @@ derivatives_group_dir = fullfile(derivatives_dir, 'group');
 derivatives_img_dir = fullfile(derivatives_dir, 'img');
 
 % Start logging
-diaryfile = fullfile(data_dir, 'beamformer_group_ga.log');
+diaryfile = fullfile(data_dir, 'logs', 'beamformer_group_ga.log');
 if (exist(diaryfile, 'file'))
   delete(diaryfile);
 end
@@ -36,7 +36,9 @@ conditions = ["con" "strobe"];
 
 
 allsources_int_volnorm_filename = fullfile(derivatives_group_dir, 'allsources-lcmv_contrast_proc-interp-volnorm.mat');
+allsources_beta_int_volnorm_filename = fullfile(derivatives_group_dir, 'allsources-lcmv_beta-contrast_proc-interp-volnorm.mat');
 load (allsources_int_volnorm_filename)
+load (allsources_beta_int_volnorm_filename)
 
 %%
 
@@ -44,19 +46,25 @@ baddies = [];
 
 cfg = [];
 cfg.method        = 'slice';
-cfg.funparameter="pow"
 for task_no = 1:numel(tasks)
     task = tasks(task_no)
     for condition = conditions
         for s = 1:numel(subjects)
             sub = subjects(s)
+            subses_img_dir = fullfile(derivatives_dir, sprintf('sub-%03d', sub), 'ses-001', 'img');
             substr = sprintf('sub%d', sub)
             tit_str = sprintf('sub-%d task-%s cond-%s', sub, task, condition);
             try
+                cfg.funparameter="pow"
                 figure;
                 ft_sourceplot(cfg, allsources_int_volnorm.(task).(condition){s})
                 title(tit_str)
-                saveas(gcf, fullfile(derivatives_img_dir,sprintf('sub-%d_task-%s_cond-%s', sub, task, condition)))
+                saveas(gcf, fullfile(subses_img_dir, sprintf('sub-%d_task-%s_cond-%s.png', sub, task, condition)))
+                
+                cfg.funparameter="stat"
+                figure;
+                ft_sourceplot(cfg, allsources_beta_int_volnorm.(task).(condition){s})
+                saveas(gcf, fullfile(subses_img_dir, sprintf('sub-%03d_task-%s_cond-%s_beta.png', sub, task, condition)))
             catch
                 close gcf
                 if not(isfield(baddies, task))
@@ -77,42 +85,58 @@ end
 %%
 
 allsources_int_volnorm_ga = [];
+allsources_beta_int_volnorm_ga = [];
 for task=tasks
     allsources_int_volnorm_ga.(task) = [];
     for condition = conditions
 
-        % grand average over subjects
+        % grand average power over subjects
         cfg           = [];
-        cfg.parameter = 'pow';%{'pow', 'anatomy'};
+        cfg.parameter = 'pow';
         allsources_int_volnorm_ga.(task).(condition) = ft_sourcegrandaverage(cfg, allsources_int_volnorm.(task).(condition){:});
         
         cfg           = [];
-        cfg.parameter = 'anatomy';%{'pow', 'anatomy'};
+        cfg.parameter = 'anatomy';
         anatomy = ft_sourcegrandaverage(cfg, allsources_int_volnorm.(task).(condition){:});
         allsources_int_volnorm_ga.(task).(condition).anatomy = anatomy.anatomy;
+        
+        % grand average betas over subjects
+        cfg           = [];
+        cfg.parameter = 'stat';
+        allsources_beta_int_volnorm_ga.(task).(condition) = ft_sourcegrandaverage(cfg, allsources_beta_int_volnorm.(task).(condition){:});
     end
 end
-%
+
 allsources_ga_filename = fullfile(derivatives_group_dir, 'allsources_contrast_grandaverage.mat');
 save (allsources_ga_filename, 'allsources_int_volnorm_ga', '-v7.3')
+allsources_beta_ga_filename = fullfile(derivatives_group_dir, 'allsources_contrast_grandaverage.mat');
+save (allsources_beta_ga_filename, 'allsources_beta_int_volnorm_ga', '-v7.3')
 
 %%
 allsources_ga_filename = fullfile(derivatives_group_dir, 'allsources_contrast_grandaverage.mat');
 load (allsources_ga_filename)
 
 %%
-
+close all
 cfg = [];
 cfg.method        = 'slice';
-cfg.funparameter = "pow";
 for task_no = 1:numel(tasks)
     task = tasks(task_no);
     for condition = conditions
-        tit_str = sprintf('grand average task-%s cond-%s', task, condition)
+        tit_str = sprintf('grand average power task-%s cond-%s', task, condition)
+        cfg.funparameter = "pow";
         allsources_int_volnorm_ga.(task).(condition).cfg = []; % a bit hacky, but could speed up
         figure;
         ft_sourceplot(cfg, allsources_int_volnorm_ga.(task).(condition))
         title(tit_str)
-        saveas(gcf,fullfile(derivatives_img_dir, sprintf('sub-all_task-%s_cond-%s.png', task, condition)))
+        saveas(gcf,fullfile(derivatives_img_dir, sprintf('sub-all_power_task-%s_cond-%s.png', task, condition)))
+
+        tit_str = sprintf('grand average beta task-%s cond-%s', task, condition)
+        cfg.funparameter = "stat";
+        allsources_beta_int_volnorm_ga.(task).(condition).cfg = []; % a bit hacky, but could speed up
+        figure;
+        ft_sourceplot(cfg, allsources_beta_int_volnorm_ga.(task).(condition))
+        title(tit_str)  
+        saveas(gcf,fullfile(derivatives_img_dir, sprintf('sub-all_beta_task-%s_cond-%s.png', task, condition)))
     end
 end
