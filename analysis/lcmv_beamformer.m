@@ -192,8 +192,8 @@ for sub = subjects
     
             % Find and select left and right attention trials independently
             % or for the high/low arithmetic difficulty
-            trials_task1 = data_task_cond.trialinfo(:,4) == 1;
-            trials_task2 = data_task_cond.trialinfo(:,4) == 2;
+            trials_task1 = data_task_cond.trialinfo(:,4) == 1; % Left / High
+            trials_task2 = data_task_cond.trialinfo(:,4) == 2; % Right / Low
             cfg = [];
             cfg.trials = trials_task1;
             data_task1 = ft_selectdata(cfg, data_task_cond);
