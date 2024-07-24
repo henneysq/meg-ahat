@@ -14,6 +14,7 @@ data_dir = '/project/3031004.01/data/';
 derivatives_dir = fullfile(data_dir, 'derivatives');
 derivatives_group_dir = fullfile(derivatives_dir, 'group');
 derivatives_img_dir = fullfile(derivatives_dir, 'img');
+derivatives_img_dir_source = fullfile(derivatives_img_dir, 'source-level');
 
 tasks = ["va" "wm"];
 
@@ -90,7 +91,7 @@ figure
 ft_sourceplot(cfg, stat);
 title("Permute VA task levels across stim condtions")
 output_file = extractBefore(output_file, '.');
-output_file = fullfile(derivatives_img_dir, strcat(output_file, '.png'));
+output_file = fullfile(derivatives_img_dir_source, strcat(output_file, '.png'));
 saveas(gcf, output_file)
 
 
@@ -113,7 +114,7 @@ figure
 ft_sourceplot(cfg, stat);
 title("Permute VA stim conditions")
 output_file = extractBefore(output_file, '.');
-output_file = fullfile(derivatives_img_dir, strcat(output_file, '.png'));
+output_file = fullfile(derivatives_img_dir_source, strcat(output_file, '.png'));
 saveas(gcf, output_file)
 
 % Permute VA task levels within stim conditions
@@ -136,7 +137,7 @@ figure
 ft_sourceplot(cfg, stat);
 title("Permute VA task levels within stim conditions: Strobe")
 output_file = extractBefore(output_file, '.');
-output_file = fullfile(derivatives_img_dir, strcat(output_file, '.png'));
+output_file = fullfile(derivatives_img_dir_source, strcat(output_file, '.png'));
 saveas(gcf, output_file)
 
 % Con
@@ -158,7 +159,7 @@ figure
 ft_sourceplot(cfg, stat);
 title("Permute VA task levels within stim conditions: Con")
 output_file = extractBefore(output_file, '.');
-output_file = fullfile(derivatives_img_dir, strcat(output_file, '.png'));
+output_file = fullfile(derivatives_img_dir_source, strcat(output_file, '.png'));
 saveas(gcf, output_file)
 
 % WM
@@ -182,7 +183,7 @@ figure
 ft_sourceplot(cfg, stat);
 title("Permute WM task levels across stim condtions")
 output_file = extractBefore(output_file, '.');
-output_file = fullfile(derivatives_img_dir, strcat(output_file, '.png'));
+output_file = fullfile(derivatives_img_dir_source, strcat(output_file, '.png'));
 saveas(gcf, output_file)
 
 
@@ -204,7 +205,7 @@ figure
 ft_sourceplot(cfg, stat);
 title("Permute WM stim conditions")
 output_file = extractBefore(output_file, '.');
-output_file = fullfile(derivatives_img_dir, strcat(output_file, '.png'));
+output_file = fullfile(derivatives_img_dir_source, strcat(output_file, '.png'));
 saveas(gcf, output_file)
 
 % Permute WM task levels within stim conditions
@@ -227,7 +228,7 @@ figure
 ft_sourceplot(cfg, stat);
 title("Permute WM task levels within stim condition: Strobe")
 output_file = extractBefore(output_file, '.');
-output_file = fullfile(derivatives_img_dir, strcat(output_file, '.png'));
+output_file = fullfile(derivatives_img_dir_source, strcat(output_file, '.png'));
 saveas(gcf, output_file)
 
 % Con
@@ -249,5 +250,5 @@ figure
 ft_sourceplot(cfg, stat);
 title("Permute WM task levels within stim condition: Con")
 output_file = extractBefore(output_file, '.');
-output_file = fullfile(derivatives_img_dir, strcat(output_file, '.png'));
+output_file = fullfile(derivatives_img_dir_source, strcat(output_file, '.png'));
 saveas(gcf, output_file)
