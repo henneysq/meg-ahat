@@ -51,7 +51,8 @@ for sub = subjects
     dataset_dir = fullfile(raw2_dir, sprintf('sub-%03d', sub), 'ses-001', 'meg', ...
         sprintf('sub-%03d_ses-001_task-flicker_meg.ds', sub));
     
-    for run = [1 2] 
+    for run = [1 2]
+        
         task = tasks(run)
 
         cfg = [];

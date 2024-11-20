@@ -33,7 +33,7 @@ conditions = ["con" "strobe"];
 
 % Flag to indicate whether we update source and leadfield models
 % update_forward_models = false;
-numrandomization = 1500;
+numrandomization = 2;
 correctm = 'cluster';
 %%
 

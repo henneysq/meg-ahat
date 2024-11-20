@@ -7,6 +7,9 @@ addpath('/project/3031004.01/meg-ahat/analysis')
 % Define directories
 data_dir = '/project/3031004.01/data/';
 derivatives_dir = fullfile(data_dir, 'derivatives');
+derivatives_group_dir = fullfile(derivatives_dir, 'group');
+derivatives_img_dir = fullfile(derivatives_dir, 'img');
+derivatives_img_dir_sensor = fullfile(derivatives_img_dir, 'sensor-level');
 
 % Start logging
 diaryfile = fullfile(data_dir, 'sensor_level_analysis.log');
@@ -26,11 +29,22 @@ subjects = data_details_cfg.new_trigger_subs;
 
 stim_map = dictionary(["con", "isf", "strobe"], [1, 2, 3]);
 
+% Create a character vector describing the avering procedure
+operation_str_avg = '(';
+for s = 1:numel(subjects)
+    operation_str_avg = [operation_str_avg 'x' num2str(s) '+'];
+end
+operation_str_avg = [operation_str_avg(1:end-1) ')/' num2str(numel(subjects))];
+
 %
 %% VISUAL ATTENTION EXPERIMENT
 %
 %
 task_map = dictionary(["left", "right"], [1, 2]);
+tfr_data = [];
+tfr_data.con = [];
+tfr_data.strobe = [];
+
 for sub = subjects
     sub_str = sprintf('sub-%03d', sub)
     close all
@@ -48,7 +62,7 @@ for sub = subjects
     data        = ft_redefinetrial(cfg,data_pca_va);
     
     % Prepare some variables
-    foilims = [[39 41]', [7 15]', [13 30]'];
+    foilims = [[38 42]', [7 15]', [13 30]'];
     foilim_bands = ["40-Hz", "7-15-Hz", "13-30-Hz"];
     lateral_contrast_gamma = [];
     lateral_contrast_alpha = [];
@@ -75,10 +89,12 @@ for sub = subjects
         cfg.channel      = channels;
         cfg.method       = 'mtmconvol';
         cfg.taper        = 'boxcar';
-        cfg.foi          = 10:1:50;                         
-        cfg.t_ftimwin    = ones(length(cfg.foi),1).*1;   
-        cfg.toi          = 0:0.05:2;
+        cfg.foi          = 30:1:50;                         
+        cfg.t_ftimwin    = 10./cfg.foi;%ones(length(cfg.foi),1).*1;   
+        cfg.toi          = -0.5:0.05:2.5;
         TFRboxcar_ar_eft = ft_freqanalysis(cfg, data_va_cond);
+
+        tfr_data.(condition).(sprintf('sub%d',sub)) = TFRboxcar_ar_eft;
 
         cfg = [];
         figure; ft_singleplotTFR(cfg, TFRboxcar_ar_eft);
@@ -99,7 +115,7 @@ for sub = subjects
         
         % Iterate over three bands defined by `foilims`
         proc = "splg"; % Indicates synthetic planar gradients
-        for foilim = [1 2 3]
+        for foilim = 1%[1 2 3]
             
             % Prepare neighbours for planar gradients (but re-use)
             if not(exist('neighbours', 'var') == 1)
@@ -187,6 +203,25 @@ for sub = subjects
     save (ar_out_dest, 'lateral_contrast_beta', '-v7.3');
 end
 
+tfr_data.strobe = struct2cell(tfr_data.strobe);
+tfr_data.con = struct2cell(tfr_data.con);
+%% Plot average spectrograms
+
+cfg = [];
+cfg.parameter = 'powspctrm';
+cfg.operation = operation_str_avg;
+
+tfr_data.strobe_avg = ft_math(cfg, tfr_data.strobe{:});
+tfr_data.con_avg = ft_math(cfg, tfr_data.con{:});
+
+cfg = [];
+figure; ft_singleplotTFR(cfg, tfr_data.strobe_avg);
+title('strobe')
+saveas(gcf, fullfile(derivatives_img_dir_sensor, 'spectrogram_stim-strobe_task-va.png'))
+
+figure; ft_singleplotTFR(cfg, tfr_data.con_avg);
+title('con')
+saveas(gcf, fullfile(derivatives_img_dir_sensor, 'spectrogram_stim-con_task-va.png'))
 
 %% Calculate contrast pr. band averaged over subjects
 
@@ -220,31 +255,20 @@ for band = ["40", "alpha", "beta"]
     end
 
     for cond = condition
-        % Average spectra over subjects
-        cfg = [];
-        cfg.parameter = 'powspctrm';
-        cfg.operation = '(x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+x11+x12+x13+x14+x15)/15';
-        
+        % Average spectra over subjects        
         data_args = {};
-        for sub = subjects
-            data_args = [data_args data.(sprintf('sub%03d', sub)).(cond)];
+       
+        operation_str = '(';
+        for s = 1:numel(subjects)
+            data_args = [data_args data.(sprintf('sub%03d', subjects(s))).(cond)];
+            operation_str = [operation_str 'x' num2str(s) '+'];
         end
 
+        cfg = [];
+        cfg.parameter = 'powspctrm';
+        cfg.operation = [operation_str(1:end-1) ')/' num2str(numel(subjects))];
+
         avg_ERboxcar_ar_lateral_dif = ft_math(cfg, data_args{:});
-        % avg_ERboxcar_ar_lateral_dif = ft_math(cfg, ...
-        %     data.sub008.(cond), ...
-        %     data.sub009.(cond), ...
-        %     data.sub011.(cond), ...
-        %     data.sub013.(cond), ...
-        %     data.sub018.(cond), ...
-        %     data.sub021.(cond), ...
-        %     data.sub022.(cond), ...
-        %     data.sub023.(cond), ...
-        %     data.sub025.(cond), ...
-        %     data.sub027.(cond), ...
-        %     data.sub028.(cond), ...
-        %     data.sub029.(cond), ...
-        %     data.sub030.(cond));
     
         % Plot the average topography
         cfg = [];
@@ -439,34 +463,21 @@ for band = ["40", "alpha", "beta"]
             data = sub_struct_beta;
     end
     for cond = condition
+        % Average spectra over subjects        
+        data_args = {};
+       
+        operation_str = '(';
+        for s = 1:numel(subjects)
+            data_args = [data_args data.(sprintf('sub%03d', subjects(n))).(cond)];
+            operation_str = [operation_str 'x' num2str(s) '+'];
+        end
+        operation_str = [operation_str(1:end-1) ')/' num2str(numel(subjects))];
+
         cfg = [];
         cfg.parameter = 'powspctrm';
-        cfg.operation = '(x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+x11+x12+x13+x14+x15)/15';
-        
-        data_args = {};
-        for sub = subjects
-            data_args = [data_args data.(sprintf('sub%03d', sub)).(cond)];
-        end
+        cfg.operation = operation_str;
 
         avg_ERboxcar_ar_lateral_dif = ft_math(cfg, data_args{:});
-
-        % avg_ERboxcar_ar_lateral_dif = ft_math(cfg, ...
-        %     data.sub008.(cond), ...
-        %     data.sub009.(cond), ...
-        %     data.sub011.(cond), ...
-        %     data.sub013.(cond), ...
-        %     data.sub017.(cond), ...
-        %     data.sub018.(cond), ...
-        %     data.sub021.(cond), ...
-        %     data.sub022.(cond), ...
-        %     data.sub023.(cond), ...
-        %     data.sub025.(cond), ...
-        %     data.sub027.(cond), ...
-        %     data.sub028.(cond), ...
-        %     data.sub029.(cond), ...
-        %     data.sub030.(cond));
-        
-        %avg_cond.(cond) = avg_ERboxcar_ar_lateral_dif;
     
         cfg = [];
         cfg.marker       = 'on';

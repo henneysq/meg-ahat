@@ -102,12 +102,12 @@ function [stat, output_file] = permute_conditions(permute_cfg)
             mri_realigned = load (fullfile(deriv_anat_dir, 'mri_realigned.mat'));
             mri_realigned = mri_realigned.mri_realigned;
     
-            % 
+
             cfg           = [];
             cfg.parameter = 'pow';
             source1 = ft_sourceinterpolate(cfg, source1, mri_realigned);
             source2 = ft_sourceinterpolate(cfg, source2, mri_realigned);
-    
+
             cfg = [];
             cfg.nonlinear     = 'no';
             source1 = ft_volumenormalise(cfg, source1);
@@ -125,7 +125,7 @@ function [stat, output_file] = permute_conditions(permute_cfg)
     end
 
     cfg=[]; 
-    cfg.numrandomization = numrandomization;
+    cfg.numrandomization = 5;
     cfg.correctm = 'cluster';
     cfg.dim         = sources1{1}.dim;
     cfg.method      = 'montecarlo';
