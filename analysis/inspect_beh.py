@@ -10,6 +10,7 @@ from copy import deepcopy
 from typing import Final
 from pathlib import Path
 
+import numpy as np
 from numpy import ndarray
 import pandas as pd
 import seaborn as sns
@@ -22,7 +23,7 @@ IMG_DIR = Path(__file__).parent.parent / "img"  # Output local image dir
 DATA_DIR = Path("/Volumes/3031004.01/data/raw2")
 
 FIRST_FIFTEEN: Final[tuple] = {1, 2, 3, 4, 5, 6, 7, 10, 12, 14, 15, 16, 19, 20}
-SUBJECTS = {8, 9, 11, 13, 17, 18, 21, 22, 23, 25, 27, 28, 29}
+SUBJECTS = {8, 9, 11, 13, 17, 18, 21, 22, 23, 24, 25, 27, 28, 29, 30}
 assert len(SUBJECTS.intersection(FIRST_FIFTEEN)) == 0
 RUNS = (1, 2)
 
@@ -61,9 +62,9 @@ TASK_LEVEL_MAP_VERBOSE = {
     2: ("Arithmetic Difficulty", {"high": "High", "low": "Low"}),
 }
 STIM_MAP = {
-    "con": "0 Hz",
-    "strobe": "40 Hz LF",
+    "con": "0 Hz CON",
     "isf": "40 Hz ISF",
+    "strobe": "40 Hz LF",
 }
 
 def make_beh_plots(df_: pd.DataFrame, axes_: ndarray[ndarray[plt.Axes]], run: int):
@@ -179,6 +180,286 @@ def make_beh_plots(df_: pd.DataFrame, axes_: ndarray[ndarray[plt.Axes]], run: in
 
     return axes_
 
+def make_beh_plots_w_bps(df_: pd.DataFrame, axes_: ndarray[ndarray[plt.Axes]], run: int):
+    
+    # response_frac_by_stim = {}
+    
+    # response_frac_by_stim["sub"] = []
+    # response_frac_by_stim["stimulus_condition"] = []
+    # response_frac_by_stim["task_level"] = []
+    # response_frac_by_stim["task_spec"] = []
+    # response_frac_by_stim["frac_correct"] = []
+
+    # for sub in df_["sub"].unique():
+    #     for task in df_[TASK_LEVEL_MAP[run]].unique():
+    #         for task_spec in df_[TASK_SPEC_MAP[run]].unique():
+    #             for stim_condition in df_["stimulus_condition"].unique():
+    #                 mask = (df_["sub"]==sub).values & \
+    #                     (df_[TASK_LEVEL_MAP[run]]==task).values & \
+    #                     (df_[TASK_SPEC_MAP[run]]==task_spec).values & \
+    #                     (df_["stimulus_condition"]==stim_condition).values
+                    
+    #                 frac = df_[mask]["correct_response"].mean()
+
+    #                 response_frac_by_stim["sub"].append(sub)
+    #                 response_frac_by_stim["task_level"].append(task)
+    #                 response_frac_by_stim["task_spec"].append(task_spec)
+    #                 response_frac_by_stim["stimulus_condition"].append(stim_condition)
+    #                 response_frac_by_stim["frac_correct"].append(frac)
+    
+    # response_frac_df = pd.DataFrame.from_dict(response_frac_by_stim)
+    
+    response_frac_by_stim = {}
+    response_frac_by_stim["sub"] = []
+    response_frac_by_stim["stimulus_condition"] = []#df_["stimulus_condition"].unique()
+    response_frac_by_stim["frac_correct"] = []
+    for sub in df_["sub"].unique():
+        for stim_condition in df_["stimulus_condition"].unique():
+            mask = (df_["sub"]==sub).values & \
+                    (df_["stimulus_condition"]==stim_condition).values
+            
+            frac = df_[mask]["correct_response"].mean()
+            response_frac_by_stim["sub"].append(sub)
+            response_frac_by_stim["stimulus_condition"].append(stim_condition)
+            response_frac_by_stim["frac_correct"].append(frac)
+
+    response_frac_df = pd.DataFrame.from_dict(response_frac_by_stim)
+
+    # Bar plot of correct responses by stimulus for run
+    ax = sns.boxplot(
+        data=response_frac_df,
+        x="stimulus_condition",
+        y="frac_correct",
+        hue="stimulus_condition",
+        ax=axes_[1, 0],
+        # kde=True,
+        # stat="percent",
+        legend=False,
+        orient="v",
+        # whis=(0, 100),
+        boxprops={'alpha': 0.4},
+        showfliers=False,
+    )
+    # sns.stripplot(data=response_frac_df, x="stimulus_condition", y="frac_correct",
+    #           hue="stimulus_condition", hue_order=['con', 'isf', "strobe"], dodge=False, ax=ax,
+    #           marker="D", alpha=.6, jitter=.25)
+    # ax.axhline(0, color='black', ls='--')
+    ax.set(xlabel="Stimulus", ylabel="Response Accuracy",ylim=(0,1))
+    
+    jitter = 0.1#05
+    df_x_jitter = response_frac_df.copy()
+    df_x_jitter["stimulus_condition"] = df_x_jitter["stimulus_condition"].map({"con": 0, "isf": 1, "strobe": 2})
+    df_x_jitter["stimulus_condition"] += np.random.normal(loc=0, scale=jitter, size=len(response_frac_df))
+    for col in response_frac_df["stimulus_condition"].unique():
+        mask = response_frac_df["stimulus_condition"]==col
+        ax.plot(df_x_jitter[mask]["stimulus_condition"], response_frac_df[mask]["frac_correct"], 'D', alpha=.40, zorder=1, mew=.5)
+    ax.set_xticks(range(3))
+    ax.set_xticklabels(response_frac_df["stimulus_condition"].unique())
+    ax.set_xlim(-0.5, 3-0.5)
+    for sub in response_frac_df["sub"].unique():
+        mask = response_frac_df["sub"] == sub
+        ax.plot((df_x_jitter[mask].iloc[0]["stimulus_condition"], df_x_jitter[mask].iloc[1]["stimulus_condition"], df_x_jitter[mask].iloc[2]["stimulus_condition"]),
+                (response_frac_df[mask].iloc[0]["frac_correct"], response_frac_df[mask].iloc[1]["frac_correct"], response_frac_df[mask].iloc[2]["frac_correct"]), 
+                color = 'grey',  linewidth = 0.7, linestyle = '--', zorder=1, alpha=0.5)    
+
+    xtick_lab = ax.axes.get_xticklabels()
+    for xtl in xtick_lab:
+        xtl.set_text(STIM_MAP[xtl._text])
+    ax.axes.set_xticklabels(xtick_lab)
+
+    # Histogram of reaction time grouped by stimulus for run
+    ax = sns.histplot(
+        data=df_[df_.reaction_time > 0],
+        x="reaction_time",
+        hue="stimulus_condition",
+        kde=True,
+        ax=axes_[0, 0],
+        stat="percent",
+    )
+    ax.set_xlim(left=0, right=SETTINGS_MAP[run].RESPONSE_TIMEOUT)
+    ax.set(xlabel="Response Time", ylabel="Percent")
+    leg = ax.axes.get_legend()
+    for t in leg.texts:
+        leg.set_title("Stimulus")
+        t.set_text(STIM_MAP[t._text])
+    sns.move_legend(ax, "upper left")
+    
+    
+    response_frac_by_stim = {}
+    response_frac_by_stim["sub"] = []
+    response_frac_by_stim["task_spec"] = []#df_["stimulus_condition"].unique()
+    response_frac_by_stim["frac_correct"] = []
+    for sub in df_["sub"].unique():
+        for task_spec in df_[TASK_SPEC_MAP[run]].unique():
+            mask = (df_["sub"]==sub).values & \
+                    (df_[TASK_SPEC_MAP[run]]==task_spec).values
+            
+            frac = df_[mask]["correct_response"].mean()
+            response_frac_by_stim["sub"].append(sub)
+            response_frac_by_stim["task_spec"].append(task_spec)
+            response_frac_by_stim["frac_correct"].append(frac)
+
+    response_frac_df = pd.DataFrame.from_dict(response_frac_by_stim)
+
+    # Bar plot of correct responses by stimulus for run
+    ax = sns.boxplot(
+        data=response_frac_df,
+        x="task_spec",
+        y="frac_correct",
+        hue="task_spec",
+        ax=axes_[1, 1],
+        # kde=True,
+        # stat="percent",
+        legend=False,
+        orient="v",
+        # whis=(0, 100),
+        boxprops={'alpha': 0.4},
+        showfliers=False,
+    )
+    # sns.stripplot(data=response_frac_df, x="task_spec", y="frac_correct",
+    #           hue="task_spec", dodge=False, ax=ax, legend=False,
+    #           marker="D", alpha=.6, jitter=.25)
+    ax.set(xlabel=TASK_SPEC_MAP_VERBOSE[run][0], ylabel="",ylim=(0,1))
+    jitter = 0.1#05
+    df_x_jitter = response_frac_df.copy()
+    # df_x_jitter["task_spec"] = df_x_jitter["task_spec"].map({"con": 0, "isf": 1, "strobe": 2})
+    df_x_jitter["task_spec"] += np.random.normal(loc=0, scale=jitter, size=len(response_frac_df))
+    for col in response_frac_df["task_spec"].unique():
+        mask = response_frac_df["task_spec"]==col
+        ax.plot(df_x_jitter[mask]["task_spec"], response_frac_df[mask]["frac_correct"], 'D', alpha=.40, zorder=1, mew=.5)
+    ax.set_xticks(range(2))
+    ax.set_xticklabels(response_frac_df["task_spec"].unique())
+    ax.set_xlim(-0.5, 2-0.5)
+    for sub in response_frac_df["sub"].unique():
+        mask = response_frac_df["sub"] == sub
+        ax.plot((df_x_jitter[mask].iloc[0]["task_spec"], df_x_jitter[mask].iloc[1]["task_spec"]),
+                (response_frac_df[mask].iloc[0]["frac_correct"], response_frac_df[mask].iloc[1]["frac_correct"]), 
+                color = 'grey', linewidth = 0.7, linestyle = '--', zorder=1, alpha=0.5)  
+    # ax = sns.histplot(
+    #     data=df_,
+    #     #x=TASK_SPEC_MAP[run],
+    #     x="correct_response",
+    #     hue=TASK_SPEC_MAP[run],
+    #     ax=axes_[1, 1],
+    #     legend=False,
+    #     kde=True,
+    #     stat="percent",
+    # )
+    # ax.set(xlabel=TASK_SPEC_MAP_VERBOSE[run][0], ylabel="Fraction Correct Reponses")
+    xtick_lab = ax.axes.get_xticklabels()
+    for xtl in xtick_lab:
+        # import pdb; pdb.set_trace()
+        # break
+        xtl.set_text(TASK_SPEC_MAP_VERBOSE[run][1][int(xtl._text)])
+    ax.axes.set_xticklabels(xtick_lab)
+
+    # Histogram of reaction time grouped by stimulus for run
+    ax = sns.histplot(
+        data=df_[df_.reaction_time > 0],
+        x="reaction_time",
+        hue=TASK_SPEC_MAP[run],
+        kde=True,
+        ax=axes_[0, 1],
+        stat="percent",
+    )
+    ax.set_xlim(left=0, right=SETTINGS_MAP[run].RESPONSE_TIMEOUT)
+    ax.set(xlabel="Response Time", ylabel="")
+    leg = ax.axes.get_legend()
+    leg.set_title(TASK_SPEC_MAP_VERBOSE[run][0])
+    for t in leg.texts:
+        t.set_text(TASK_SPEC_MAP_VERBOSE[run][1][int(t._text)])
+    sns.move_legend(ax, "upper left")
+
+    
+    response_frac_by_stim = {}
+    response_frac_by_stim["sub"] = []
+    response_frac_by_stim["task"] = []#df_["stimulus_condition"].unique()
+    response_frac_by_stim["frac_correct"] = []
+    for sub in df_["sub"].unique():
+        for task in df_[TASK_LEVEL_MAP[run]].unique():
+            mask = (df_["sub"]==sub).values & \
+                    (df_[TASK_LEVEL_MAP[run]]==task).values
+            
+            frac = df_[mask]["correct_response"].mean()
+            response_frac_by_stim["sub"].append(sub)
+            response_frac_by_stim["task"].append(task)
+            response_frac_by_stim["frac_correct"].append(frac)
+
+    response_frac_df = pd.DataFrame.from_dict(response_frac_by_stim)
+
+    # Bar plot of correct responses by stimulus for run
+    ax = sns.boxplot(
+        data=response_frac_df,
+        x="task",
+        y="frac_correct",
+        hue="task",
+        ax=axes_[1, 2],
+        # kde=True,
+        # stat="percent",
+        legend=False,
+        orient="v",
+        # whis=(0, 100),
+        boxprops={'alpha': 0.4},
+        showfliers=False,
+    )
+    # sns.stripplot(data=response_frac_df, x="task", y="frac_correct",
+    #           hue="task", dodge=False, ax=ax, legend=False,
+    #           marker="D", alpha=.6, jitter=.25)
+    ax.set(xlabel=TASK_LEVEL_MAP_VERBOSE[run][0], ylabel="",ylim=(0,1))
+    jitter = 0.1#05
+    df_x_jitter = response_frac_df.copy()
+    df_x_jitter["task"] = df_x_jitter["task"].map({"left": 0, "right": 1, "low": 0, "high": 1})
+    df_x_jitter["task"] += np.random.normal(loc=0, scale=jitter, size=len(response_frac_df))
+    for col in response_frac_df["task"].unique():
+        mask = response_frac_df["task"]==col
+        ax.plot(df_x_jitter[mask]["task"], response_frac_df[mask]["frac_correct"], 'D', alpha=.40, zorder=1, mew=.5)
+    ax.set_xticks(range(2))
+    ax.set_xticklabels(response_frac_df["task"].unique())
+    ax.set_xlim(-0.5, 2-0.5)
+    for sub in response_frac_df["sub"].unique():
+        mask = response_frac_df["sub"] == sub
+        ax.plot((df_x_jitter[mask].iloc[0]["task"], df_x_jitter[mask].iloc[1]["task"]),
+                (response_frac_df[mask].iloc[0]["frac_correct"], response_frac_df[mask].iloc[1]["frac_correct"]), 
+                color = 'grey',  linewidth = 0.7, linestyle = '--', zorder=1, alpha=0.5)  
+    xtick_lab = ax.axes.get_xticklabels()
+    for xtl in xtick_lab:
+
+        xtl.set_text(TASK_LEVEL_MAP_VERBOSE[run][1][xtl._text])
+    ax.axes.set_xticklabels(xtick_lab)
+    # ax = sns.histplot(
+    #     data=df_,
+    #     # x=TASK_LEVEL_MAP[run],
+    #     x="correct_response",
+    #     hue=TASK_LEVEL_MAP[run],
+    #     ax=axes_[1, 2],
+    #     legend=False,
+    #     kde=True,
+    #     stat="percent",
+    # )
+    # ax.set(xlabel=TASK_LEVEL_MAP_VERBOSE[run][0], ylabel="Fraction Correct Reponses")
+    # xtick_lab = ax.axes.get_xticklabels()
+    # for xtl in xtick_lab:
+    #     xtl.set_text(TASK_LEVEL_MAP_VERBOSE[run][1][xtl._text])
+    # ax.axes.set_xticklabels(xtick_lab)
+
+    # Histogram of reaction time grouped by stimulus for run
+    ax = sns.histplot(
+        data=df_[df_.reaction_time > 0],
+        x="reaction_time",
+        hue=TASK_LEVEL_MAP[run],
+        kde=True,
+        ax=axes_[0, 2],
+        stat="percent",
+    )
+    ax.set_xlim(left=0, right=SETTINGS_MAP[run].RESPONSE_TIMEOUT)
+    ax.set(xlabel="Response Time", ylabel="")
+    leg = ax.axes.get_legend()
+    leg.set_title(TASK_LEVEL_MAP_VERBOSE[run][0])
+    for t in leg.texts:
+        t.set_text(TASK_LEVEL_MAP_VERBOSE[run][1][t._text])
+    sns.move_legend(ax, "upper left")
+
+    return axes_
 
 # Set seaborn theme
 sns.set_theme()
@@ -230,16 +511,16 @@ for sub in SUBJECTS:
         # Access the axes for the run
         axes_ = axes_tup[run - 1]
 
-        axes_ = make_beh_plots(df, axes_, run)
+        # axes_ = make_beh_plots(df, axes_, run)
 
         # Append the subject data to the list; make sure
         # to avoid passing the variable by reference
         runs_df_map[run].append(deepcopy(df))
 
-    fig_va.savefig(
-        IMG_DIR / f"sub-{sub:03d}_run-001_task-visualattention.png", bbox_inches="tight"
-    )
-    fig_wm.savefig(IMG_DIR / f"sub-{sub:03d}_run-002_task-workingmemory.png", bbox_inches="tight")
+    # fig_va.savefig(
+    #     IMG_DIR / f"sub-{sub:03d}_run-001_task-visualattention.png", bbox_inches="tight"
+    # )
+    # fig_wm.savefig(IMG_DIR / f"sub-{sub:03d}_run-002_task-workingmemory.png", bbox_inches="tight")
 
 # Merge dataframes across subejcts within each run
 merged_run1_df = pd.concat(runs_df_map[1])
@@ -268,7 +549,7 @@ for run in RUNS:
     # Access the axes for the run
     axes_ = axes_tup[run - 1]
 
-    axes_ = make_beh_plots(df_, axes_, run)
+    axes_ = make_beh_plots_w_bps(df_, axes_, run)
 
 
 fig_va.savefig(
