@@ -1,7 +1,7 @@
 %%
 clear; close all;
 
-reestimate = true;
+reestimate = false;
 
 % Load data details
 addpath('/project/3031004.01/meg-ahat/util')
@@ -96,6 +96,8 @@ for task = tasks
 end
 
 %%
+psd_condif_avg_db_pool = [];
+psd_40dif_avg_db_pool = [];
 for task = tasks
     psd_task_avg = []; % OBS: before log-transform
     psd_dif_avg_db = [];
@@ -173,6 +175,12 @@ for task = tasks
         ylabel('dB')
         saveas(gcf,fullfile(derivatives_img_dir_sensor, ...
             sprintf('task-%s_contrast-%s-%s_stim-%s_psd.png', task, task_levels(1), task_levels(2), stim_condition)))
+
+        if not(stim_condition == "con")
+            psd_40dif_avg_db_pool = [psd_40dif_avg_db_pool; psd_dif_avg_db.(stim_condition).powspctrm];
+        else
+            psd_condif_avg_db_pool = [psd_condif_avg_db_pool; psd_dif_avg_db.(stim_condition).powspctrm];
+        end
     end
 
     % Stim contrast
@@ -230,6 +238,105 @@ for task = tasks
         sprintf('task-%s_interaction-task-stim_tasklevel-%s-%s_stim_condition-%s-%s_psd.png', task, ...
         task_levels(1), task_levels(2), 'con', 'isf')))
 end
+
+%% Plot variance over channels in spectrum
+x = psd_interaction_avg_db.freq;
+x2 = [x, fliplr(x)];
+
+close all
+psd_mean40 = mean(psd_40dif_avg_db_pool);
+psd_var40 = var(psd_40dif_avg_db_pool);
+psd_std40 = std(psd_40dif_avg_db_pool);
+psd_meanCon = mean(psd_condif_avg_db_pool);
+psd_varCon = var(psd_condif_avg_db_pool);
+psd_stdCon = std(psd_condif_avg_db_pool);
+
+figure
+plot(psd_dif_avg_db.(stim_condition).freq,psd_40dif_avg_db_pool)
+%hold on
+
+f=figure;
+f.Position(3) = f.Position(3)*2;
+hold on
+plot(psd_dif_avg_db.(stim_condition).freq,psd_40dif_avg_db_pool)
+inBetween = [psd_mean40 - 5*psd_var40, fliplr(psd_mean40 + 5*psd_var40)];
+fill(x2, inBetween, [.5 .5 .5], 'FaceAlpha', 0.3, 'LineStyle', ':');
+plot(psd_dif_avg_db.(stim_condition).freq,psd_mean40, 'Color', 'k', 'LineStyle', '-')
+% plot(psd_dif_avg_db.(stim_condition).freq,psd_mean40 + psd_var40*1.001, 'Color', 'k', 'LineStyle', ':')
+% plot(psd_dif_avg_db.(stim_condition).freq,psd_mean40 - psd_var40*1.001, 'Color', 'k', 'LineStyle', ':')
+title("40 Hz ISF \cup 40 Hz LF")
+xlabel("Frequency [Hz]")
+ylabel("dB")
+exportgraphics(gcf,fullfile(derivatives_img_dir_sensor, '40hz_psd_var.png'),'BackgroundColor','none')
+% saveas(gcf,fullfile(derivatives_img_dir_sensor, '40hz_psd_var.png'))
+hold off
+
+figure
+hold on
+% plot(psd_dif_avg_db.(stim_condition).freq,psd_40dif_avg_db_pool)
+inBetween = [psd_mean40 - psd_40dif_avg_db_pool, fliplr(psd_mean40 + psd_40dif_avg_db_pool)];
+inBetween = [psd_mean40 - 0.00001*psd_40dif_avg_db_pool, fliplr(0.0001*psd_mean40 + psd_40dif_avg_db_pool)];
+fill(x2, inBetween, [0.3 0.3 0.3], 'FaceAlpha', 0.05, 'LineStyle', ':');
+plot(psd_dif_avg_db.(stim_condition).freq,psd_mean40, 'Color', 'k', 'LineStyle', '-')
+% plot(psd_dif_avg_db.(stim_condition).freq,psd_mean40 + psd_var40*1.001, 'Color', 'k', 'LineStyle', ':')
+% plot(psd_dif_avg_db.(stim_condition).freq,psd_mean40 - psd_var40*1.001, 'Color', 'k', 'LineStyle', ':')
+hold off
+
+figure
+plot(psd_dif_avg_db.(stim_condition).freq,psd_meanCon)
+%hold on
+
+
+f=figure;
+f.Position(3) = f.Position(3)*2;
+hold on
+plot(psd_dif_avg_db.(stim_condition).freq,psd_condif_avg_db_pool)
+inBetween = [psd_meanCon - 5*psd_varCon, fliplr(psd_meanCon + 5*psd_varCon)];
+fill(x2, inBetween, [.5 .5 .5], 'FaceAlpha', 0.3, 'LineStyle', ':');
+plot(psd_dif_avg_db.(stim_condition).freq,psd_meanCon, 'Color', 'k', 'LineStyle', '-')
+% plot(psd_dif_avg_db.(stim_condition).freq,psd_mean40 + psd_var40*1.001, 'Color', 'k', 'LineStyle', ':')
+% plot(psd_dif_avg_db.(stim_condition).freq,psd_mean40 - psd_var40*1.001, 'Color', 'k', 'LineStyle', ':')
+title("0 Hz Con")
+xlabel("Frequency [Hz]")
+ylabel("dB")
+exportgraphics(gcf,fullfile(derivatives_img_dir_sensor, 'con_psd_var.png'),'BackgroundColor','none')
+% saveas(gcf,)
+hold off
+
+% 
+% figure
+% plot(psd_dif_avg_db.(stim_condition).freq,psd_var)
+% 
+% figure
+% plot(psd_dif_avg_db.(stim_condition).freq,psd_condif_avg_db_pool)
+% %hold on
+% 
+% figure
+% plot(psd_dif_avg_db.(stim_condition).freq,psd_varCon)
+
+%%
+close all; figure
+nbins = 10;
+counts = zeros(nbins,3);
+for c = 1:3
+    [counts(:,c),~] = imhist(psd_40dif_avg_db_pool(c,:),nbins);
+end
+% plot them using bar3()
+xoffset = [0 10 20];
+alpha = 0.5;
+hb = bar3(counts);
+for k = 1:numel(hb)
+    hb(k).XData(:) = xoffset(k);
+    hb(k).FaceAlpha = alpha;
+    hb(k).LineStyle = 'none';
+end
+xticks(xoffset)
+colormap(hsv(numel(hb))) % or pick whatever map you want
+% adjust dataaspect to force spacing on x
+xscalefactor = 2; % adjust me
+yl = ylim; % store for later
+hax = gca;
+hax.DataAspectRatio(1) = hax.DataAspectRatio(1)/xscalefactor;
 
 %% TOPOGRAPHY
 
