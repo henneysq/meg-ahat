@@ -21,24 +21,27 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 
 # Table of contents
 
-1. [About the Project](#about-the-project)
-2. [Data Curration](#data-curration)
-	1. [Philosophy](#philosophy)
-	2. [Data Versions](#data-versions)
-	3. [Converting Data](#converting-data)
-	4. [Trial rejection](#trial-rejection)
-3. [Data Analysis](#data-analysis)
-	1. [Dependencies](#dependencies)
-	2. [40 Hz Artefact Removal](#40-hz-artefact-removal)
-	3. [Sensor Level Analysis](#sensor-level-analysis)
-	4. [Source Level Analysis](#source-level-analysis)
-	5. [Behavioural Analysis](#behavioural-analysis)
-4. [Experiment Management](#experiment-management)
-	1. [Dependencies](#dependencies)
-	2. [Quick-Start Guide](#quick-start-guide)
-	3. [Code Structure](#code-structure)
-	4. [Advanced Options](#advanced-options)
-5. [Testing](#testing)
+- [MEG-AHAT: Propagation of spectral flicker during visual- and non-visual cognitive tasks](#meg-ahat-propagation-of-spectral-flicker-during-visual--and-non-visual-cognitive-tasks)
+  - [About the Project ](#about-the-project-)
+- [Table of contents](#table-of-contents)
+  - [Data Curration ](#data-curration-)
+    - [Philosophy ](#philosophy-)
+    - [Data Versions ](#data-versions-)
+    - [Converting Data ](#converting-data-)
+    - [Trial rejection ](#trial-rejection-)
+  - [Data Analysis ](#data-analysis-)
+    - [Dependencies  ](#dependencies--)
+    - [Pipeline](#pipeline)
+    - [40 Hz Artefact Removal ](#40-hz-artefact-removal-)
+    - [Sensor Level Analysis ](#sensor-level-analysis-)
+    - [Source Level Analysis ](#source-level-analysis-)
+    - [Behavioural Analysis ](#behavioural-analysis-)
+  - [Experiment Management ](#experiment-management-)
+    - [Dependencies  ](#dependencies---1)
+    - [Quick-Start Guide ](#quick-start-guide-)
+    - [Code Structure ](#code-structure-)
+    - [Advanced Options ](#advanced-options-)
+  - [Testing ](#testing-)
 
 
 ## Data Curration <a name="data-curration"></a>
@@ -144,13 +147,11 @@ The overall data analysis pipeline is defined by the flowchart, in which `.m` an
 graph TD;
     A[raw2/meg]-->a(artefact_rejection.m)-->B[derivatives/meg];
     
-    B-->b(sensor_level_analysis.m)-->D[Sensor level results]
+    B-->b(run_sensor_pipeline.m)-->D[Sensor level results]
 
-    C[raw2/anat]-->c( make_headmodel.m)-->E[derivatives/anat]
+    C[raw2/anat]-->c(run_source_pipeline.m)-->E[derivatives/anat]
     
-    d(beamformer.m)
-    B-->d-->F[Source level results]
-    E-->d
+    B-->c-->F[Source level results]
 
     G[raw2/beh]-->e(inspect_beh.py)-->H[Behavioural results]
     
@@ -195,6 +196,8 @@ graph LR
 The 40 Hz cable noise is removed using [`artifact_rejection.m`](analysis/artifact_rejection.m).
 
 ### Sensor Level Analysis <a name="sensor-level-analysis"></a>
+
+
 
 ### Source Level Analysis <a name="source-level-analysis"></a>
 

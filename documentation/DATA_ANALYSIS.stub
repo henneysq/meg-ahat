@@ -11,13 +11,11 @@ The overall data analysis pipeline is defined by the flowchart, in which `.m` an
 graph TD;
     A[raw2/meg]-->a(artefact_rejection.m)-->B[derivatives/meg];
     
-    B-->b(sensor_level_analysis.m)-->D[Sensor level results]
+    B-->b(run_sensor_pipeline.m)-->D[Sensor level results]
 
-    C[raw2/anat]-->c( make_headmodel.m)-->E[derivatives/anat]
+    C[raw2/anat]-->c(run_source_pipeline.m)-->E[derivatives/anat]
     
-    d(beamformer.m)
-    B-->d-->F[Source level results]
-    E-->d
+    B-->c-->F[Source level results]
 
     G[raw2/beh]-->e(inspect_beh.py)-->H[Behavioural results]
     
@@ -62,6 +60,8 @@ graph LR
 The 40 Hz cable noise is removed using [`artifact_rejection.m`](analysis/artifact_rejection.m).
 
 ### Sensor Level Analysis
+
+
 
 ### Source Level Analysis
 
