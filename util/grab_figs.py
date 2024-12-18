@@ -4,7 +4,7 @@ import shutil
 
 from _subj_def import subjects
 
-SERVER_DERIV_DIR = Path("/Volumes/3031004.01/data/derivatives")
+SERVER_DERIV_DIR = Path("/Volumes/3031004.01/data/derivatives/img")
 LOCAL_IMG_DIR = Path(__file__).parent.parent / "img"
 STIMS = ("con", "strobe")
 BANDS = ("40", "alpha", "beta")
@@ -20,6 +20,19 @@ for comb in combs:
     maintained_figs.append(
         f"sub-all_stim-{comb[0]}_band-{comb[1]}_{comb[2]}-dif.png"
     )
+
+source_perm_figs =  [
+    "task-va_contrast-tasklevel-left-right_permutation-stimcondition-con-strobe_npermut-1500",
+    "task-va_permutation-stimcondition-con-strobe_npermut-1500",
+    "task-va_stimcondition-con_permutation-tasklevel-left-right_npermut-1500",
+    "task-va_stimcondition-strobe_permutation-tasklevel-left-right_npermut-1500",
+    "task-wm_contrast-tasklevel-low-high_permutation-stimcondition-con-strobe_npermut-1500",
+    "task-wm_permutation-stimcondition-con-strobe_npermut-1500",
+    "task-wm_stimcondition-con_permutation-tasklevel-low-high_npermut-1500",
+    "task-wm_stimcondition-strobe_permutation-tasklevel-low-high_npermut-1500"
+]
+[maintained_figs.append(f"{fig}.png") for fig in source_perm_figs]
+
 
 # maintained_figs = [
 #     "sub-all_stim-con_band-40_lateral-dif.png",
