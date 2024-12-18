@@ -30,9 +30,6 @@ See also the [`DCCN project proposal slides`](protocol/Invisible-Flicker_aka_MEG
 3. [Data Analysis](#data-analysis)
 	1. [Dependencies](#dependencies)
 	2. [40 Hz Artefact Removal](#40-hz-artefact-removal)
-	3. [Sensor Level Analysis](#sensor-level-analysis)
-	4. [Source Level Analysis](#source-level-analysis)
-	5. [Behavioural Analysis](#behavioural-analysis)
 4. [Experiment Management](#experiment-management)
 	1. [Dependencies](#dependencies)
 	2. [Quick-Start Guide](#quick-start-guide)
@@ -180,8 +177,8 @@ graph LR
         subject(Subject brain)
     end
 
-    driver1[40 Hz LED Driver]-- ~700 mA AC -->led1[Visual stimulator 1]
-    driver2[40 Hz LED Driver]-- ~700 mA AC -->led2[Visual stimulator 2]
+    driver1[40 Hz LED Driver]-->led1[Visual stimulator 1]
+    driver2[40 Hz LED Driver]-->led2[Visual stimulator 2]
     led1-. 40 Hz visual stimulation .-> subject
     led2-. 40 Hz visual stimulation .-> subject
     led1-. 40 Hz magnetic field oscillation .-> meg
@@ -190,15 +187,6 @@ graph LR
 ```
 
 The 40 Hz cable noise is removed using [`artifact_rejection.m`](analysis/artifact_rejection.m).
-
-### Sensor Level Analysis <a name="sensor-level-analysis"></a>
-
-
-
-### Source Level Analysis <a name="source-level-analysis"></a>
-
-### Behavioural Analysis <a name="behavioural-analysis"></a>
-
 
 
 ## Experiment Management <a name="experiment-management"></a>
